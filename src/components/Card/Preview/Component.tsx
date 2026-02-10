@@ -111,16 +111,7 @@ export default function PreviewCard() {
   }, [addCard, elements, getImageUrl, previewTheme, showSnackbar]);
 
   return (
-    <Box
-      width="20%"
-      position="relative"
-      minWidth="400px"
-      sx={() => ({
-        scale: { xs: 0.8, md: 1.0 },
-        transformOrigin: "center center",
-        top: { xs: -40, md: 0 },
-      })}
-    >
+    <Box width="20%" position="relative" minWidth="400px">
       <Background ref={elementRef}>
         {elements
           .map((element) => {

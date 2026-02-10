@@ -19,10 +19,6 @@ export default function EditCard() {
       flexDirection="column"
       width="20%"
       minWidth={400}
-      sx={() => ({
-        scale: { xs: 0.8, md: 1.0 },
-        transformOrigin: "center center",
-      })}
     >
       <BaseCard>
         {elements
