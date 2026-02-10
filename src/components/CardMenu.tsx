@@ -1,11 +1,14 @@
-import { DoDisturb, Image, Replay, TextFields } from "@mui/icons-material";
+import { DoDisturb, Image, Palette, Replay, TextFields } from "@mui/icons-material";
 import { IconButton, Paper } from "@mui/material";
 import { useElementRegistry } from "./Card/Element/useElementRegistry";
 import { useSnackbar } from "./useSnackbar";
+import { useState } from "react";
+import ColorSettingsModal from "./ColorSettingsModal";
 
-export default function CardMenu() {
+export default function CardMenu({ anchorEl }: { anchorEl: HTMLElement | null }) {
   const { registerElement, reset } = useElementRegistry();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
+  const [colorModalOpen, setColorModalOpen] = useState(false);
 
   return (
     <>
@@ -24,6 +27,9 @@ export default function CardMenu() {
         <IconButton onClick={() => registerElement("image")}>
           <Image />
         </IconButton>
+        <IconButton onClick={() => setColorModalOpen(true)}>
+          <Palette />
+        </IconButton>
         <IconButton
           onClick={() => {
             reset(true);
@@ -41,6 +47,11 @@ export default function CardMenu() {
           <DoDisturb />
         </IconButton>
       </Paper>
+      <ColorSettingsModal 
+        open={colorModalOpen} 
+        onClose={() => setColorModalOpen(false)} 
+        anchorEl={anchorEl}
+      />
     </>
   );
 }

@@ -3,12 +3,22 @@ import CardMenu from "../CardMenu";
 import { ImageElement, TextElement } from "./Element";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import BaseCard from "./BaseCard";
+import { useState } from "react";
 
 export default function EditCard() {
   const { elements } = useElementRegistry();
+  const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
 
   return (
-    <Box flexDirection="column" width="20%" minWidth="400px">
+    <Box
+      ref={(node: HTMLElement) => {
+        setContainerEl(node);
+      }}
+      display="flex"
+      flexDirection="column"
+      width="20%"
+      minWidth="400px"
+    >
       <BaseCard>
         {elements
           .map((element) => {
@@ -30,7 +40,7 @@ export default function EditCard() {
             </Box>
           ))}
       </BaseCard>
-      <CardMenu />
+      <CardMenu anchorEl={containerEl} />
     </Box>
   );
 }

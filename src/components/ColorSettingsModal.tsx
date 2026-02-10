@@ -1,0 +1,168 @@
+import { Close, Restore } from "@mui/icons-material";
+import {
+  Popover,
+  IconButton,
+  Stack,
+  Typography,
+  Box,
+  Button,
+} from "@mui/material";
+import { MuiColorInput } from "mui-color-input";
+import { usePreviewTheme, DEFAULT_THEME } from "./Card/Preview";
+
+interface ColorSettingsModalProps {
+  open: boolean;
+  onClose: () => void;
+  anchorEl: HTMLElement | null;
+}
+
+const DEFAULT_CP_SP = {
+  input: {
+    sx: { paddingLeft: 1 },
+  },
+  htmlInput: {
+    sx: { padding: 1 },
+  },
+};
+
+export default function ColorSettingsModal({
+  open,
+  onClose,
+  anchorEl,
+}: ColorSettingsModalProps) {
+  const { fill, stroke, bannerFill, boxFill, boxText, bannerText, setTheme } =
+    usePreviewTheme();
+
+  const handleReset = () => {
+    setTheme(DEFAULT_THEME);
+  };
+
+  return (
+    <Popover
+      open={open}
+      onClose={onClose}
+      anchorEl={anchorEl}
+      anchorOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+      transformOrigin={{
+        vertical: "bottom",
+        horizontal: "center",
+      }}
+      hideBackdrop
+      slotProps={{
+        paper: {
+          sx: {
+            width: anchorEl?.clientWidth,
+            height: anchorEl?.clientHeight,
+            padding: 0,
+            boxShadow: 8,
+            borderRadius: 2,
+            display: "flex",
+            flexDirection: "column",
+          },
+        },
+      }}
+    >
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        paddingY={1}
+        paddingX={2}
+      >
+        <Typography variant="h6">Card Colors</Typography>
+        <IconButton onClick={onClose} size="small">
+          <Close />
+        </IconButton>
+      </Box>
+      <Stack spacing={2} sx={{ overflowY: "auto", flexGrow: 1, padding: 2 }}>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Background Fill
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            value={fill}
+            slotProps={DEFAULT_CP_SP}
+            onChange={(color) => setTheme({ fill: color })}
+          />
+        </Box>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Stroke / Border
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            value={stroke}
+            slotProps={DEFAULT_CP_SP}
+            onChange={(color) => setTheme({ stroke: color })}
+          />
+        </Box>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Banner
+          </Typography>
+          <Typography variant="caption" gutterBottom>
+            Background
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            slotProps={DEFAULT_CP_SP}
+            value={bannerFill}
+            onChange={(color) => setTheme({ bannerFill: color })}
+          />
+          <Typography variant="caption" gutterBottom>
+            Text
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            value={bannerText}
+            slotProps={DEFAULT_CP_SP}
+            onChange={(color) => setTheme({ bannerText: color })}
+          />
+        </Box>
+        <Box>
+          <Typography variant="h5" gutterBottom>
+            Box
+          </Typography>
+          <Typography variant="caption" gutterBottom>
+            Background
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            value={boxFill}
+            slotProps={DEFAULT_CP_SP}
+            onChange={(color) => setTheme({ boxFill: color })}
+          />
+          <Typography variant="caption" gutterBottom>
+            Text
+          </Typography>
+          <MuiColorInput
+            fullWidth
+            format="hex"
+            value={boxText}
+            slotProps={DEFAULT_CP_SP}
+            onChange={(color) => setTheme({ boxText: color })}
+          />
+        </Box>
+
+        <Button
+          variant="outlined"
+          startIcon={<Restore />}
+          onClick={handleReset}
+          fullWidth
+          sx={{ mt: "auto", pt: 1 }}
+        >
+          Reset Defaults
+        </Button>
+      </Stack>
+    </Popover>
+  );
+}

@@ -19,7 +19,7 @@ const SvgBackground = styled("svg")({
 });
 
 const Box = ({ children }: TextProps) => {
-  const { boxFill, fill, stroke } = usePreviewTheme();
+  const { boxFill, fill, stroke, boxText } = usePreviewTheme();
 
   return (
     <>
@@ -36,13 +36,15 @@ const Box = ({ children }: TextProps) => {
       {/* Background SVG Layer */}
 
       {/* Foreground Text Layer */}
-      <MuiBox style={{ position: "relative" }}>{children}</MuiBox>
+      <MuiBox style={{ position: "relative", color: boxText }}>
+        {children}
+      </MuiBox>
     </>
   );
 };
 
 const Banner = ({ children }: TextProps) => {
-  const { bannerFill, fill, stroke } = usePreviewTheme();
+  const { bannerFill, fill, stroke, bannerText } = usePreviewTheme();
 
   return (
     <>
@@ -71,7 +73,9 @@ const Banner = ({ children }: TextProps) => {
       </svg>
 
       {/* Foreground Text Layer */}
-      <MuiBox sx={{ position: "relative", padding: "0px 8px" }}>
+      <MuiBox
+        sx={{ position: "relative", padding: "0px 8px", color: bannerText }}
+      >
         {children}
       </MuiBox>
     </>
