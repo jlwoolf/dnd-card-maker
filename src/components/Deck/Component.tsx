@@ -17,6 +17,7 @@ import UploadButton from "./UploadButton";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import { usePreviewTheme } from "../Card/Preview";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
 
 // CONFIGURATION
 const CARD_WIDTH = 100;
@@ -37,12 +38,16 @@ const Deck = () => {
   const prevCard = () =>
     setActiveIndex((prev) => (prev - 1 + cards.length) % cards.length);
 
+  const theme = useTheme();
+  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+
   return (
-    <div
-      style={{
+    <Box
+      sx={{
         position: "fixed",
         bottom: 60,
-        right: 40,
+        left: { xs: 40, md: "unset" },
+        right: { xs: "unset", md: 40 },
         zIndex: 500,
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -53,7 +58,7 @@ const Deck = () => {
         const isActive = index === activeIndex;
         let offsetFromActive = index - activeIndex;
         if (offsetFromActive < 0) offsetFromActive += cards.length;
-        if (offsetFromActive > 20) return null;
+        if (offsetFromActive > 16) return null;
 
         const zIndex = isActive ? 100 : cards.length - offsetFromActive;
 
@@ -65,13 +70,13 @@ const Deck = () => {
             animate={isActive && !isCollapsed ? "active" : "stacked"}
             variants={{
               stacked: {
-                x: 0 + offsetFromActive * 2,
+                x: 0 + offsetFromActive * 2 * (isDesktop ? 1 : -1),
                 y: 0 - offsetFromActive * 2,
                 scale: 0.9,
                 zIndex: zIndex,
               },
               active: {
-                x: -120,
+                x: isDesktop ? -120 : 120,
                 y: -250,
                 scale: 2.2,
                 rotate: 0,
@@ -160,16 +165,24 @@ const Deck = () => {
       })}
 
       {/* --- THE CONTROLS --- */}
-      <div
-        style={{
+      <Box
+        sx={{
           position: "absolute",
           bottom: -40,
-          right: 30,
+          left: { xs: 30, md: "unset" },
+          right: { xs: "unset", md: 30 },
           display: "flex",
           gap: "12px",
           zIndex: 600,
         }}
       >
+        {!isDesktop && (
+          <ControlButton
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            label={isCollapsed ? "Expand" : "Collapse"}
+            icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+          />
+        )}
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div
@@ -219,13 +232,15 @@ const Deck = () => {
             </motion.div>
           )}
         </AnimatePresence>
-        <ControlButton
-          onClick={() => setIsCollapsed(!isCollapsed)}
-          label={isCollapsed ? "Expand" : "Collapse"}
-          icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
-        />
-      </div>
-    </div>
+        {isDesktop && (
+          <ControlButton
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            label={isCollapsed ? "Expand" : "Collapse"}
+            icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+          />
+        )}
+      </Box>
+    </Box>
   );
 };
 

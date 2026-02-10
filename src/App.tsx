@@ -6,7 +6,9 @@ function App() {
     <Box
       display="flex"
       width="100vw"
-      height="100vh"
+      sx={{
+        height: { xs: undefined, md: '100vh'}
+      }}
       justifyContent="center"
       alignItems="center"
     >
