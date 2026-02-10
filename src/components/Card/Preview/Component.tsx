@@ -201,8 +201,11 @@ export default function PreviewCard() {
       <RoundedButtonGroup
         sx={{
           position: "absolute",
-          bottom: -32,
-          right: {xs: `calc(50% - ${validCard ? 64 : 32}px)`, md: -32},
+          bottom: { xs: -(57.6 / 2 / 0.8), md: -(57.6 / 2) },
+          right: {
+            xs: `calc(50% - ${validCard ? 57.6 / 0.8 : 57.6 / 2 / 0.8}px)`,
+            md: -(57.6 / 2),
+          },
         }}
       >
         {validCard && (
