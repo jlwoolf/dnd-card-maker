@@ -95,9 +95,9 @@ const DEFAULT_CARD: Element[] = [
     id: uuid(),
     type: "image",
     value: {
-      radius: 5,
+      radius: 0,
       src: "https://external-content.duckduckgo.com/iu/?u=https%3A%2F%2Fcdna.artstation.com%2Fp%2Fassets%2Fimages%2Fimages%2F077%2F858%2F690%2Flarge%2Fbram-sels-wotc-mtg-nine-lives-familiar-bram-sels.jpg%3F1720544283&f=1&nofb=1&ipt=9603a9d37b83c0432dd935b8f872136013e941ecd562c03ab77742fd0dd08550",
-      width: 100,
+      width: 95,
     },
     style: {
       grow: false,
