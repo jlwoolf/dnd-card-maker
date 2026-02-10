@@ -43,25 +43,39 @@ export default function PreviewCard() {
   const getImageUrl = useCallback(async () => {
     if (elementRef.current === null) return;
 
-    // 1. Find all images within the ref
+    // Find all images within the ref
     const images = elementRef.current.querySelectorAll("img");
     const originalSrcs = new Map<HTMLImageElement, string>();
 
     try {
-      // 2. Convert all images to DataURLs and store originals
+      // Convert ALL images (Remote AND Blobs) to DataURLs
       const conversionPromises = Array.from(images).map(async (img) => {
+        // Store original src for cleanup
         originalSrcs.set(img, img.src);
-        const proxyUrl = "https://cors-anywhere.com/";
-        const dataUrl = await toDataUrl(proxyUrl + img.src);
+
+        // Skip processing if it's already a data URL
+        if (img.src.startsWith("data:")) return;
+
+        let urlToFetch = img.src;
+
+        // ONLY apply the proxy if it is a remote web URL.
+        // Do NOT apply proxy to "blob:" urls.
+        if (img.src.startsWith("http") || img.src.startsWith("https")) {
+          const proxyUrl = "https://cors-anywhere.com/";
+          urlToFetch = proxyUrl + img.src;
+        }
+
+        // fetch() works on blob: URLs natively, converting them to blobs,
+        // which FileReader then converts to base64.
+        const dataUrl = await toDataUrl(urlToFetch);
         img.src = dataUrl;
       });
 
       await Promise.all(conversionPromises);
 
-      // 3. Perform the capture
+      // Perform the capture
       const dataUrl = await toPng(elementRef.current, {
         cacheBust: true,
-        // Ensure fonts/styles are included
         skipFonts: false,
       });
 
@@ -71,7 +85,7 @@ export default function PreviewCard() {
       showSnackbar("Failed to generate image preview", "error");
       return;
     } finally {
-      // 4. Cleanup: Revert images back to original URLs
+      // Cleanup: Revert images back to original URLs (blobs or http links)
       originalSrcs.forEach((src, img) => {
         img.src = src;
       });
