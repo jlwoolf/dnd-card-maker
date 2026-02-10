@@ -1,6 +1,5 @@
 import { Box } from "@mui/material";
-import { Card, Deck } from "./components"; // Your existing Card
-import GlobalSnackbar from "./components/GlobalSnackbar";
+import { Card, Deck, GlobalSnackbar } from "./components";
 
 function App() {
   return (

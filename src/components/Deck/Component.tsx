@@ -1,6 +1,5 @@
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import useExportCards from "./useExportCards";
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,14 +10,18 @@ import {
   ExpandMore,
   Upload,
 } from "@mui/icons-material";
-import { useElementRegistry } from "./Card/Element/useElementRegistry";
-import { useSnackbar } from "./useSnackbar";
+import { useElementRegistry } from "../Card/Element/useElementRegistry";
+import ActionButton from "./ActionButton";
+import ControlButton from "./ControlButton";
+import UploadButton from "./UploadButton";
+import useExportCards from "../useExportCards";
+import { useSnackbar } from "../useSnackbar";
 
 // CONFIGURATION
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
-export const Deck = () => {
+const Deck = () => {
   const cards = useExportCards((state) => state.cards);
   const removeCard = useExportCards((state) => state.removeCard);
   const loadFile = useExportCards((state) => state.loadFile);
@@ -48,7 +51,8 @@ export const Deck = () => {
         const isActive = index === activeIndex;
         let offsetFromActive = index - activeIndex;
         if (offsetFromActive < 0) offsetFromActive += cards.length;
-        if (offsetFromActive > 5) return null;
+        if (offsetFromActive > 20) return null;
+
         const zIndex = isActive ? 100 : cards.length - offsetFromActive;
 
         return (
@@ -62,7 +66,6 @@ export const Deck = () => {
                 x: 0 + offsetFromActive * 2,
                 y: 0 - offsetFromActive * 2,
                 scale: 0.9,
-                rotate: offsetFromActive * 2,
                 zIndex: zIndex,
               },
               active: {
@@ -223,133 +226,4 @@ export const Deck = () => {
   );
 };
 
-// Define the props interface
-interface UploadButtonProps<T> {
-  onUpload: (data: T) => void;
-  icon: React.ReactNode;
-  // Allows for extra ControlButton props like 'title' or 'className'
-  [key: string]: unknown;
-}
-
-/**
- * A reusable component that triggers a file upload via a hidden input.
- * @template T The expected type of the JSON data.
- */
-function UploadButton<T>({ onUpload, icon, ...props }: UploadButtonProps<T>) {
-  // Explicitly type the ref for an HTMLInputElement
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const showSnackbar = useSnackbar((state) => state.showSnackbar);
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
-    const file = event.target.files?.[0];
-    if (!file) return;
-
-    const reader = new FileReader();
-
-    reader.onload = (e: ProgressEvent<FileReader>) => {
-      try {
-        const result = e.target?.result;
-        if (typeof result === "string") {
-          const json = JSON.parse(result) as T;
-          onUpload(json);
-        }
-      } catch (err) {
-        console.error("Failed to parse JSON:", err);
-        showSnackbar("Invalid JSON file format.", "error");
-      }
-    };
-
-    reader.readAsText(file);
-
-    // Reset the input value so the same file can be re-uploaded if modified
-    event.target.value = "";
-  };
-
-  return (
-    <>
-      <ControlButton
-        {...props}
-        icon={icon}
-        onClick={() => fileInputRef.current?.click()}
-      />
-      <input
-        type="file"
-        ref={fileInputRef}
-        style={{ display: "none" }}
-        accept="application/json"
-        onChange={handleFileChange}
-      />
-    </>
-  );
-}
-
-export default UploadButton;
-
-// --- HELPER COMPONENTS ---
-
-const ActionButton = ({
-  icon,
-  color,
-  onClick,
-  disabled,
-}: {
-  icon: React.ReactNode;
-  color: string;
-  onClick: () => void;
-  disabled?: boolean;
-}) => (
-  <motion.button
-    whileHover={{ scale: 1.1 }}
-    whileTap={{ scale: 0.9 }}
-    onClick={(e) => {
-      e.stopPropagation(); // Prevent card clicks
-      onClick();
-    }}
-    disabled={disabled}
-    style={{
-      background: color,
-      color: "white",
-      border: "none",
-      borderRadius: "4px",
-      width: "24px",
-      height: "24px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-    }}
-  >
-    {icon}
-  </motion.button>
-);
-
-const ControlButton = ({ onClick, icon, label }: ControlButtonProps) => (
-  <motion.button
-    whileHover={{ scale: 1.1 }}
-    whileTap={{ scale: 0.9 }}
-    onClick={onClick}
-    style={{
-      background: "#222",
-      color: "white",
-      border: "none",
-      borderRadius: "50%",
-      width: "40px",
-      height: "40px",
-      display: "flex",
-      alignItems: "center",
-      justifyContent: "center",
-      cursor: "pointer",
-      boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-    }}
-    aria-label={label}
-  >
-    {icon}
-  </motion.button>
-);
-
-interface ControlButtonProps {
-  onClick?: React.MouseEventHandler<HTMLButtonElement>;
-  label?: string;
-  icon: React.ReactNode;
-}
+export default Deck;
