@@ -38,7 +38,7 @@ A powerful and interactive web application for creating custom tabletop RPG card
 
 1. Clone the repository:
    ```bash
-   git clone <repository-url>
+   git clone https://github.com/jlwoolf/dnd-card-maker.git
    cd dnd-card-maker
    ```
 
