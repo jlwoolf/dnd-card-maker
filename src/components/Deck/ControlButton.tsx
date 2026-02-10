@@ -24,6 +24,7 @@ const ControlButton = ({ onClick, icon, label }: ControlButtonProps) => (
       justifyContent: "center",
       cursor: "pointer",
       boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
+      pointerEvents: 'auto'
     }}
     aria-label={label}
   >

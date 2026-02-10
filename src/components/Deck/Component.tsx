@@ -3,32 +3,25 @@ import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
-  Delete,
-  Download,
-  Edit,
   ExpandLess,
   ExpandMore,
   Upload,
 } from "@mui/icons-material";
-import { useElementRegistry } from "../Card/Element/useElementRegistry";
-import ActionButton from "./ActionButton";
 import ControlButton from "./ControlButton";
 import UploadButton from "./UploadButton";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
-import { usePreviewTheme } from "../Card/Preview";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
+import DownloadButton from "./DownloadButton";
+import PdfButton from "./PdfButton";
+import CardButtons from "./CardButtons";
 
-// CONFIGURATION
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
 const Deck = () => {
-  const setTheme = usePreviewTheme((state) => state.setTheme);
   const cards = useExportCards((state) => state.cards);
-  const removeCard = useExportCards((state) => state.removeCard);
   const loadFile = useExportCards((state) => state.loadFile);
-  const loadCard = useElementRegistry((state) => state.loadCard);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHoveringActive, setIsHoveringActive] = useState(false);
@@ -46,7 +39,8 @@ const Deck = () => {
       sx={{
         position: "fixed",
         bottom: 60,
-        left: { xs: 40, md: "unset" },
+        // Keep the deck container itself on the left for mobile
+        left: { xs: 20, md: "unset" },
         right: { xs: "unset", md: 40 },
         zIndex: 500,
         width: CARD_WIDTH,
@@ -76,8 +70,9 @@ const Deck = () => {
                 zIndex: zIndex,
               },
               active: {
-                x: isDesktop ? -120 : 120,
-                y: -250,
+                // Modified X for mobile so it expands toward the center/right
+                x: isDesktop ? -120 : 60,
+                y: isDesktop ? -250 : -200,
                 scale: 2.2,
                 rotate: 0,
                 zIndex: 100,
@@ -100,7 +95,6 @@ const Deck = () => {
               cursor: isActive ? "default" : "pointer",
             }}
           >
-            {/* Action Buttons Overlay */}
             <AnimatePresence>
               {isActive && isHoveringActive && !isCollapsed && (
                 <motion.div
@@ -117,35 +111,7 @@ const Deck = () => {
                     zIndex: 110,
                   }}
                 >
-                  <ActionButton
-                    icon={<Edit style={{ fontSize: 14 }} />}
-                    color="#3b82f6"
-                    onClick={() => {
-                      loadCard(card.elements, card.id);
-                      setTheme(card.theme);
-                      showSnackbar("Card loaded into editor", "info");
-                    }}
-                  />
-                  <ActionButton
-                    icon={<Delete style={{ fontSize: 14 }} />}
-                    color="#ef4444"
-                    onClick={() => {
-                      removeCard(card.id);
-                      setActiveIndex(0);
-                      showSnackbar("Card removed from deck", "warning");
-                    }}
-                  />
-                  <ActionButton
-                    icon={<Download style={{ fontSize: 14 }} />}
-                    color="#0e9e0c"
-                    onClick={() => {
-                      const link = document.createElement("a");
-                      link.download = `card-${card.id}.png`;
-                      link.href = card.imgUrl;
-                      link.click();
-                      showSnackbar("Image downloaded", "success");
-                    }}
-                  />
+                  <CardButtons card={card} onDelete={() => setActiveIndex(0)} />
                 </motion.div>
               )}
             </AnimatePresence>
@@ -167,51 +133,55 @@ const Deck = () => {
       {/* --- THE CONTROLS --- */}
       <Box
         sx={{
-          position: "absolute",
-          bottom: -40,
-          left: { xs: 30, md: "unset" },
-          right: { xs: "unset", md: 30 },
+          position: { xs: "fixed", md: "absolute" },
+          bottom: { xs: 20, md: -40 },
+          left: 0,
+          width: "100%",
+          md: {
+            position: "absolute",
+            left: "unset",
+            right: 30,
+            width: "auto",
+          },
+          height: "40px",
           display: "flex",
-          gap: "12px",
+          justifyContent: { xs: "center", md: "flex-end" },
+          alignItems: "center",
           zIndex: 600,
+          pointerEvents: "none",
         }}
       >
+        {/* Collapse button anchored to the left on mobile */}
         {!isDesktop && (
-          <ControlButton
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            label={isCollapsed ? "Expand" : "Collapse"}
-            icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
-          />
+          <Box
+            sx={{
+              position: "absolute",
+              left: 20,
+              top: "50%",
+              transform: "translateY(-50%)",
+            }}
+          >
+            <ControlButton
+              onClick={() => setIsCollapsed(!isCollapsed)}
+              label={isCollapsed ? "Expand" : "Collapse"}
+              icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+            />
+          </Box>
         )}
+
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div
-              initial={{ opacity: 0, x: 20 }}
-              animate={{ opacity: 1, x: 0 }}
-              exit={{ opacity: 0, x: 20 }}
-              style={{ display: "flex", gap: "12px" }}
+              initial={{ opacity: 0, scale: 0.8 }}
+              animate={{ opacity: 1, scale: 1 }}
+              exit={{ opacity: 0, scale: 0.8 }}
+              style={{
+                display: "flex",
+                gap: "12px",
+                alignItems: "center",
+              }}
             >
-              <ControlButton
-                icon={<Download />}
-                onClick={() => {
-                  const jsonString = JSON.stringify(cards, null, 2);
-
-                  const blob = new Blob([jsonString], {
-                    type: "application/json",
-                  });
-
-                  const href = URL.createObjectURL(blob);
-                  const link = document.createElement("a");
-                  link.href = href;
-                  link.download = "cards_data.json"; // Name of the file
-
-                  document.body.appendChild(link);
-                  link.click();
-                  document.body.removeChild(link);
-                  URL.revokeObjectURL(href);
-                  showSnackbar("Deck exported to JSON", "success");
-                }}
-              />
+              <DownloadButton />
               <UploadButton
                 onUpload={(data) => {
                   loadFile(data);
@@ -219,6 +189,7 @@ const Deck = () => {
                 }}
                 icon={<Upload />}
               />
+              <PdfButton />
               <ControlButton
                 onClick={prevCard}
                 label="Prev"
@@ -232,6 +203,7 @@ const Deck = () => {
             </motion.div>
           )}
         </AnimatePresence>
+
         {isDesktop && (
           <ControlButton
             onClick={() => setIsCollapsed(!isCollapsed)}

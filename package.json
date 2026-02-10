@@ -17,6 +17,7 @@
     "clsx": "^2.1.1",
     "framer-motion": "^12.34.0",
     "html-to-image": "^1.11.13",
+    "jspdf": "^4.1.0",
     "lodash": "^4.17.23",
     "mui-color-input": "^7.0.0",
     "react": "^19.2.0",
