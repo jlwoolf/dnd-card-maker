@@ -132,7 +132,7 @@ const Deck = () => {
                     color="#0e9e0c"
                     onClick={() => {
                       const link = document.createElement("a");
-                      link.download = "my-awesome-design.png";
+                      link.download = `card-${card.id}.png`;
                       link.href = card.imgUrl;
                       link.click();
                       showSnackbar("Image downloaded", "success");
