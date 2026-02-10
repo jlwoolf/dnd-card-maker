@@ -20,6 +20,7 @@ import { useElementRegistry } from "../useElementRegistry";
 import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
 import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
 import usePopperRef from "../usePopperRef";
+import { mergeSx } from "@src/utils/mergeSx";
 
 export interface MenuProps {
   visible?: boolean;
@@ -242,23 +243,7 @@ export default function Menu({
                                     size="small"
                                     color="primary"
                                     variant="contained"
-                                    sx={(theme) => {
-                                      if (!button.sx) {
-                                        return BUTTON_STYLES(theme);
-                                      } else if (
-                                        typeof button.sx === "function"
-                                      ) {
-                                        return {
-                                          ...BUTTON_STYLES(theme),
-                                          ...button.sx(theme),
-                                        };
-                                      } else {
-                                        return {
-                                          ...BUTTON_STYLES(theme),
-                                          ...button.sx,
-                                        };
-                                      }
-                                    }}
+                                    sx={mergeSx(BUTTON_STYLES, button.sx)}
                                     {...omit(button, "sx")}
                                   />
                                 );

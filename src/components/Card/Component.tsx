@@ -3,6 +3,7 @@ import CardMenu from "../CardMenu";
 import { ImageElement, TextElement } from "./Element";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import { PreviewCard } from "./Preview";
+import { mergeSx } from "../../utils/mergeSx";
 
 const BASE_STYLES = (theme: Theme) => ({
   "&:has(~ .card-menu)": {
@@ -19,21 +20,7 @@ function BaseCard({ children, sx }: PaperProps) {
   return (
     <Paper
       id="base-card-paper-container"
-      sx={(theme) => {
-        if (!sx) {
-          return BASE_STYLES(theme);
-        } else if (typeof sx === "function") {
-          return {
-            ...BASE_STYLES(theme),
-            ...sx(theme),
-          };
-        } else {
-          return {
-            ...BASE_STYLES(theme),
-            ...sx,
-          };
-        }
-      }}
+      sx={mergeSx(BASE_STYLES, sx)}
       elevation={4}
     >
       <Box

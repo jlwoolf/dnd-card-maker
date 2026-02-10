@@ -1,4 +1,5 @@
 import { ButtonGroup, type ButtonGroupProps } from "@mui/material";
+import { mergeSx } from "../../utils/mergeSx";
 
 const BASE_SX = {
   // 1. Give the container a high border radius
@@ -37,21 +38,7 @@ export default function RoundedButtonGroup({
     <ButtonGroup
       variant="contained"
       aria-label="rounded button group"
-      sx={(theme) => {
-        if (!sx) {
-          return BASE_SX;
-        } else if (typeof sx === "function") {
-          return {
-            ...BASE_SX,
-            ...sx(theme),
-          };
-        } else {
-          return {
-            ...BASE_SX,
-            ...sx,
-          };
-        }
-      }}
+      sx={mergeSx(BASE_SX, sx)}
       {...props}
     >
       {children}
