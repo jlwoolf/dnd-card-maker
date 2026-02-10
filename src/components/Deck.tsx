@@ -7,6 +7,8 @@ import {
   Delete,
   Download,
   Edit,
+  ExpandLess,
+  ExpandMore,
   Upload,
 } from "@mui/icons-material";
 import { useElementRegistry } from "./Card/Element/useElementRegistry";
@@ -24,6 +26,7 @@ export const Deck = () => {
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHoveringActive, setIsHoveringActive] = useState(false);
+  const [isCollapsed, setIsCollapsed] = useState(false);
 
   const nextCard = () => setActiveIndex((prev) => (prev + 1) % cards.length);
   const prevCard = () =>
@@ -34,7 +37,7 @@ export const Deck = () => {
       style={{
         position: "fixed",
         bottom: 60,
-        right: 60,
+        right: 40,
         zIndex: 500,
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -45,6 +48,7 @@ export const Deck = () => {
         const isActive = index === activeIndex;
         let offsetFromActive = index - activeIndex;
         if (offsetFromActive < 0) offsetFromActive += cards.length;
+        if (offsetFromActive > 5) return null;
         const zIndex = isActive ? 100 : cards.length - offsetFromActive;
 
         return (
@@ -52,7 +56,7 @@ export const Deck = () => {
             key={card.id}
             onMouseEnter={() => isActive && setIsHoveringActive(true)}
             onMouseLeave={() => isActive && setIsHoveringActive(false)}
-            animate={isActive ? "active" : "stacked"}
+            animate={isActive && !isCollapsed ? "active" : "stacked"}
             variants={{
               stacked: {
                 x: 0 + offsetFromActive * 2,
@@ -71,7 +75,7 @@ export const Deck = () => {
             }}
             style={{
               position: "absolute",
-              bottom: 0,
+              bottom: 20,
               right: 0,
               width: CARD_WIDTH,
               height: CARD_HEIGHT,
@@ -88,7 +92,7 @@ export const Deck = () => {
           >
             {/* Action Buttons Overlay */}
             <AnimatePresence>
-              {isActive && isHoveringActive && (
+              {isActive && isHoveringActive && !isCollapsed && (
                 <motion.div
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
@@ -116,6 +120,7 @@ export const Deck = () => {
                     color="#ef4444"
                     onClick={() => {
                       removeCard(card.id);
+                      setActiveIndex(0);
                       showSnackbar("Card removed from deck", "warning");
                     }}
                   />
@@ -159,37 +164,59 @@ export const Deck = () => {
           zIndex: 600,
         }}
       >
+        <AnimatePresence>
+          {!isCollapsed && (
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, x: 20 }}
+              style={{ display: "flex", gap: "12px" }}
+            >
+              <ControlButton
+                icon={<Download />}
+                onClick={() => {
+                  const jsonString = JSON.stringify(cards, null, 2);
+
+                  const blob = new Blob([jsonString], {
+                    type: "application/json",
+                  });
+
+                  const href = URL.createObjectURL(blob);
+                  const link = document.createElement("a");
+                  link.href = href;
+                  link.download = "cards_data.json"; // Name of the file
+
+                  document.body.appendChild(link);
+                  link.click();
+                  document.body.removeChild(link);
+                  URL.revokeObjectURL(href);
+                  showSnackbar("Deck exported to JSON", "success");
+                }}
+              />
+              <UploadButton
+                onUpload={(data) => {
+                  loadFile(data);
+                  showSnackbar("Deck loaded successfully", "success");
+                }}
+                icon={<Upload />}
+              />
+              <ControlButton
+                onClick={prevCard}
+                label="Prev"
+                icon={<ChevronLeft />}
+              />
+              <ControlButton
+                onClick={nextCard}
+                label="Next"
+                icon={<ChevronRight />}
+              />
+            </motion.div>
+          )}
+        </AnimatePresence>
         <ControlButton
-          icon={<Download />}
-          onClick={() => {
-            const jsonString = JSON.stringify(cards, null, 2);
-
-            const blob = new Blob([jsonString], { type: "application/json" });
-
-            const href = URL.createObjectURL(blob);
-            const link = document.createElement("a");
-            link.href = href;
-            link.download = "cards_data.json"; // Name of the file
-
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-            URL.revokeObjectURL(href);
-            showSnackbar("Deck exported to JSON", "success");
-          }}
-        />
-        <UploadButton
-          onUpload={(data) => {
-            loadFile(data);
-            showSnackbar("Deck loaded successfully", "success");
-          }}
-          icon={<Upload />}
-        />
-        <ControlButton onClick={prevCard} label="Prev" icon={<ChevronLeft />} />
-        <ControlButton
-          onClick={nextCard}
-          label="Next"
-          icon={<ChevronRight />}
+          onClick={() => setIsCollapsed(!isCollapsed)}
+          label={isCollapsed ? "Expand" : "Collapse"}
+          icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
         />
       </div>
     </div>
