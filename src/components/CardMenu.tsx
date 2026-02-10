@@ -1,8 +1,11 @@
 import { DoDisturb, Image, Replay, TextFields } from "@mui/icons-material";
 import { IconButton, Paper } from "@mui/material";
 import { useElementRegistry } from "./Card/Element/useElementRegistry";
+import { useSnackbar } from "./useSnackbar";
+
 export default function CardMenu() {
   const { registerElement, reset } = useElementRegistry();
+  const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   return (
     <>
@@ -21,10 +24,20 @@ export default function CardMenu() {
         <IconButton onClick={() => registerElement("image")}>
           <Image />
         </IconButton>
-        <IconButton onClick={() => reset(true)}>
+        <IconButton
+          onClick={() => {
+            reset(true);
+            showSnackbar("Reset to default card", "info");
+          }}
+        >
           <Replay />
         </IconButton>
-        <IconButton onClick={() => reset()}>
+        <IconButton
+          onClick={() => {
+            reset();
+            showSnackbar("Card cleared", "warning");
+          }}
+        >
           <DoDisturb />
         </IconButton>
       </Paper>

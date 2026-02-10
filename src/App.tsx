@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
 import { Card, Deck } from "./components"; // Your existing Card
+import GlobalSnackbar from "./components/GlobalSnackbar";
 
 function App() {
   return (
@@ -10,6 +11,7 @@ function App() {
       justifyContent="center"
       alignItems="center"
     >
+      <GlobalSnackbar />
       <Card />
       <Deck />
     </Box>

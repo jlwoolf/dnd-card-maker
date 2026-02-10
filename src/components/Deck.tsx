@@ -10,6 +10,7 @@ import {
   Upload,
 } from "@mui/icons-material";
 import { useElementRegistry } from "./Card/Element/useElementRegistry";
+import { useSnackbar } from "./useSnackbar";
 
 // CONFIGURATION
 const CARD_WIDTH = 100;
@@ -20,6 +21,7 @@ export const Deck = () => {
   const removeCard = useExportCards((state) => state.removeCard);
   const loadFile = useExportCards((state) => state.loadFile);
   const loadCard = useElementRegistry((state) => state.loadCard);
+  const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHoveringActive, setIsHoveringActive] = useState(false);
 
@@ -104,21 +106,28 @@ export const Deck = () => {
                   <ActionButton
                     icon={<Edit style={{ fontSize: 14 }} />}
                     color="#3b82f6"
-                    onClick={() => loadCard(card.elements, card.id)}
+                    onClick={() => {
+                      loadCard(card.elements, card.id);
+                      showSnackbar("Card loaded into editor", "info");
+                    }}
                   />
                   <ActionButton
                     icon={<Delete style={{ fontSize: 14 }} />}
                     color="#ef4444"
-                    onClick={() => removeCard(card.id)}
+                    onClick={() => {
+                      removeCard(card.id);
+                      showSnackbar("Card removed from deck", "warning");
+                    }}
                   />
                   <ActionButton
                     icon={<Download style={{ fontSize: 14 }} />}
                     color="#0e9e0c"
                     onClick={() => {
                       const link = document.createElement("a");
-                      link.download = `${card.id}.png`;
+                      link.download = "my-awesome-design.png";
                       link.href = card.imgUrl;
                       link.click();
+                      showSnackbar("Image downloaded", "success");
                     }}
                   />
                 </motion.div>
@@ -166,9 +175,16 @@ export const Deck = () => {
             link.click();
             document.body.removeChild(link);
             URL.revokeObjectURL(href);
+            showSnackbar("Deck exported to JSON", "success");
           }}
         />
-        <UploadButton onUpload={(data) => loadFile(data)} icon={<Upload />} />
+        <UploadButton
+          onUpload={(data) => {
+            loadFile(data);
+            showSnackbar("Deck loaded successfully", "success");
+          }}
+          icon={<Upload />}
+        />
         <ControlButton onClick={prevCard} label="Prev" icon={<ChevronLeft />} />
         <ControlButton
           onClick={nextCard}
@@ -195,6 +211,7 @@ interface UploadButtonProps<T> {
 function UploadButton<T>({ onUpload, icon, ...props }: UploadButtonProps<T>) {
   // Explicitly type the ref for an HTMLInputElement
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
@@ -211,7 +228,7 @@ function UploadButton<T>({ onUpload, icon, ...props }: UploadButtonProps<T>) {
         }
       } catch (err) {
         console.error("Failed to parse JSON:", err);
-        alert("Invalid JSON file format.");
+        showSnackbar("Invalid JSON file format.", "error");
       }
     };
 

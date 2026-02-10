@@ -8,6 +8,7 @@ import { useCallback, useRef } from "react";
 import { toPng } from "html-to-image";
 import useExportCards from "@src/components/useExportCards";
 import RoundedButtonGroup from "../RoundedButtonGroup";
+import { useSnackbar } from "@src/components/useSnackbar";
 
 async function toDataUrl(url: string): Promise<string> {
   // Check if it's already a data URL to avoid re-fetching
@@ -35,6 +36,7 @@ export default function PreviewCard() {
   );
   const { addCard, updateCard } = useExportCards();
   const elementRef = useRef<HTMLDivElement>(null);
+  const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   const getImageUrl = useCallback(async () => {
     if (elementRef.current === null) return;
@@ -64,6 +66,7 @@ export default function PreviewCard() {
       return dataUrl;
     } catch (err) {
       console.error("Oops, something went wrong!", err);
+      showSnackbar("Failed to generate image preview", "error");
       return;
     } finally {
       // 4. Cleanup: Revert images back to original URLs
@@ -71,21 +74,25 @@ export default function PreviewCard() {
         img.src = src;
       });
     }
-  }, []);
+  }, [showSnackbar]);
 
   const handleSave = useCallback(async () => {
     if (cardId) {
       const dataUrl = await getImageUrl();
-      updateCard(cardId, { elements, imgUrl: dataUrl });
+      if (dataUrl) {
+        updateCard(cardId, { elements, imgUrl: dataUrl });
+        showSnackbar("Card saved successfully!", "success");
+      }
     }
-  }, [cardId, elements, getImageUrl, updateCard]);
+  }, [cardId, elements, getImageUrl, updateCard, showSnackbar]);
 
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (dataUrl) {
       addCard(elements, dataUrl);
+      showSnackbar("Card added to deck!", "success");
     }
-  }, [addCard, elements, getImageUrl]);
+  }, [addCard, elements, getImageUrl, showSnackbar]);
 
   return (
     <Box width="20%" position="relative" minWidth="400px">
