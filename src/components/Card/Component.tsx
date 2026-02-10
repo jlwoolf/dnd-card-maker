@@ -8,7 +8,11 @@ export default function Card() {
       width="100%"
       display="flex"
       justifyContent="center"
-      sx={(theme) => ({ gap: theme.spacing(1) })}
+      sx={(theme) => ({ 
+        flexDirection: { xs: 'column', md: 'row' },
+        gap: theme.spacing(1),
+        alignItems: { xs: 'center', md: 'flex-start' } // Optional: centers cards when stacked
+      })}
     >
       <EditCard />
       <PreviewCard />
