@@ -1,18 +1,16 @@
 import { useRef, type ChangeEvent } from "react";
-import { Link as LinkIcon, Folder as FolderIcon } from "@mui/icons-material"; // Imported FolderIcon
+import { Link as LinkIcon, Folder as FolderIcon } from "@mui/icons-material";
 import {
   Box,
-  ClickAwayListener,
   TextField,
-  Tooltip,
   InputAdornment,
-  IconButton, // Imported IconButton
-  Divider, // Imported Divider
+  IconButton,
+  Divider,
   type PopperProps,
 } from "@mui/material";
 import { Image as ImageIcon } from "@mui/icons-material";
 import { ICON_STYLES } from "../styles";
-import usePopperRef from "../usePopperRef";
+import SettingsTooltip from "../SettingsTooltip";
 
 interface SourceTooltipProps {
   src: string;
@@ -27,12 +25,7 @@ const SourceTooltip = ({
   onClose,
   onUpdate,
 }: SourceTooltipProps) => {
-  const popperRef = usePopperRef();
   const fileInputRef = useRef<HTMLInputElement>(null);
-
-  const handleClose = () => {
-    onClose();
-  };
 
   // Trigger the hidden file input click
   const handleFolderClick = () => {
@@ -50,92 +43,77 @@ const SourceTooltip = ({
   };
 
   return (
-    <Tooltip
+    <SettingsTooltip
       open={isOpen}
-      arrow
-      slotProps={{
-        popper: {
-          popperRef,
-          modifiers: [{ name: "offset", options: { offset: [0, -8] } }],
-        },
-        tooltip: {
-          sx: (theme) => ({
-            backgroundColor: theme.palette.primary.main,
-            padding: 0,
-          }),
-        },
-        arrow: { sx: (theme) => ({ color: theme.palette.primary.main }) },
-      }}
+      onClose={onClose}
       title={
-        <ClickAwayListener onClickAway={handleClose}>
-          <Box p={1} display="flex" alignItems="center">
-            {/* Hidden File Input */}
-            <input
-              type="file"
-              hidden
-              ref={fileInputRef}
-              accept="image/*"
-              onChange={handleFileChange}
-            />
+        <Box p={1} display="flex" alignItems="center">
+          {/* Hidden File Input */}
+          <input
+            type="file"
+            hidden
+            ref={fileInputRef}
+            accept="image/*"
+            onChange={handleFileChange}
+          />
 
-            <TextField
-              size="small"
-              placeholder="https://..."
-              variant="standard"
-              value={src}
-              onChange={(e) => onUpdate(e.target.value)}
-              slotProps={{
-                input: {
-                  // Left side: Link Icon
-                  startAdornment: (
-                    <InputAdornment position="start">
-                      <LinkIcon sx={{ color: "white", fontSize: 16 }} />
-                    </InputAdornment>
-                  ),
-                  // Right side: Divider | Folder Icon
-                  endAdornment: (
-                    <InputAdornment position="end" sx={{ marginLeft: 1 }}>
-                      <Divider
-                        orientation="vertical"
-                        variant="middle"
-                        flexItem
-                        sx={{
-                          borderColor: "rgba(255,255,255,0.5)",
-                          height: 16,
-                          mx: 1, // Margin for spacing around the pipe
-                        }}
-                      />
-                      <IconButton
-                        size="small"
-                        onClick={handleFolderClick}
-                        sx={{ padding: 0 }}
-                      >
-                        <FolderIcon sx={{ color: "white", fontSize: 16 }} />
-                      </IconButton>
-                    </InputAdornment>
-                  ),
-                  sx: {
-                    color: "white",
-                    minWidth: 200,
-                    "&:before": {
-                      borderBottomColor: "white",
-                    },
-                    "&:hover:not(.Mui-disabled):before": {
-                      borderBottomColor: "white",
-                    },
-                    "&:after": {
-                      borderBottomColor: "white",
-                    },
+          <TextField
+            size="small"
+            placeholder="https://..."
+            variant="standard"
+            value={src}
+            onChange={(e) => onUpdate(e.target.value)}
+            slotProps={{
+              input: {
+                // Left side: Link Icon
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <LinkIcon sx={{ color: "white", fontSize: 16 }} />
+                  </InputAdornment>
+                ),
+                // Right side: Divider | Folder Icon
+                endAdornment: (
+                  <InputAdornment position="end" sx={{ marginLeft: 1 }}>
+                    <Divider
+                      orientation="vertical"
+                      variant="middle"
+                      flexItem
+                      sx={{
+                        borderColor: "rgba(255,255,255,0.5)",
+                        height: 16,
+                        mx: 1, // Margin for spacing around the pipe
+                      }}
+                    />
+                    <IconButton
+                      size="small"
+                      onClick={handleFolderClick}
+                      sx={{ padding: 0 }}
+                    >
+                      <FolderIcon sx={{ color: "white", fontSize: 16 }} />
+                    </IconButton>
+                  </InputAdornment>
+                ),
+                sx: {
+                  color: "white",
+                  minWidth: 200,
+                  "&:before": {
+                    borderBottomColor: "white",
+                  },
+                  "&:hover:not(.Mui-disabled):before": {
+                    borderBottomColor: "white",
+                  },
+                  "&:after": {
+                    borderBottomColor: "white",
                   },
                 },
-              }}
-            />
-          </Box>
-        </ClickAwayListener>
+              },
+            }}
+          />
+        </Box>
       }
     >
       <ImageIcon sx={ICON_STYLES} />
-    </Tooltip>
+    </SettingsTooltip>
   );
 };
 

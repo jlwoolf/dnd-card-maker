@@ -3,9 +3,9 @@ import {
   FormatAlignLeft,
   FormatAlignRight,
 } from "@mui/icons-material";
-import { Tooltip, ClickAwayListener, Button, ButtonGroup } from "@mui/material";
+import { Button, ButtonGroup } from "@mui/material";
 import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
-import usePopperRef from "../usePopperRef";
+import SettingsTooltip from "../SettingsTooltip";
 
 type Alignment = "left" | "center" | "right";
 
@@ -22,86 +22,55 @@ export default function AlignmentTooltip({
   onClose,
   onUpdate,
 }: FontSizeTooltipProps) {
-  const popperRef = usePopperRef();
-
   return (
-    <Tooltip
+    <SettingsTooltip
       open={isOpen}
+      onClose={onClose}
       title={
-        <ClickAwayListener onClickAway={onClose}>
-          <ButtonGroup
-            sx={{
-              minHeight: 0,
-              zIndex: 1,
-            }}
+        <ButtonGroup
+          sx={{
+            minHeight: 0,
+            zIndex: 1,
+          }}
+        >
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "left")(theme),
+            })}
+            onClick={() => onUpdate("left")}
           >
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "left")(theme),
-              })}
-              onClick={() => onUpdate("left")}
-            >
-              <FormatAlignLeft sx={ICON_STYLES} />
-            </Button>
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "center")(theme),
-              })}
-              onClick={() => onUpdate("center")}
-            >
-              <FormatAlignCenter sx={ICON_STYLES} />
-            </Button>
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "right")(theme),
-              })}
-              onClick={() => onUpdate("right")}
-            >
-              <FormatAlignRight sx={ICON_STYLES} />
-            </Button>
-          </ButtonGroup>
-        </ClickAwayListener>
+            <FormatAlignLeft sx={ICON_STYLES} />
+          </Button>
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "center")(theme),
+            })}
+            onClick={() => onUpdate("center")}
+          >
+            <FormatAlignCenter sx={ICON_STYLES} />
+          </Button>
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "right")(theme),
+            })}
+            onClick={() => onUpdate("right")}
+          >
+            <FormatAlignRight sx={ICON_STYLES} />
+          </Button>
+        </ButtonGroup>
       }
-      arrow
-      slotProps={{
-        tooltip: {
-          sx: (theme) => ({
-            backgroundColor: theme.palette.primary.main,
-            padding: 0,
-            borderRadius: theme.spacing(4),
-            display: "flex",
-            justifyContent: "center",
-          }),
-        },
-        arrow: {
-          sx: (theme) => ({
-            color: theme.palette.primary.main,
-          }),
-        },
-        popper: {
-          popperRef,
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -8],
-              },
-            },
-          ],
-        },
-      }}
     >
       {alignment === "left" ? (
         <FormatAlignLeft sx={ICON_STYLES} />
@@ -110,6 +79,6 @@ export default function AlignmentTooltip({
       ) : (
         <FormatAlignRight sx={ICON_STYLES} />
       )}
-    </Tooltip>
+    </SettingsTooltip>
   );
 }

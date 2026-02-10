@@ -1,13 +1,8 @@
 import { CheckBoxOutlineBlankOutlined } from "@mui/icons-material";
-import {
-  Tooltip,
-  ClickAwayListener,
-  Button,
-  ButtonGroup,
-} from "@mui/material";
+import { Button, ButtonGroup } from "@mui/material";
 import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
-import usePopperRef from "../usePopperRef";
 import BannerIcon from "./BannerIcon";
+import SettingsTooltip from "../SettingsTooltip";
 
 type Variant = "banner" | "box";
 
@@ -24,76 +19,45 @@ export default function VariantTooltip({
   onClose,
   onUpdate,
 }: VariantTooltipProps) {
-  const popperRef = usePopperRef();
-
   return (
-    <Tooltip
+    <SettingsTooltip
       open={isOpen}
+      onClose={onClose}
       title={
-        <ClickAwayListener onClickAway={onClose}>
-          <ButtonGroup
-            sx={{
-              minHeight: 0,
-              zIndex: 1,
-            }}
+        <ButtonGroup
+          sx={{
+            minHeight: 0,
+            zIndex: 1,
+          }}
+        >
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(variant === "banner")(theme),
+              px: 2, // Added horizontal padding for text readability
+            })}
+            onClick={() => onUpdate("banner")}
           >
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(variant === "banner")(theme),
-                px: 2, // Added horizontal padding for text readability
-              })}
-              onClick={() => onUpdate("banner")}
-            >
-              <BannerIcon sx={ICON_STYLES} />
-            </Button>
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(variant === "box")(theme),
-                px: 2,
-              })}
-              onClick={() => onUpdate("box")}
-            >
-              <CheckBoxOutlineBlankOutlined sx={ICON_STYLES} />
-            </Button>
-          </ButtonGroup>
-        </ClickAwayListener>
+            <BannerIcon sx={ICON_STYLES} />
+          </Button>
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(variant === "box")(theme),
+              px: 2,
+            })}
+            onClick={() => onUpdate("box")}
+          >
+            <CheckBoxOutlineBlankOutlined sx={ICON_STYLES} />
+          </Button>
+        </ButtonGroup>
       }
-      arrow
-      slotProps={{
-        tooltip: {
-          sx: (theme) => ({
-            backgroundColor: theme.palette.primary.main,
-            padding: 0,
-            borderRadius: theme.spacing(4),
-            display: "flex",
-            justifyContent: "center",
-          }),
-        },
-        arrow: {
-          sx: (theme) => ({
-            color: theme.palette.primary.main,
-          }),
-        },
-        popper: {
-          popperRef,
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -8],
-              },
-            },
-          ],
-        },
-      }}
     >
       {/* The trigger icon changes based on selection */}
       {variant === "banner" ? (
@@ -101,6 +65,6 @@ export default function VariantTooltip({
       ) : (
         <CheckBoxOutlineBlankOutlined sx={ICON_STYLES} />
       )}
-    </Tooltip>
+    </SettingsTooltip>
   );
 }

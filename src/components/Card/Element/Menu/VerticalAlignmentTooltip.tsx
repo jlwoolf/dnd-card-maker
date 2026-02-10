@@ -3,8 +3,9 @@ import {
   VerticalAlignCenter,
   VerticalAlignTop,
 } from "@mui/icons-material";
-import { Tooltip, ClickAwayListener, Button, ButtonGroup } from "@mui/material";
+import { Button, ButtonGroup } from "@mui/material";
 import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
+import SettingsTooltip from "../SettingsTooltip";
 
 type VerticalAlignment = "start" | "center" | "end";
 
@@ -22,82 +23,54 @@ export default function VerticalAlignmentTooltip({
   onUpdate,
 }: VerticalAlignmentTooltipProps) {
   return (
-    <Tooltip
+    <SettingsTooltip
       open={isOpen}
+      onClose={onClose}
       title={
-        <ClickAwayListener onClickAway={onClose}>
-          <ButtonGroup
-            sx={{
-              minHeight: 0,
-              zIndex: 1,
-            }}
+        <ButtonGroup
+          sx={{
+            minHeight: 0,
+            zIndex: 1,
+          }}
+        >
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "start")(theme),
+            })}
+            onClick={() => onUpdate("start")}
           >
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "start")(theme),
-              })}
-              onClick={() => onUpdate("start")}
-            >
-              <VerticalAlignTop sx={ICON_STYLES} />
-            </Button>
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "center")(theme),
-              })}
-              onClick={() => onUpdate("center")}
-            >
-              <VerticalAlignCenter sx={ICON_STYLES} />
-            </Button>
-            <Button
-              size="small"
-              color="primary"
-              variant="contained"
-              sx={(theme) => ({
-                ...BUTTON_STYLES(theme),
-                ...getToggleStyles(alignment === "end")(theme),
-              })}
-              onClick={() => onUpdate("end")}
-            >
-              <VerticalAlignBottom sx={ICON_STYLES} />
-            </Button>
-          </ButtonGroup>
-        </ClickAwayListener>
+            <VerticalAlignTop sx={ICON_STYLES} />
+          </Button>
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "center")(theme),
+            })}
+            onClick={() => onUpdate("center")}
+          >
+            <VerticalAlignCenter sx={ICON_STYLES} />
+          </Button>
+          <Button
+            size="small"
+            color="primary"
+            variant="contained"
+            sx={(theme) => ({
+              ...BUTTON_STYLES(theme),
+              ...getToggleStyles(alignment === "end")(theme),
+            })}
+            onClick={() => onUpdate("end")}
+          >
+            <VerticalAlignBottom sx={ICON_STYLES} />
+          </Button>
+        </ButtonGroup>
       }
-      arrow
-      slotProps={{
-        tooltip: {
-          sx: (theme) => ({
-            backgroundColor: theme.palette.primary.main,
-            padding: 0,
-            borderRadius: theme.spacing(4),
-            display: "flex",
-            justifyContent: "center",
-          }),
-        },
-        arrow: {
-          sx: (theme) => ({
-            color: theme.palette.primary.main,
-          }),
-        },
-        popper: {
-          modifiers: [
-            {
-              name: "offset",
-              options: {
-                offset: [0, -8],
-              },
-            },
-          ],
-        },
-      }}
     >
       {alignment === "start" ? (
         <VerticalAlignTop sx={ICON_STYLES} />
@@ -106,6 +79,6 @@ export default function VerticalAlignmentTooltip({
       ) : (
         <VerticalAlignBottom sx={ICON_STYLES} />
       )}
-    </Tooltip>
+    </SettingsTooltip>
   );
 }
