@@ -118,7 +118,7 @@ export default function PreviewCard() {
       sx={() => ({
         scale: { xs: 0.8, md: 1.0 },
         transformOrigin: "center center",
-        top: {xs: -40, md: 0}
+        top: { xs: -40, md: 0 },
       })}
     >
       <Background ref={elementRef}>
@@ -202,7 +202,7 @@ export default function PreviewCard() {
         sx={{
           position: "absolute",
           bottom: -32,
-          right: -32,
+          right: {xs: `calc(50% - ${validCard ? 64 : 32}px)`, md: -32},
         }}
       >
         {validCard && (
