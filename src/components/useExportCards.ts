@@ -2,27 +2,31 @@ import { create } from "zustand";
 import { ElementSchema, type Element } from "./Card";
 import z from "zod";
 import { v4 as uuid } from "uuid";
+import { PreviewThemeSchema, type PreviewTheme } from "./Card/Preview";
 
 const CardSchema = z.object({
   elements: z.array(ElementSchema),
   imgUrl: z.string(),
   id: z.string(),
+  theme: PreviewThemeSchema,
 });
 
+type Card = z.infer<typeof CardSchema>;
+
 const useExportCards = create<{
-  cards: { elements: Element[]; imgUrl: string; id: string }[];
-  addCard(elements: Element[], imgUrl: string): void;
+  cards: Card[];
+  addCard(elements: Element[], imgUrl: string, theme: PreviewTheme): void;
   updateCard(
     id: string,
-    data: Partial<{ elements: Element[]; imgUrl: string }>,
+    data: Partial<{ elements: Element[]; imgUrl: string; theme: PreviewTheme }>,
   ): void;
   removeCard(id: string): void;
   loadFile(data: unknown): void;
 }>((set) => ({
   cards: [],
-  addCard(elements, imgUrl) {
+  addCard(elements, imgUrl, theme) {
     set((state) => ({
-      cards: [...state.cards, { elements, imgUrl, id: uuid() }],
+      cards: [...state.cards, { elements, imgUrl, id: uuid(), theme }],
     }));
   },
   removeCard(id) {

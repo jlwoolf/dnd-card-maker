@@ -1,16 +1,18 @@
+import z from "zod";
 import { create } from "zustand";
 
-interface PreviewTheme {
-  fill: string;
-  stroke: string;
-  bannerFill: string;
-  bannerText: string;
-  boxFill: string;
-  boxText: string;
-  setTheme: (theme: Partial<Omit<PreviewTheme, "setTheme">>) => void;
-}
+export const PreviewThemeSchema = z.object({
+  fill: z.string(),
+  bannerFill: z.string(),
+  boxFill: z.string(),
+  stroke: z.string(),
+  bannerText: z.string(),
+  boxText: z.string(),
+});
 
-export const DEFAULT_THEME = {
+export type PreviewTheme = z.infer<typeof PreviewThemeSchema>;
+
+export const DEFAULT_THEME: PreviewTheme = {
   fill: "#48534b",
   bannerFill: "#c1b8b9",
   boxFill: "#e6e5e3",
@@ -19,7 +21,11 @@ export const DEFAULT_THEME = {
   boxText: "#000000",
 };
 
-export const usePreviewTheme = create<PreviewTheme>((set) => ({
+export const usePreviewTheme = create<
+  PreviewTheme & {
+    setTheme: (theme: Partial<Omit<PreviewTheme, "setTheme">>) => void;
+  }
+>((set) => ({
   ...DEFAULT_THEME,
   setTheme: (theme) => set((state) => ({ ...state, ...theme })),
 }));

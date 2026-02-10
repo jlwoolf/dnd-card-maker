@@ -9,6 +9,7 @@ import { toPng } from "html-to-image";
 import useExportCards from "@src/components/useExportCards";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import { useSnackbar } from "@src/components/useSnackbar";
+import { usePreviewTheme } from "./usePreviewTheme";
 
 async function toDataUrl(url: string): Promise<string> {
   // Check if it's already a data URL to avoid re-fetching
@@ -30,9 +31,10 @@ async function toDataUrl(url: string): Promise<string> {
 }
 
 export default function PreviewCard() {
+  const previewTheme = usePreviewTheme();
   const { elements, cardId } = useElementRegistry();
-  const validCard = useExportCards((state) =>
-    !!state.cards.find((card) => card.id === cardId),
+  const validCard = useExportCards(
+    (state) => !!state.cards.find((card) => card.id === cardId),
   );
   const { addCard, updateCard } = useExportCards();
   const elementRef = useRef<HTMLDivElement>(null);
@@ -80,19 +82,19 @@ export default function PreviewCard() {
     if (cardId) {
       const dataUrl = await getImageUrl();
       if (dataUrl) {
-        updateCard(cardId, { elements, imgUrl: dataUrl });
+        updateCard(cardId, { elements, imgUrl: dataUrl, theme: previewTheme });
         showSnackbar("Card saved successfully!", "success");
       }
     }
-  }, [cardId, elements, getImageUrl, updateCard, showSnackbar]);
+  }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
 
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (dataUrl) {
-      addCard(elements, dataUrl);
+      addCard(elements, dataUrl, previewTheme);
       showSnackbar("Card added to deck!", "success");
     }
-  }, [addCard, elements, getImageUrl, showSnackbar]);
+  }, [addCard, elements, getImageUrl, previewTheme, showSnackbar]);
 
   return (
     <Box width="20%" position="relative" minWidth="400px">

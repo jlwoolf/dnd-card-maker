@@ -16,12 +16,14 @@ import ControlButton from "./ControlButton";
 import UploadButton from "./UploadButton";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
+import { usePreviewTheme } from "../Card/Preview";
 
 // CONFIGURATION
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
 const Deck = () => {
+  const setTheme = usePreviewTheme((state) => state.setTheme);
   const cards = useExportCards((state) => state.cards);
   const removeCard = useExportCards((state) => state.removeCard);
   const loadFile = useExportCards((state) => state.loadFile);
@@ -115,6 +117,7 @@ const Deck = () => {
                     color="#3b82f6"
                     onClick={() => {
                       loadCard(card.elements, card.id);
+                      setTheme(card.theme);
                       showSnackbar("Card loaded into editor", "info");
                     }}
                   />

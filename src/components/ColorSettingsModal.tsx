@@ -61,8 +61,12 @@ export default function ColorSettingsModal({
             borderRadius: 2,
             display: "flex",
             flexDirection: "column",
+            pointerEvents: 'auto',
           },
         },
+        root: {
+          sx: { pointerEvents: 'none'}
+        }
       }}
     >
       <Box
