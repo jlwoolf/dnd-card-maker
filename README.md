@@ -9,6 +9,7 @@ A powerful and interactive web application for creating custom tabletop RPG card
   - **Customization**: 
     - **Text**: Adjust font size, style (bold/italic), alignment, width, and choose between "Banner" or "Box" backgrounds.
     - **Images**: Upload local images or paste URLs, adjust corner radius, and resize width.
+    - **Themeing**: Full color control over card background, borders, banners, and text boxes.
   - **Layout Control**: Reorder elements, toggle vertical growth to fill space, and align items.
 - **Real-time Preview**: See exactly what your card will look like as you edit, complete with thematic SVG backgrounds.
 - **Deck Management**:
@@ -21,7 +22,7 @@ A powerful and interactive web application for creating custom tabletop RPG card
 ## Tech Stack
 
 - **Framework**: [React](https://react.dev/) + [TypeScript](https://www.typescriptlang.org/) + [Vite](https://vitejs.dev/)
-- **UI Component Library**: [Material UI (MUI)](https://mui.com/)
+- **UI Component Library**: [Material UI (MUI)](https://mui.com/) + [Mui Color Input](https://github.com/vicbt/mui-color-input)
 - **State Management**: [Zustand](https://github.com/pmndrs/zustand)
 - **Animations**: [Framer Motion](https://www.framer.com/motion/)
 - **Image Generation**: [html-to-image](https://github.com/bubkoo/html-to-image)
@@ -57,7 +58,10 @@ A powerful and interactive web application for creating custom tabletop RPG card
 ## Usage
 
 1. **Editing a Card**:
-   - Use the menu below the editor card to add **Text** or **Image** elements.
+   - Use the menu below the editor card to:
+     - Add **Text** or **Image** elements.
+     - Open the **Color Settings** to customize the card's color scheme.
+     - **Reset** the card to default or **Clear** all elements.
    - Hover over an element in the editor to reveal its controls:
      - **Move**: Arrows to reorder up/down.
      - **Grow**: Toggle whether the element expands to fill available vertical space.
