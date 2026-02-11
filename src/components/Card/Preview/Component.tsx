@@ -1,9 +1,43 @@
-import { Box, Typography } from "@mui/material";
+import { Box } from "@mui/material";
 import { useElementRegistry } from "../Element/useElementRegistry";
 import Background from "./Background";
 import Text from "./Text";
 import Image from "./Image";
 import { useSharedElement } from "../ElementRefContext";
+import { Text as SlateText, type Descendant } from "slate";
+import type { CustomElement } from "../Element/Text/schema";
+
+const renderSlateNodes = (nodes: Descendant[]) => {
+  return nodes.map((node, index) => {
+    if (SlateText.isText(node)) {
+      return (
+        <span
+          key={index}
+          style={{
+            fontWeight: node.bold ? "bold" : "normal",
+            fontStyle: node.italic ? "italic" : "normal",
+            fontSize: node.fontSize ? `${node.fontSize}px` : undefined,
+            whiteSpace: "pre-wrap",
+          }}
+        >
+          {node.text}
+        </span>
+      );
+    }
+
+    return (
+      <div
+        key={index}
+        style={{
+          textAlign: (node as CustomElement).align || "left",
+          minHeight: "1em",
+        }}
+      >
+        {renderSlateNodes(node.children)}
+      </div>
+    );
+  });
+};
 
 export default function PreviewCard() {
   const { elements } = useElementRegistry();
@@ -16,40 +50,11 @@ export default function PreviewCard() {
           .map((element) => {
             switch (element.type) {
               case "text": {
-                const {
-                  value,
-                  bold,
-                  italic,
-                  size,
-                  alignment,
-                  variant,
-                  width,
-                  expand,
-                } = element.value;
-                const values = value.split("\n");
-                const typography = values.map((v, index) => (
-                  <Typography
-                    key={index}
-                    component="p"
-                    whiteSpace="pre-line"
-                    lineHeight={"1.2"}
-                    fontSize={size}
-                    textAlign={alignment}
-                    fontWeight={bold ? "bold" : "normal"}
-                    fontStyle={italic ? "italic" : "normal"}
-                    sx={{
-                      wordBreak: "break-word",
-                      marginBottom:
-                        index < values.length - 1 ? "0.5em" : undefined,
-                    }}
-                  >
-                    {v ? v : <>&nbsp;</>}
-                  </Typography>
-                ));
+                const { value, variant, width, expand } = element.value;
                 return [
                   element,
                   <Text variant={variant} width={width} expand={expand}>
-                    {typography}
+                    {renderSlateNodes(value as Descendant[])}
                   </Text>,
                 ] as const;
               }

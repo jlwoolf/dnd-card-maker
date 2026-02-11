@@ -77,11 +77,13 @@ const DEFAULT_CARD: Element[] = [
     id: uuid(),
     type: "text",
     value: {
-      value: "Nine-Lives Familiar",
-      alignment: "left",
-      size: 24,
-      bold: true,
-      italic: false,
+      value: [
+        {
+          type: "paragraph",
+          align: "left",
+          children: [{ text: "Nine-Lives Familiar", bold: true, fontSize: 24 }],
+        },
+      ],
       variant: "banner",
       expand: false,
       width: 100,
@@ -108,11 +110,13 @@ const DEFAULT_CARD: Element[] = [
     id: uuid(),
     type: "text",
     value: {
-      value: "Creature - Cat",
-      alignment: "left",
-      size: 18,
-      bold: true,
-      italic: false,
+      value: [
+        {
+          type: "paragraph",
+          align: "left",
+          children: [{ text: "Creature - Cat", bold: true, fontSize: 18 }],
+        },
+      ],
       variant: "banner",
       expand: false,
       width: 100,
@@ -126,12 +130,24 @@ const DEFAULT_CARD: Element[] = [
     id: uuid(),
     type: "text",
     value: {
-      value: `This creature enters with eight revival counters on it if you cast it.
-When this creature dies, if it had a revival counter on it, return it to the battlefield with one fewer revival counter on it at the beginning of the next end step.`,
-      alignment: "left",
-      size: 18,
-      bold: false,
-      italic: true,
+      value: [
+        {
+          type: "paragraph",
+          align: "left",
+          children: [
+            {
+              text: "This creature enters with eight revival counters on it if you cast it.",
+              italic: true,
+              fontSize: 18,
+            },
+            {
+              text: "When this creature dies, if it had a revival counter on it, return it to the battlefield with one fewer revival counter on it at the beginning of the next end step.",
+              italic: true,
+              fontSize: 18,
+            },
+          ],
+        },
+      ],
       variant: "box",
       expand: true,
       width: 95,
