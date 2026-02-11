@@ -177,7 +177,7 @@ const Deck = () => {
               exit={{ opacity: 0, scale: 0.8 }}
               style={{
                 display: "flex",
-                gap: "12px",
+                gap: isDesktop ? "12px" : "2px",
                 alignItems: "center",
               }}
             >
