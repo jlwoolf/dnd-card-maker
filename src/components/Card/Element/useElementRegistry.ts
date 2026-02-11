@@ -140,6 +140,12 @@ const DEFAULT_CARD: Element[] = [
               italic: true,
               fontSize: 18,
             },
+          ],
+        },
+        {
+          type: "paragraph",
+          align: "left",
+          children: [
             {
               text: "When this creature dies, if it had a revival counter on it, return it to the battlefield with one fewer revival counter on it at the beginning of the next end step.",
               italic: true,
