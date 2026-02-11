@@ -37,9 +37,6 @@ export default function FontSizeTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopLeftRadius: theme.spacing(4),
-              borderBottomLeftRadius: theme.spacing(4),
             })}
             onClick={() => {
               if (size <= 1) {
@@ -88,9 +85,6 @@ export default function FontSizeTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopRightRadius: theme.spacing(4),
-              borderBottomRightRadius: theme.spacing(4),
             })}
             onClick={() => {
               onUpdate(size + 1);
