@@ -3,6 +3,7 @@ import { Box } from "@mui/material";
 import { useCallback, useState } from "react";
 import { useElementRegistry } from "../useElementRegistry";
 import FontSizeTooltip from "./FontSizeTooltip";
+import LineHeightTooltip from "./LineHeightTooltip";
 import { getToggleStyles, ICON_STYLES } from "../styles";
 import AlignmentTooltip from "./AlignmentTooltip";
 import Element from "../Element";
@@ -64,6 +65,7 @@ const setMarkValue = <F extends keyof FormatMap>(
 
 type BlockMap = {
   align: CustomElement["align"];
+  lineHeight: CustomElement["lineHeight"];
 };
 
 const getBlockValue = <F extends keyof BlockMap>(editor: Editor, format: F) => {
@@ -99,6 +101,7 @@ export default function TextElement({ id }: TextElementProps) {
 
   const [isFocused, setIsFocused] = useState(false);
   const [fontSizeOpen, setFontSizeOpen] = useState(false);
+  const [lineHeightOpen, setLineHeightOpen] = useState(false);
   const [alignmentOpen, setAlignmentOpen] = useState(false);
   const [variantOpen, setVariantOpen] = useState(false);
   const [widthOpen, setWidthOpen] = useState(false);
@@ -120,7 +123,13 @@ export default function TextElement({ id }: TextElementProps) {
   const renderElement = useCallback((props: RenderElementProps) => {
     const { attributes, children, element } = props;
     return (
-      <div {...attributes} style={{ textAlign: element.align || "left" }}>
+      <div
+        {...attributes}
+        style={{
+          textAlign: element.align || "left",
+          lineHeight: element.lineHeight ? `${element.lineHeight}%` : undefined,
+        }}
+      >
         {children}
       </div>
     );
@@ -150,10 +159,12 @@ export default function TextElement({ id }: TextElementProps) {
     value: { value, variant, expand, width },
   } = element;
 
-  const isVisible = isFocused || fontSizeOpen || alignmentOpen || variantOpen;
+  const isVisible =
+    isFocused || fontSizeOpen || lineHeightOpen || alignmentOpen || variantOpen;
 
   const currentAlignment = getBlockValue(editor, "align") || "left";
   const currentFontSize = getMarkValue(editor, "fontSize") || 16;
+  const currentLineHeight = getBlockValue(editor, "lineHeight") || 120;
   const isBold = isMarkActive(editor, "bold");
   const isItalic = isMarkActive(editor, "italic");
 
@@ -193,6 +204,22 @@ export default function TextElement({ id }: TextElementProps) {
             ),
             onClick: () => {
               setFontSizeOpen(true);
+            },
+          },
+          {
+            children: (
+              <LineHeightTooltip
+                lineHeight={currentLineHeight}
+                isOpen={lineHeightOpen}
+                onClose={() => setLineHeightOpen(false)}
+                onUpdate={(lineHeight) => {
+                  setBlockValue(editor, "lineHeight", lineHeight);
+                  ReactEditor.focus(editor);
+                }}
+              />
+            ),
+            onClick: () => {
+              setLineHeightOpen(true);
             },
           },
           {

@@ -1,21 +1,21 @@
-import { Add, FormatSize, Remove } from "@mui/icons-material";
+import { Add, Height, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import { ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
 
-interface FontSizeTooltipProps {
-  size: number;
+interface LineHeightTooltipProps {
+  lineHeight: number;
   isOpen: boolean;
   onClose: () => void;
   onUpdate: (val: number) => void;
 }
 
-export default function FontSizeTooltip({
-  size,
+export default function LineHeightTooltip({
+  lineHeight,
   isOpen,
   onClose,
   onUpdate,
-}: FontSizeTooltipProps) {
+}: LineHeightTooltipProps) {
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
@@ -45,17 +45,17 @@ export default function FontSizeTooltip({
               borderBottomLeftRadius: theme.spacing(4),
             })}
             onClick={() => {
-              if (size <= 1) {
+              if (lineHeight <= 1) {
                 return;
               } else {
-                onUpdate(size - 1);
+                onUpdate(lineHeight - 10);
               }
             }}
           >
             <Remove sx={{ width: "12px" }} />
           </Button>
           <TextField
-            value={size.toString()}
+            value={lineHeight.toString()}
             onChange={handleChange}
             disabled
             onKeyDown={(e) => {
@@ -77,7 +77,7 @@ export default function FontSizeTooltip({
               },
               htmlInput: {
                 sx: (theme) => ({
-                  width: `${size.toString().length || 1}ch`,
+                  width: `${lineHeight.toString().length || 1}ch`,
                   fontSize: "14px",
                   textAlign: "center",
                   padding: theme.spacing(1),
@@ -97,7 +97,7 @@ export default function FontSizeTooltip({
               borderBottomRightRadius: theme.spacing(4),
             })}
             onClick={() => {
-              onUpdate(size + 1);
+              onUpdate(lineHeight + 10);
             }}
           >
             <Add sx={{ width: "12px" }} />
@@ -105,7 +105,7 @@ export default function FontSizeTooltip({
         </div>
       }
     >
-      <FormatSize sx={ICON_STYLES} />
+      <Height sx={ICON_STYLES} />
     </SettingsTooltip>
   );
 }

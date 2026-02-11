@@ -15,7 +15,7 @@ export default function Element({
   children,
 }: ElementProps) {
   const [isHovered, setIsHovered] = useState(false);
-  const [elementRef, isObstructed] = useBottomObstructed(
+  const [elementRef] = useBottomObstructed(
     "#base-card-paper-container",
   );
 
@@ -37,7 +37,7 @@ export default function Element({
       <Menu
         id={id}
         visible={isHovered || visible}
-        obstructed={isObstructed}
+        // obstructed={isObstructed}
         {...menuProps}
       />
     </Box>

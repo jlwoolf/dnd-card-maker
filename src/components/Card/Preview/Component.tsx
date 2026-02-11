@@ -30,6 +30,9 @@ const renderSlateNodes = (nodes: Descendant[]) => {
         key={index}
         style={{
           textAlign: (node as CustomElement).align || "left",
+          lineHeight: (node as CustomElement).lineHeight
+            ? `${(node as CustomElement).lineHeight}%`
+            : undefined,
           minHeight: "1em",
         }}
       >

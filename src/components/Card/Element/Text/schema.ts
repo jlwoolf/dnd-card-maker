@@ -5,6 +5,7 @@ import { ReactEditor } from "slate-react";
 export type CustomElement = {
   type: "paragraph";
   align?: "left" | "center" | "right";
+  lineHeight?: number;
   children: CustomText[];
 };
 

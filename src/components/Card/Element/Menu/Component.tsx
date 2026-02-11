@@ -25,6 +25,7 @@ import { mergeSx } from "@src/utils/mergeSx";
 export interface MenuProps {
   visible?: boolean;
   obstructed?: boolean;
+  focused?: boolean;
   buttons?: (React.ReactElement | ButtonProps)[];
   settings?: (React.ReactElement | ButtonProps)[];
   id: string;
@@ -33,6 +34,7 @@ export interface MenuProps {
 export default function Menu({
   visible = false,
   obstructed = false,
+  focused = false,
   settings,
   buttons,
   id,
@@ -77,7 +79,7 @@ export default function Menu({
     }
   };
 
-  const open = visible || settingsOpen || vaOpen;
+  const open = focused || visible || settingsOpen || vaOpen;
 
   return (
     <>
@@ -85,7 +87,7 @@ export default function Menu({
         ref={anchorRef}
         style={{ position: "absolute", width: 0, height: 0 }}
       />
-      {!obstructed && (
+      {(!obstructed || focused) && (
         <Popper
           popperRef={popperRef}
           open={Boolean(open && parentElement)}
