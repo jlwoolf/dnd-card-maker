@@ -59,6 +59,7 @@ const Deck = () => {
         return (
           <motion.div
             key={card.id}
+            onClick={() => isActive && setIsHoveringActive(!isHoveringActive)}
             onMouseEnter={() => isActive && setIsHoveringActive(true)}
             onMouseLeave={() => isActive && setIsHoveringActive(false)}
             animate={isActive && !isCollapsed ? "active" : "stacked"}
