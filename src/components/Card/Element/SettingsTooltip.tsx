@@ -1,6 +1,14 @@
-import { Tooltip, ClickAwayListener, Box, type PopperProps } from "@mui/material";
+import {
+  Tooltip,
+  ClickAwayListener,
+  Box,
+  type PopperProps,
+  type SxProps,
+  type Theme,
+} from "@mui/material";
 import usePopperRef from "./usePopperRef";
 import React from "react";
+import { mergeSx } from "@src/utils/mergeSx";
 
 interface SettingsTooltipProps {
   open: boolean;
@@ -8,6 +16,7 @@ interface SettingsTooltipProps {
   title: React.ReactNode;
   children: React.ReactElement;
   popperRef?: PopperProps["popperRef"];
+  tooltipSx?: SxProps<Theme>;
 }
 
 /**
@@ -19,6 +28,7 @@ export default function SettingsTooltip({
   onClose,
   title,
   children,
+  tooltipSx,
   popperRef: externalPopperRef,
 }: SettingsTooltipProps) {
   const internalPopperRef = usePopperRef();
@@ -34,18 +44,18 @@ export default function SettingsTooltip({
           modifiers: [{ name: "offset", options: { offset: [0, -8] } }],
         },
         tooltip: {
-          sx: (theme) => ({
+          sx: mergeSx((theme) => ({
             backgroundColor: theme.palette.primary.main,
             padding: 0,
-          }),
+          }), tooltipSx),
         },
         arrow: { sx: (theme) => ({ color: theme.palette.primary.main }) },
       }}
       title={
         <ClickAwayListener onClickAway={onClose}>
-            <Box component="div" sx={{ display: 'flex' }}>
-                {title}
-            </Box>
+          <Box component="div" sx={{ display: "flex" }}>
+            {title}
+          </Box>
         </ClickAwayListener>
       }
     >

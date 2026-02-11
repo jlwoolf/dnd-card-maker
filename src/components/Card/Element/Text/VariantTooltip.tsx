@@ -23,6 +23,9 @@ export default function VariantTooltip({
     <SettingsTooltip
       open={isOpen}
       onClose={onClose}
+      tooltipSx={{
+        borderRadius: 100,
+      }}
       title={
         <ButtonGroup
           sx={{

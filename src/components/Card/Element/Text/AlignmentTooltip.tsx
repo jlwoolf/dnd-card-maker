@@ -25,6 +25,9 @@ export default function AlignmentTooltip({
   return (
     <SettingsTooltip
       open={isOpen}
+      tooltipSx={{
+        borderRadius: 100,
+      }}
       onClose={onClose}
       title={
         <ButtonGroup
