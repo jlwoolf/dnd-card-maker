@@ -1,7 +1,7 @@
 import { Add, Height, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface LineHeightTooltipProps {
   lineHeight: number | undefined;
@@ -31,6 +31,13 @@ export default function LineHeightTooltip({
       onUpdate(lineHeight);
     }
   };
+
+  useEffect(() => {
+    if (lineHeight !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setValue(lineHeight.toString());
+    }
+  }, [lineHeight]);
 
   return (
     <SettingsTooltip

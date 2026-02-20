@@ -60,6 +60,12 @@ const setMarkValue = <F extends keyof FormatMap>(
   format: F,
   value: FormatMap[F],
 ) => {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  if (!editor.selection && (editor as any).lastSelection) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Transforms.select(editor, (editor as any).lastSelection);
+  }
+
   Editor.addMark(editor, format, value);
 };
 
@@ -242,14 +248,20 @@ export default function TextElement({ id }: TextElementProps) {
                 <FontSizeTooltip
                   size={currentFontSize}
                   isOpen={fontSizeOpen}
-                  onClose={() => setFontSizeOpen(false)}
+                  onClose={() => {
+                    setFontSizeOpen(false);
+                    ReactEditor.focus(editor);
+                  }}
                   onUpdate={(size) => {
                     setMarkValue(editor, "fontSize", size ?? 16);
                   }}
                 />
               ),
               onMouseDown: (e) => {
-                e.preventDefault();
+                // ONLY prevent default if the click didn't come from an input field
+                if ((e.target as HTMLElement).tagName !== "INPUT") {
+                  e.preventDefault();
+                }
                 setFontSizeOpen(true);
               },
               tooltip: "Font Size",
@@ -259,14 +271,20 @@ export default function TextElement({ id }: TextElementProps) {
                 <LineHeightTooltip
                   lineHeight={currentLineHeight}
                   isOpen={lineHeightOpen}
-                  onClose={() => setLineHeightOpen(false)}
+                  onClose={() => {
+                    setLineHeightOpen(false);
+                    ReactEditor.focus(editor);
+                  }}
                   onUpdate={(lineHeight) => {
                     setBlockValue(editor, "lineHeight", lineHeight);
                   }}
                 />
               ),
               onMouseDown: (e) => {
-                e.preventDefault();
+                // ONLY prevent default if the click didn't come from an input field
+                if ((e.target as HTMLElement).tagName !== "INPUT") {
+                  e.preventDefault();
+                }
                 setLineHeightOpen(true);
               },
               tooltip: "Line Height",

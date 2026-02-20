@@ -1,7 +1,7 @@
 import { Add, FormatSize, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 
 interface FontSizeTooltipProps {
   size: number | undefined;
@@ -31,6 +31,13 @@ export default function FontSizeTooltip({
       onUpdate(size);
     }
   };
+
+  useEffect(() => {
+    if (size !== undefined) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setValue(size.toString());
+    }
+  }, [size]);
 
   return (
     <SettingsTooltip
