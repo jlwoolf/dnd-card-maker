@@ -161,6 +161,29 @@ export default function TextElement({ id }: TextElementProps) {
   }, []);
 
   useEffect(() => {
+    if (element?.type !== "text") {
+      return;
+    }
+
+    // 1. Check if the editor's current content is different from the store's value
+    // We stringify for a simple deep-equality check
+    const isDifferent =
+      JSON.stringify(editor.children) !== JSON.stringify(element.value.value);
+
+    if (isDifferent) {
+      Editor.withoutNormalizing(editor, () => {
+        editor.children.forEach(() =>
+          Transforms.removeNodes(editor, { at: [0] }),
+        );
+
+        Transforms.insertNodes(editor, element.value.value as Descendant[], {
+          at: [0],
+        });
+      });
+    }
+  }, [element, editor]);
+
+  useEffect(() => {
     if (id !== activeSettingsId) {
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setWidthOpen(false);
