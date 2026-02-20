@@ -24,6 +24,7 @@ export default function AlignmentTooltip({
 }: FontSizeTooltipProps) {
   return (
     <SettingsTooltip
+      variant="toolbar"
       open={isOpen}
       sx={{
         tooltip: {

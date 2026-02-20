@@ -26,6 +26,7 @@ export default function CardButtons({
   return (
     <>
       <ActionButton
+        tooltip="Edit Card"
         icon={<Edit style={{ fontSize: 14 }} />}
         color="#3b82f6"
         onClick={() => {
@@ -36,6 +37,7 @@ export default function CardButtons({
         }}
       />
       <ActionButton
+        tooltip="Delete Card"
         icon={<Delete style={{ fontSize: 14 }} />}
         color="#ef4444"
         onClick={() => {
@@ -45,6 +47,7 @@ export default function CardButtons({
         }}
       />
       <ActionButton
+        tooltip="Download Card"
         icon={<Download style={{ fontSize: 14 }} />}
         color="#0e9e0c"
         onClick={() => {

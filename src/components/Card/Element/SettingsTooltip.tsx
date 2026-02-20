@@ -43,11 +43,9 @@ export default function SettingsTooltip({
     <Tooltip
       open={open}
       arrow
-      placement="bottom"
       slotProps={{
         popper: {
           popperRef,
-          disablePortal: true,
           modifiers: [{ name: "offset", options: { offset: [0, -8] } }],
         },
         tooltip: {
@@ -85,6 +83,20 @@ export default function SettingsTooltip({
               "& .MuiSlider-valueLabel": {
                 backgroundColor: "grey.700",
               },
+              "& .MuiButtonBase-root": {
+                backgroundColor:
+                  variant === "toolbar" ? "grey.300" : "primary.main",
+
+                "&.toggled": {
+                  backgroundColor:
+                    variant === "toolbar" ? "grey.400" : "primary.dark",
+                  boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.2)",
+
+                  ".MuiSvgIcon-root": {
+                    color: variant === "toolbar" ? "grey.800" : "white",
+                  },
+                },
+              },
             }),
             sx?.tooltip,
           ),
@@ -92,10 +104,7 @@ export default function SettingsTooltip({
         arrow: {
           sx: mergeSx(
             {
-              color: "primary.main",
-              ".card-menu &": {
-                color: "grey.300",
-              },
+              color: variant === "toolbar" ? "grey.300" : "primary.main",
             },
             sx?.arrow,
           ),

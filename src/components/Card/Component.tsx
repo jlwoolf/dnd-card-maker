@@ -17,7 +17,7 @@ export default function Card() {
           alignItems: { xs: "center", md: "flex-start" },
           scale: { xs: 0.8, md: 1 },
           transformOrigin: "center center",
-          marginTop: { xs: theme.spacing(-8), md: "unset" },
+          marginTop: { xs: theme.spacing(-4), md: "unset" },
         })}
       >
         <EditCard />

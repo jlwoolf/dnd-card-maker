@@ -8,6 +8,7 @@ import { useSnackbar } from "../useSnackbar";
 import { usePreviewTheme } from "./Preview";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
+import Tooltip from "../Tooltip";
 
 async function toDataUrl(url: string): Promise<string> {
   // Check if it's already a data URL to avoid re-fetching
@@ -119,13 +120,17 @@ export default function CardButtons() {
       }}
     >
       {validCard && (
-        <Button onClick={handleSave}>
-          <Save />
-        </Button>
+        <Tooltip title="Save card">
+          <Button onClick={handleSave}>
+            <Save />
+          </Button>
+        </Tooltip>
       )}
-      <Button onClick={handleAdd}>
-        <Add />
-      </Button>
+      <Tooltip title="Add card to deck">
+        <Button onClick={handleAdd}>
+          <Add />
+        </Button>
+      </Tooltip>
     </RoundedButtonGroup>
   );
 }

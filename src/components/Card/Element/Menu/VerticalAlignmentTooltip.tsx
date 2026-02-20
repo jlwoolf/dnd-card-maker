@@ -5,6 +5,7 @@ import {
 } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
+import classNames from "classnames";
 
 type VerticalAlignment = "start" | "center" | "end";
 
@@ -49,24 +50,24 @@ export default function VerticalAlignmentTooltip({
         >
           <Button
             size="small"
-            color="primary"
             variant="contained"
+            className={classNames({ toggled: alignment === "start" })}
             onClick={() => onUpdate("start")}
           >
             <VerticalAlignTop />
           </Button>
           <Button
             size="small"
-            color="primary"
             variant="contained"
+            className={classNames({ toggled: alignment === "center" })}
             onClick={() => onUpdate("center")}
           >
             <VerticalAlignCenter />
           </Button>
           <Button
             size="small"
-            color="primary"
             variant="contained"
+            className={classNames({ toggled: alignment === "end" })}
             onClick={() => onUpdate("end")}
           >
             <VerticalAlignBottom />

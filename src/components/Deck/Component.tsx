@@ -15,6 +15,7 @@ import { Box, useMediaQuery, useTheme } from "@mui/material";
 import DownloadButton from "./DownloadButton";
 import PdfButton from "./PdfButton";
 import CardButtons from "./CardButtons";
+import Tooltip from "../Tooltip";
 
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
@@ -182,25 +183,40 @@ const Deck = () => {
                 alignItems: "center",
               }}
             >
-              <DownloadButton />
-              <UploadButton
-                onUpload={(data) => {
-                  loadFile(data);
-                  showSnackbar("Deck loaded successfully", "success");
-                }}
-                icon={<Upload />}
-              />
-              <PdfButton />
-              <ControlButton
-                onClick={prevCard}
-                label="Prev"
-                icon={<ChevronLeft />}
-              />
-              <ControlButton
-                onClick={nextCard}
-                label="Next"
-                icon={<ChevronRight />}
-              />
+              <Tooltip title="Download JSON">
+                <DownloadButton />
+              </Tooltip>
+
+              <Tooltip title="Upload File">
+                <UploadButton
+                  onUpload={(data) => {
+                    // Replace 'any' with your specific Data Type
+                    loadFile(data);
+                    showSnackbar("Deck loaded successfully", "success");
+                  }}
+                  icon={<Upload />}
+                />
+              </Tooltip>
+
+              <Tooltip title="Export to PDF">
+                <PdfButton />
+              </Tooltip>
+
+              <Tooltip title="Previous Card">
+                <ControlButton
+                  onClick={prevCard}
+                  label="Prev"
+                  icon={<ChevronLeft />}
+                />
+              </Tooltip>
+
+              <Tooltip title="Next Card">
+                <ControlButton
+                  onClick={nextCard}
+                  label="Next"
+                  icon={<ChevronRight />}
+                />
+              </Tooltip>
             </motion.div>
           )}
         </AnimatePresence>

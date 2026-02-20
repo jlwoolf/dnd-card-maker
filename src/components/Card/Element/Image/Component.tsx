@@ -50,6 +50,7 @@ export default function ImageElement({ id }: { id: string }) {
               />
             ),
             onClick: () => setSrcOpen(true),
+            tooltip: "Source",
           },
           {
             children: (
@@ -61,6 +62,7 @@ export default function ImageElement({ id }: { id: string }) {
               />
             ),
             onClick: () => setWidthOpen(true),
+            tooltip: "Width",
           },
           {
             children: (
@@ -72,6 +74,7 @@ export default function ImageElement({ id }: { id: string }) {
               />
             ),
             onClick: () => setRadiusOpen(true),
+            tooltip: "Radius",
           },
         ],
       }}

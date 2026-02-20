@@ -166,7 +166,6 @@ export default function TextElement({ id }: TextElementProps) {
     }
 
     // 1. Check if the editor's current content is different from the store's value
-    // We stringify for a simple deep-equality check
     const isDifferent =
       JSON.stringify(editor.children) !== JSON.stringify(element.value.value);
 
@@ -236,6 +235,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 setAlignmentOpen(true);
               },
+              tooltip: "Alignment",
             },
             {
               children: (
@@ -252,6 +252,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 setFontSizeOpen(true);
               },
+              tooltip: "Font Size",
             },
             {
               children: (
@@ -268,6 +269,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 setLineHeightOpen(true);
               },
+              tooltip: "Line Height",
             },
             {
               children: (
@@ -282,6 +284,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 setVariantOpen(true);
               },
+              tooltip: "Variant",
             },
             {
               children: (
@@ -296,6 +299,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 setWidthOpen(true);
               },
+              tooltip: "Width",
             },
             {
               children: <FormatBold />,
@@ -304,6 +308,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 toggleMark(editor, "bold");
               },
+              tooltip: "Bold",
             },
             {
               children: <FormatItalic />,
@@ -312,6 +317,7 @@ export default function TextElement({ id }: TextElementProps) {
                 e.preventDefault();
                 toggleMark(editor, "italic");
               },
+              tooltip: "Italic",
             },
             {
               children: <OpenInFull />,
@@ -321,6 +327,7 @@ export default function TextElement({ id }: TextElementProps) {
                 updateElement<"text">(id, { expand: !expand });
               },
               disabled: !grow,
+              tooltip: "Expand",
             },
           ],
         }}

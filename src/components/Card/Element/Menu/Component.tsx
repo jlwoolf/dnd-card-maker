@@ -22,6 +22,7 @@ import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
 import usePopperRef from "../usePopperRef";
 import { useSharedElement } from "../../ElementRefContext";
 import { mergeSx } from "@src/utils/mergeSx";
+import { Tooltip } from "@src/components";
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
 const BUTTON_STYLES = (_theme: Theme) => ({});
@@ -31,7 +32,7 @@ export interface MenuProps {
   obstructed?: boolean;
   focused?: boolean;
   buttons?: (React.ReactElement | ButtonProps)[];
-  settings?: (React.ReactElement | ButtonProps)[];
+  settings?: (React.ReactElement | (ButtonProps & { tooltip?: string }))[];
   id: string;
 }
 
@@ -70,7 +71,7 @@ export default function Menu({
   }, []);
 
   if (!element) {
-    return;
+    return null;
   }
 
   const handleMoveUp = () => {
@@ -102,30 +103,14 @@ export default function Menu({
           transition
           disablePortal={true}
           modifiers={[
-            {
-              name: "offset",
-              options: {
-                offset: [0, 0],
-              },
-            },
-            {
-              name: "flip",
-              enabled: true,
-              options: {
-                padding: 8,
-              },
-            },
+            { name: "offset", options: { offset: [0, 0] } },
+            { name: "flip", enabled: true, options: { padding: 8 } },
             {
               name: "preventOverflow",
               enabled: true,
-              options: {
-                boundary: "clippingParents",
-              },
+              options: { boundary: "clippingParents" },
             },
-            {
-              name: "hide",
-              enabled: true,
-            },
+            { name: "hide", enabled: true },
           ]}
           sx={{
             zIndex: 1300,
@@ -147,91 +132,116 @@ export default function Menu({
                   minHeight: 0,
                   whiteSpace: "nowrap",
 
+                  "& .MuiButtonBase-root": {
+                    minHeight: 0,
+                    padding: 0,
+                  },
+
                   "& .MuiSvgIcon-root": {
                     aspectRatio: "1/1",
                     width: theme.spacing(2),
                   },
                 })}
               >
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={handleMoveUp}
-                >
-                  <ArrowUpward />
-                </Button>
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={handleMoveDown}
-                >
-                  <ArrowDownward />
-                </Button>
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={() => updateStyle(id, { grow: !element.style.grow })}
-                >
-                  <Expand />
-                </Button>
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={(event) => setVaAnchorEl(event.currentTarget)}
-                >
-                  <VerticalAlignmentTooltip
-                    alignment={element.style.align}
-                    isOpen={vaOpen}
-                    onClose={() => setVaAnchorEl(null)}
-                    onUpdate={(align) => updateStyle(id, { align })}
-                  />
-                </Button>
-                {buttons?.map((button) => {
+                <Tooltip title="Move Up">
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={handleMoveUp}
+                  >
+                    <ArrowUpward />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Move Down">
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={handleMoveDown}
+                  >
+                    <ArrowDownward />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title={element.style.grow ? "Shrink" : "Grow"}>
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={() =>
+                      updateStyle(id, { grow: !element.style.grow })
+                    }
+                  >
+                    <Expand />
+                  </Button>
+                </Tooltip>
+
+                <Tooltip title="Vertical Alignment">
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={(event) => setVaAnchorEl(event.currentTarget)}
+                  >
+                    <VerticalAlignmentTooltip
+                      alignment={element.style.align}
+                      isOpen={vaOpen}
+                      onClose={() => setVaAnchorEl(null)}
+                      onUpdate={(align) => updateStyle(id, { align })}
+                    />
+                  </Button>
+                </Tooltip>
+
+                {buttons?.map((button, i) => {
                   if (React.isValidElement(button)) {
                     return button;
                   } else {
                     return (
-                      <Button
-                        size="small"
-                        color="primary"
-                        variant="contained"
-                        sx={(theme) => {
-                          if (!button.sx) {
-                            return BUTTON_STYLES(theme);
-                          } else if (typeof button.sx === "function") {
-                            return {
-                              ...BUTTON_STYLES(theme),
-                              ...button.sx(theme),
-                            };
-                          } else {
-                            return {
-                              ...BUTTON_STYLES(theme),
-                              ...button.sx,
-                            };
-                          }
-                        }}
-                        {...omit(button, "sx")}
-                      />
+                      <Tooltip key={i} title={button.title || ""}>
+                        <Button
+                          size="small"
+                          color="primary"
+                          variant="contained"
+                          sx={(theme) => {
+                            if (!button.sx) {
+                              return BUTTON_STYLES(theme);
+                            } else if (typeof button.sx === "function") {
+                              return {
+                                ...BUTTON_STYLES(theme),
+                                ...button.sx(theme),
+                              };
+                            } else {
+                              return {
+                                ...BUTTON_STYLES(theme),
+                                ...button.sx,
+                              };
+                            }
+                          }}
+                          {...omit(button, ["sx", "title"])}
+                        />
+                      </Tooltip>
                     );
                   }
                 })}
-                <Button
-                  size="small"
-                  color="primary"
-                  variant="contained"
-                  onClick={() => unregisterElement(id)}
-                >
-                  <Delete />
-                </Button>
+
+                <Tooltip title="Delete">
+                  <Button
+                    size="small"
+                    color="primary"
+                    variant="contained"
+                    onClick={() => unregisterElement(id)}
+                  >
+                    <Delete />
+                  </Button>
+                </Tooltip>
               </ButtonGroup>
             </Fade>
           )}
         </Popper>
       )}
+      {/* Settings Portal Logic remains the same */}
       {settingsOpen && settingsAnchor && (
         <Portal container={settingsAnchor}>
           <Paper
@@ -268,8 +278,8 @@ export default function Menu({
                   key: i,
                 });
               } else {
-                const { children, sx, ...props } = button;
-                return (
+                const { children, sx, tooltip, ...props } = button;
+                const element = (
                   <IconButton
                     key={i}
                     color="default"
@@ -279,6 +289,12 @@ export default function Menu({
                     {children}
                   </IconButton>
                 );
+
+                if (tooltip) {
+                  return <Tooltip title={tooltip}>{element}</Tooltip>;
+                }
+
+                return element;
               }
             })}
           </Paper>
