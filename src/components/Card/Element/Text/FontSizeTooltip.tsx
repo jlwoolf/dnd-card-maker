@@ -51,10 +51,12 @@ export default function FontSizeTooltip({
               minHeight: 0,
               padding: theme.spacing(1),
             })}
-            onClick={() => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               if (size === undefined || size <= 1) {
                 return;
               } else {
+                setValue((size - 1).toString());
                 onUpdate(size - 1);
               }
             }}
@@ -95,10 +97,13 @@ export default function FontSizeTooltip({
               minHeight: 0,
               padding: theme.spacing(1),
             })}
-            onClick={() => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               if (size === undefined) {
                 return;
               }
+
+              setValue((size + 1).toString());
               onUpdate(size + 1);
             }}
           >

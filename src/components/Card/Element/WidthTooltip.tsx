@@ -27,7 +27,11 @@ const WidthTooltip = ({
       open={isOpen}
       onClose={onClose}
       title={
-        <Box p={1} sx={{ minWidth: 150 }}>
+        <Box
+          p={1}
+          sx={{ minWidth: 150 }}
+          onMouseDown={(e) => e.preventDefault()}
+        >
           <Typography variant="caption" sx={{ display: "block" }}>
             Width: {width}%
           </Typography>

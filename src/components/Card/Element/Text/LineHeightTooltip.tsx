@@ -51,10 +51,12 @@ export default function LineHeightTooltip({
               minHeight: 0,
               padding: theme.spacing(1),
             })}
-            onClick={() => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               if (lineHeight === undefined || lineHeight <= 1) {
                 return;
               } else {
+                setValue((lineHeight - 10).toString());
                 onUpdate(lineHeight - 10);
               }
             }}
@@ -95,11 +97,13 @@ export default function LineHeightTooltip({
               minHeight: 0,
               padding: theme.spacing(1),
             })}
-            onClick={() => {
+            onMouseDown={(e) => {
+              e.preventDefault();
               if (lineHeight === undefined) {
                 return;
               }
 
+              setValue((lineHeight + 10).toString());
               onUpdate(lineHeight + 10);
             }}
           >

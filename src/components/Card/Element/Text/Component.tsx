@@ -232,7 +232,8 @@ export default function TextElement({ id }: TextElementProps) {
                   }}
                 />
               ),
-              onClick: () => {
+              onMouseDown: (e) => {
+                e.preventDefault();
                 setAlignmentOpen(true);
               },
             },
@@ -247,7 +248,8 @@ export default function TextElement({ id }: TextElementProps) {
                   }}
                 />
               ),
-              onClick: () => {
+              onMouseDown: (e) => {
+                e.preventDefault();
                 setFontSizeOpen(true);
               },
             },
@@ -262,7 +264,8 @@ export default function TextElement({ id }: TextElementProps) {
                   }}
                 />
               ),
-              onClick: () => {
+              onMouseDown: (e) => {
+                e.preventDefault();
                 setLineHeightOpen(true);
               },
             },
@@ -275,7 +278,8 @@ export default function TextElement({ id }: TextElementProps) {
                   onUpdate={(variant) => updateElement<"text">(id, { variant })}
                 />
               ),
-              onClick: () => {
+              onMouseDown: (e) => {
+                e.preventDefault();
                 setVariantOpen(true);
               },
             },
@@ -288,30 +292,32 @@ export default function TextElement({ id }: TextElementProps) {
                   onUpdate={(val) => updateElement<"text">(id, { width: val })}
                 />
               ),
-              onClick: () => {
+              onMouseDown: (e) => {
+                e.preventDefault();
                 setWidthOpen(true);
               },
             },
             {
               children: <FormatBold />,
               className: classNames({ toggled: isBold }),
-              onClick: () => {
+              onMouseDown: (e: React.MouseEvent) => {
+                e.preventDefault();
                 toggleMark(editor, "bold");
-                ReactEditor.focus(editor);
               },
             },
             {
               children: <FormatItalic />,
               className: classNames({ toggled: isItalic }),
-              onClick: () => {
+              onMouseDown: (e: React.MouseEvent) => {
+                e.preventDefault();
                 toggleMark(editor, "italic");
-                ReactEditor.focus(editor);
               },
             },
             {
               children: <OpenInFull />,
               className: classNames({ toggled: expand }),
-              onClick: () => {
+              onMouseDown: (e: React.MouseEvent) => {
+                e.preventDefault();
                 updateElement<"text">(id, { expand: !expand });
               },
               disabled: !grow,

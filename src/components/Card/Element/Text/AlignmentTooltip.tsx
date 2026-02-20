@@ -42,7 +42,10 @@ export default function AlignmentTooltip({
             size="small"
             variant="contained"
             className={classNames({ toggled: alignment === "left" })}
-            onClick={() => onUpdate("left")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onUpdate("left");
+            }}
           >
             <FormatAlignLeft />
           </Button>
@@ -50,7 +53,10 @@ export default function AlignmentTooltip({
             size="small"
             variant="contained"
             className={classNames({ toggled: alignment === "center" })}
-            onClick={() => onUpdate("center")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onUpdate("center");
+            }}
           >
             <FormatAlignCenter />
           </Button>
@@ -58,7 +64,10 @@ export default function AlignmentTooltip({
             size="small"
             variant="contained"
             className={classNames({ toggled: alignment === "right" })}
-            onClick={() => onUpdate("right")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onUpdate("right");
+            }}
           >
             <FormatAlignRight />
           </Button>

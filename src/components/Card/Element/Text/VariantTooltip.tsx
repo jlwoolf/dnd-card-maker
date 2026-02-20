@@ -39,7 +39,10 @@ export default function VariantTooltip({
             size="small"
             className={classNames({ toggled: variant === "banner" })}
             variant="contained"
-            onClick={() => onUpdate("banner")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onUpdate("banner");
+            }}
           >
             <BannerIcon />
           </Button>
@@ -47,7 +50,10 @@ export default function VariantTooltip({
             size="small"
             className={classNames({ toggled: variant === "box" })}
             variant="contained"
-            onClick={() => onUpdate("box")}
+            onMouseDown={(e) => {
+              e.preventDefault();
+              onUpdate("box");
+            }}
           >
             <CheckBoxOutlineBlankOutlined />
           </Button>

@@ -102,7 +102,7 @@ export default function SettingsTooltip({
         },
       }}
       title={
-        <ClickAwayListener onClickAway={onClose}>
+        <ClickAwayListener onClickAway={onClose} mouseEvent="onMouseDown">
           <Box component="div" sx={{ display: "flex" }}>
             {title}
           </Box>
