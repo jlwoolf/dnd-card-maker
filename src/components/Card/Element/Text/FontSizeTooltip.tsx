@@ -1,13 +1,13 @@
 import { Add, FormatSize, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
-import { ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
+import { useState } from "react";
 
 interface FontSizeTooltipProps {
-  size: number;
+  size: number | undefined;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (val: number) => void;
+  onUpdate: (val: number | undefined) => void;
 }
 
 export default function FontSizeTooltip({
@@ -16,23 +16,33 @@ export default function FontSizeTooltip({
   onClose,
   onUpdate,
 }: FontSizeTooltipProps) {
+  const [value, setValue] = useState(size?.toString() ?? "16");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
+    if (val === "") {
+      setValue("");
+      onUpdate(undefined);
+    }
+
     if (/^[0-9\b]+$/.test(val)) {
-      onUpdate(parseInt(val));
+      const size = parseInt(val);
+      setValue(size.toString());
+      onUpdate(size);
     }
   };
 
   return (
     <SettingsTooltip
       open={isOpen}
-      onClose={onClose}
-      tooltipSx={{
-        borderRadius: 100,
+      sx={{
+        tooltip: {
+          padding: 0,
+        },
       }}
+      onClose={onClose}
       title={
-        <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <Button
             size="small"
             variant="contained"
@@ -40,12 +50,9 @@ export default function FontSizeTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopLeftRadius: theme.spacing(4),
-              borderBottomLeftRadius: theme.spacing(4),
             })}
             onClick={() => {
-              if (size <= 1) {
+              if (size === undefined || size <= 1) {
                 return;
               } else {
                 onUpdate(size - 1);
@@ -55,32 +62,27 @@ export default function FontSizeTooltip({
             <Remove sx={{ width: "12px" }} />
           </Button>
           <TextField
-            value={size.toString()}
+            value={value}
             onChange={handleChange}
-            disabled
             onKeyDown={(e) => {
               if (["e", "E", "+", "-"].includes(e.key)) {
                 e.preventDefault();
               }
             }}
             slotProps={{
-              root: {
-                sx: {
-                  marginTop: "2px",
-                },
-              },
               input: {
                 sx: {
                   borderRadius: 0,
-                  backgroundColor: "white",
+                  backgroundColor: "rgba(255,255,255,0.7)",
                 },
               },
               htmlInput: {
                 sx: (theme) => ({
-                  width: `${size.toString().length || 1}ch`,
+                  width: `${size?.toString().length || 1}ch`,
                   fontSize: "14px",
                   textAlign: "center",
                   padding: theme.spacing(1),
+                  color: "text.primary",
                 }),
               },
             }}
@@ -92,11 +94,11 @@ export default function FontSizeTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopRightRadius: theme.spacing(4),
-              borderBottomRightRadius: theme.spacing(4),
             })}
             onClick={() => {
+              if (size === undefined) {
+                return;
+              }
               onUpdate(size + 1);
             }}
           >
@@ -105,7 +107,7 @@ export default function FontSizeTooltip({
         </div>
       }
     >
-      <FormatSize sx={ICON_STYLES} />
+      <FormatSize />
     </SettingsTooltip>
   );
 }

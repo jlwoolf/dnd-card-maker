@@ -14,7 +14,6 @@ export default function usePopperRef() {
     loop();
 
     return () => {
-      console.log("unmounted");
       cancelAnimationFrame(handle);
     };
   }, []);

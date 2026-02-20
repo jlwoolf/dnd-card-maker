@@ -4,23 +4,27 @@ import {
   ArrowDownward,
   Delete,
   Expand,
-  Settings,
 } from "@mui/icons-material";
 import {
   Fade,
   ButtonGroup,
   Button,
   type ButtonProps,
-  Tooltip,
-  ClickAwayListener,
   Popper,
+  Portal,
+  Paper,
+  IconButton,
+  type Theme,
 } from "@mui/material";
 import { omit } from "lodash";
 import { useElementRegistry } from "../useElementRegistry";
-import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
 import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
 import usePopperRef from "../usePopperRef";
+import { useSharedElement } from "../../ElementRefContext";
 import { mergeSx } from "@src/utils/mergeSx";
+
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+const BUTTON_STYLES = (_theme: Theme) => ({});
 
 export interface MenuProps {
   visible?: boolean;
@@ -40,16 +44,18 @@ export default function Menu({
   id,
 }: MenuProps) {
   const popperRef = usePopperRef();
-  const settingsPopperRef = usePopperRef();
-  const { unregisterElement, elements, moveElement, updateStyle } =
-    useElementRegistry();
+  const { settingsAnchor } = useSharedElement();
+  const {
+    unregisterElement,
+    elements,
+    moveElement,
+    updateStyle,
+    activeSettingsId,
+  } = useElementRegistry();
   const index = elements.findIndex((element) => element.id === id);
   const element = useElementRegistry((state) => state.getElement(id));
 
-  const [settingsAnchorEl, setSettingsAnchorEl] = useState<HTMLElement | null>(
-    null,
-  );
-  const settingsOpen = Boolean(settingsAnchorEl);
+  const settingsOpen = activeSettingsId === id;
 
   const [vaAnchorEl, setVaAnchorEl] = useState<HTMLElement | null>(null);
   const vaOpen = Boolean(vaAnchorEl);
@@ -79,7 +85,7 @@ export default function Menu({
     }
   };
 
-  const open = focused || visible || settingsOpen || vaOpen;
+  const open = focused || visible || vaOpen;
 
   return (
     <>
@@ -94,7 +100,7 @@ export default function Menu({
           anchorEl={parentElement}
           placement="bottom-end"
           transition
-          disablePortal={false}
+          disablePortal={true}
           modifiers={[
             {
               name: "offset",
@@ -136,46 +142,45 @@ export default function Menu({
                   position: "absolute",
                   right: 0,
                   bottom: theme.spacing(-1.5),
+                  maxHeight: theme.spacing(3),
                   pointerEvents: "auto",
                   minHeight: 0,
                   whiteSpace: "nowrap",
+
+                  "& .MuiSvgIcon-root": {
+                    aspectRatio: "1/1",
+                    width: theme.spacing(2),
+                  },
                 })}
               >
                 <Button
                   size="small"
                   color="primary"
                   variant="contained"
-                  sx={BUTTON_STYLES}
                   onClick={handleMoveUp}
                 >
-                  <ArrowUpward sx={ICON_STYLES} />
+                  <ArrowUpward />
                 </Button>
                 <Button
                   size="small"
                   color="primary"
                   variant="contained"
-                  sx={BUTTON_STYLES}
                   onClick={handleMoveDown}
                 >
-                  <ArrowDownward sx={ICON_STYLES} />
+                  <ArrowDownward />
                 </Button>
                 <Button
                   size="small"
                   color="primary"
                   variant="contained"
-                  sx={(theme) => ({
-                    ...BUTTON_STYLES(theme),
-                    ...getToggleStyles(element.style.grow)(theme),
-                  })}
                   onClick={() => updateStyle(id, { grow: !element.style.grow })}
                 >
-                  <Expand sx={ICON_STYLES} />
+                  <Expand />
                 </Button>
                 <Button
                   size="small"
                   color="primary"
                   variant="contained"
-                  sx={BUTTON_STYLES}
                   onClick={(event) => setVaAnchorEl(event.currentTarget)}
                 >
                   <VerticalAlignmentTooltip
@@ -214,92 +219,70 @@ export default function Menu({
                     );
                   }
                 })}
-                {settings && (
-                  <Button
-                    size="small"
-                    color="primary"
-                    variant="contained"
-                    sx={BUTTON_STYLES}
-                    onClick={(event) =>
-                      setSettingsAnchorEl(event.currentTarget)
-                    }
-                  >
-                    <Tooltip
-                      open={settingsOpen}
-                      title={
-                        <ClickAwayListener
-                          onClickAway={() => setSettingsAnchorEl(null)}
-                        >
-                          <ButtonGroup
-                            sx={{
-                              minHeight: 0,
-                              zIndex: 1,
-                            }}
-                          >
-                            {settings?.map((button) => {
-                              if (React.isValidElement(button)) {
-                                return button;
-                              } else {
-                                return (
-                                  <Button
-                                    size="small"
-                                    color="primary"
-                                    variant="contained"
-                                    sx={mergeSx(BUTTON_STYLES, button.sx)}
-                                    {...omit(button, "sx")}
-                                  />
-                                );
-                              }
-                            })}
-                          </ButtonGroup>
-                        </ClickAwayListener>
-                      }
-                      arrow
-                      slotProps={{
-                        tooltip: {
-                          sx: (theme) => ({
-                            backgroundColor: theme.palette.primary.main,
-                            padding: 0,
-                            borderRadius: theme.spacing(4),
-                            display: "flex",
-                            justifyContent: "center",
-                          }),
-                        },
-                        arrow: {
-                          sx: (theme) => ({
-                            color: theme.palette.primary.main,
-                          }),
-                        },
-                        popper: {
-                          popperRef: settingsPopperRef,
-                          modifiers: [
-                            {
-                              name: "offset",
-                              options: {
-                                offset: [0, -8],
-                              },
-                            },
-                          ],
-                        },
-                      }}
-                    >
-                      <Settings sx={ICON_STYLES} />
-                    </Tooltip>
-                  </Button>
-                )}
                 <Button
                   size="small"
                   color="primary"
                   variant="contained"
-                  sx={BUTTON_STYLES}
                   onClick={() => unregisterElement(id)}
                 >
-                  <Delete sx={ICON_STYLES} />
+                  <Delete />
                 </Button>
               </ButtonGroup>
             </Fade>
           )}
         </Popper>
+      )}
+      {settingsOpen && settingsAnchor && (
+        <Portal container={settingsAnchor}>
+          <Paper
+            sx={{
+              borderBottomLeftRadius: "0px",
+              borderBottomRightRadius: "0px",
+              backgroundColor: "grey.300",
+              display: "flex",
+              justifyContent: "flex-start",
+              alignItems: "center",
+              px: 1,
+
+              ".MuiIconButton-root": {
+                borderRadius: 0,
+              },
+
+              "& .MuiButtonBase-root": {
+                backgroundColor: "grey.300",
+
+                "&.toggled": {
+                  backgroundColor: "grey.400",
+                  boxShadow: "inset 0px 2px 4px rgba(0, 0, 0, 0.2)",
+
+                  ".MuiSvgIcon-root": {
+                    color: "grey.800",
+                  },
+                },
+              },
+            }}
+          >
+            {settings?.map((button, i) => {
+              if (React.isValidElement(button)) {
+                return React.cloneElement(button as React.ReactElement, {
+                  key: i,
+                });
+              } else {
+                const { children, sx, ...props } = button;
+                return (
+                  <IconButton
+                    key={i}
+                    color="default"
+                    sx={mergeSx(sx)}
+                    {...props}
+                  >
+                    {children}
+                  </IconButton>
+                );
+              }
+            })}
+          </Paper>
+        </Portal>
       )}
     </>
   );

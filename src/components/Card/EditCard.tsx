@@ -1,13 +1,16 @@
 import { Box } from "@mui/material";
-import CardMenu from "../CardMenu";
+import BottomCardMenu from "./BottomCardMenu";
 import { ImageElement, TextElement } from "./Element";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import BaseCard from "./BaseCard";
 import { useState } from "react";
+import { useSharedElement } from "./ElementRefContext";
+import CardMenu from "./CardMenu";
 
 export default function EditCard() {
   const { elements } = useElementRegistry();
   const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
+  const { setSettingsAnchor } = useSharedElement();
 
   return (
     <Box
@@ -18,8 +21,12 @@ export default function EditCard() {
       position="relative"
       flexDirection="column"
       width="20%"
+      marginTop="-40px"
       minWidth={400}
     >
+      <CardMenu>
+        <Box ref={setSettingsAnchor} className="settings-menu" />
+      </CardMenu>
       <BaseCard>
         {elements
           .map((element) => {
@@ -41,7 +48,7 @@ export default function EditCard() {
             </Box>
           ))}
       </BaseCard>
-      <CardMenu anchorEl={containerEl} />
+      <BottomCardMenu anchorEl={containerEl} />
     </Box>
   );
 }

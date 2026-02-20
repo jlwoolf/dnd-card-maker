@@ -1,11 +1,5 @@
 import { WidthFull } from "@mui/icons-material";
-import {
-  Box,
-  Slider,
-  Typography,
-  type SliderOwnProps,
-} from "@mui/material";
-import { ICON_STYLES } from "./styles";
+import { Box, Slider, Typography, type SliderOwnProps } from "@mui/material";
 import SettingsTooltip from "./SettingsTooltip";
 
 interface WidthTooltipProps {
@@ -34,10 +28,7 @@ const WidthTooltip = ({
       onClose={onClose}
       title={
         <Box p={1} sx={{ minWidth: 150 }}>
-          <Typography
-            variant="caption"
-            sx={{ color: "white", display: "block" }}
-          >
+          <Typography variant="caption" sx={{ display: "block" }}>
             Width: {width}%
           </Typography>
           <Slider
@@ -47,20 +38,13 @@ const WidthTooltip = ({
             max={100}
             step={5}
             marks
-            onChangeCommitted={handleSliderChange}
-            sx={{
-              color: "white",
-              "& .MuiSlider-valueLabel": {
-                backgroundColor: "white",
-                color: "primary.main",
-              },
-            }}
+            onChange={handleSliderChange}
             valueLabelDisplay="auto"
           />
         </Box>
       }
     >
-      <WidthFull sx={ICON_STYLES} />
+      <WidthFull />
     </SettingsTooltip>
   );
 };

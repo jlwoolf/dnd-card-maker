@@ -4,8 +4,8 @@ import {
   FormatAlignRight,
 } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
-import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
+import classNames from "classnames";
 
 type Alignment = "left" | "center" | "right";
 
@@ -25,8 +25,10 @@ export default function AlignmentTooltip({
   return (
     <SettingsTooltip
       open={isOpen}
-      tooltipSx={{
-        borderRadius: 100,
+      sx={{
+        tooltip: {
+          padding: 0,
+        },
       }}
       onClose={onClose}
       title={
@@ -38,49 +40,37 @@ export default function AlignmentTooltip({
         >
           <Button
             size="small"
-            color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "left")(theme),
-            })}
+            className={classNames({ toggled: alignment === "left" })}
             onClick={() => onUpdate("left")}
           >
-            <FormatAlignLeft sx={ICON_STYLES} />
+            <FormatAlignLeft />
           </Button>
           <Button
             size="small"
-            color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "center")(theme),
-            })}
+            className={classNames({ toggled: alignment === "center" })}
             onClick={() => onUpdate("center")}
           >
-            <FormatAlignCenter sx={ICON_STYLES} />
+            <FormatAlignCenter />
           </Button>
           <Button
             size="small"
-            color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "right")(theme),
-            })}
+            className={classNames({ toggled: alignment === "right" })}
             onClick={() => onUpdate("right")}
           >
-            <FormatAlignRight sx={ICON_STYLES} />
+            <FormatAlignRight />
           </Button>
         </ButtonGroup>
       }
     >
       {alignment === "left" ? (
-        <FormatAlignLeft sx={ICON_STYLES} />
+        <FormatAlignLeft />
       ) : alignment === "center" ? (
-        <FormatAlignCenter sx={ICON_STYLES} />
+        <FormatAlignCenter />
       ) : (
-        <FormatAlignRight sx={ICON_STYLES} />
+        <FormatAlignRight />
       )}
     </SettingsTooltip>
   );

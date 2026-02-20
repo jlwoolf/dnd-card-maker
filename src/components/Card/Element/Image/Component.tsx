@@ -1,5 +1,5 @@
 import { Box } from "@mui/material";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useElementRegistry } from "../useElementRegistry";
 import SourceTooltip from "./SourceTooltip";
 import WidthTooltip from "../WidthTooltip";
@@ -9,10 +9,25 @@ import Element from "../Element";
 export default function ImageElement({ id }: { id: string }) {
   const element = useElementRegistry((state) => state.getElement(id));
   const updateElement = useElementRegistry((state) => state.updateElement);
+  const activeSettingsId = useElementRegistry(
+    (state) => state.activeSettingsId,
+  );
+  const setActiveSettingsId = useElementRegistry(
+    (state) => state.setActiveSettingsId,
+  );
 
   const [srcOpen, setSrcOpen] = useState(false);
   const [widthOpen, setWidthOpen] = useState(false);
   const [radiusOpen, setRadiusOpen] = useState(false);
+
+  useEffect(() => {
+    if (id !== activeSettingsId) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setSrcOpen(false);
+      setWidthOpen(false);
+      setRadiusOpen(false);
+    }
+  }, [id, activeSettingsId]);
 
   if (element?.type !== "image") return null;
   const { src, radius, width } = element.value;
@@ -20,6 +35,7 @@ export default function ImageElement({ id }: { id: string }) {
 
   return (
     <Element
+      onClick={() => setActiveSettingsId(id)}
       id={id}
       menuProps={{
         visible: isVisible,

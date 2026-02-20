@@ -23,7 +23,7 @@ export default function Card() {
         <EditCard />
         <PreviewCard />
       </Box>
-      <CardButtons/>
+      <CardButtons />
     </ElementRefProvider>
   );
 }

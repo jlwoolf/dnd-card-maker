@@ -1,11 +1,5 @@
 import { RoundedCorner } from "@mui/icons-material";
-import {
-  Box,
-  Slider,
-  Typography,
-  type SliderOwnProps,
-} from "@mui/material";
-import { ICON_STYLES } from "../styles";
+import { Box, Slider, Typography, type SliderOwnProps } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
 
 interface radiusTooltipProps {
@@ -36,7 +30,10 @@ const RadiusTooltip = ({
         <Box p={1} sx={{ minWidth: 150 }}>
           <Typography
             variant="caption"
-            sx={{ color: "white", display: "block", textTransform: "none" }}
+            sx={{
+              display: "block",
+              textTransform: "none",
+            }}
           >
             Radius: {radius}px
           </Typography>
@@ -49,19 +46,12 @@ const RadiusTooltip = ({
             step={1}
             marks
             onChange={handleSliderChange}
-            sx={{
-              color: "white",
-              "& .MuiSlider-valueLabel": {
-                backgroundColor: "white",
-                color: "primary.main",
-              },
-            }}
             valueLabelDisplay="auto"
           />
         </Box>
       }
     >
-      <RoundedCorner sx={ICON_STYLES} />
+      <RoundedCorner />
     </SettingsTooltip>
   );
 };

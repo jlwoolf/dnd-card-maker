@@ -4,7 +4,6 @@ import {
   VerticalAlignTop,
 } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
-import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
 
 type VerticalAlignment = "start" | "center" | "end";
@@ -24,60 +23,63 @@ export default function VerticalAlignmentTooltip({
 }: VerticalAlignmentTooltipProps) {
   return (
     <SettingsTooltip
+      variant="menu"
       open={isOpen}
+      sx={{
+        tooltip: {
+          padding: 0,
+        },
+      }}
       onClose={onClose}
       title={
         <ButtonGroup
-          sx={{
+          sx={(theme) => ({
             minHeight: 0,
             zIndex: 1,
-          }}
+
+            "& .MuiButtonBase-root": {
+              padding: 0,
+            },
+
+            "& .MuiSvgIcon-root": {
+              aspectRatio: "1/1",
+              width: theme.spacing(2),
+            },
+          })}
         >
           <Button
             size="small"
             color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "start")(theme),
-            })}
             onClick={() => onUpdate("start")}
           >
-            <VerticalAlignTop sx={ICON_STYLES} />
+            <VerticalAlignTop />
           </Button>
           <Button
             size="small"
             color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "center")(theme),
-            })}
             onClick={() => onUpdate("center")}
           >
-            <VerticalAlignCenter sx={ICON_STYLES} />
+            <VerticalAlignCenter />
           </Button>
           <Button
             size="small"
             color="primary"
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(alignment === "end")(theme),
-            })}
             onClick={() => onUpdate("end")}
           >
-            <VerticalAlignBottom sx={ICON_STYLES} />
+            <VerticalAlignBottom />
           </Button>
         </ButtonGroup>
       }
     >
       {alignment === "start" ? (
-        <VerticalAlignTop sx={ICON_STYLES} />
+        <VerticalAlignTop />
       ) : alignment === "center" ? (
-        <VerticalAlignCenter sx={ICON_STYLES} />
+        <VerticalAlignCenter />
       ) : (
-        <VerticalAlignBottom sx={ICON_STYLES} />
+        <VerticalAlignBottom />
       )}
     </SettingsTooltip>
   );

@@ -46,8 +46,10 @@ export type ElementValue<T extends Element["type"]> = Extract<
 type ElementRegistry = {
   elements: Element[];
   cardId?: string;
+  activeSettingsId?: string;
 
   // Actions
+  setActiveSettingsId: (id?: string) => void;
   registerElement<T extends Element["type"]>(
     type: T,
     initialValue?: Partial<ElementValue<T>>,
@@ -81,6 +83,7 @@ const DEFAULT_CARD: Element[] = [
         {
           type: "paragraph",
           align: "left",
+          lineHeight: 120,
           children: [{ text: "Nine-Lives Familiar", bold: true, fontSize: 24 }],
         },
       ],
@@ -134,6 +137,7 @@ const DEFAULT_CARD: Element[] = [
         {
           type: "paragraph",
           align: "left",
+          lineHeight: 120,
           children: [
             {
               text: "This creature enters with eight revival counters on it if you cast it.",
@@ -145,6 +149,7 @@ const DEFAULT_CARD: Element[] = [
         {
           type: "paragraph",
           align: "left",
+          lineHeight: 120,
           children: [
             {
               text: "When this creature dies, if it had a revival counter on it, return it to the battlefield with one fewer revival counter on it at the beginning of the next end step.",
@@ -167,6 +172,9 @@ const DEFAULT_CARD: Element[] = [
 
 export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   elements: DEFAULT_CARD,
+  activeSettingsId: undefined,
+
+  setActiveSettingsId: (id) => set({ activeSettingsId: id }),
 
   registerElement: (type, initialValue = {}) => {
     // We generate the ID here

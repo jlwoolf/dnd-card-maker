@@ -6,6 +6,8 @@ import {
 interface ElementRefContextType {
   element: HTMLElement | null;
   setElement: (node: HTMLElement | null) => void;
+  settingsAnchor: HTMLElement | null;
+  setSettingsAnchor: (node: HTMLElement | null) => void;
 }
 
 export const ElementRefContext = createContext<

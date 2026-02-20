@@ -1,13 +1,13 @@
 import { Add, Height, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
-import { ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
+import { useState } from "react";
 
 interface LineHeightTooltipProps {
-  lineHeight: number;
+  lineHeight: number | undefined;
   isOpen: boolean;
   onClose: () => void;
-  onUpdate: (val: number) => void;
+  onUpdate: (val: number | undefined) => void;
 }
 
 export default function LineHeightTooltip({
@@ -16,23 +16,33 @@ export default function LineHeightTooltip({
   onClose,
   onUpdate,
 }: LineHeightTooltipProps) {
+  const [value, setValue] = useState(lineHeight?.toString() ?? "120");
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
+    if (val === "") {
+      setValue("");
+      onUpdate(undefined);
+    }
+
     if (/^[0-9\b]+$/.test(val)) {
-      onUpdate(parseInt(val));
+      const lineHeight = parseInt(val);
+      setValue(lineHeight.toString());
+      onUpdate(lineHeight);
     }
   };
 
   return (
     <SettingsTooltip
       open={isOpen}
-      onClose={onClose}
-      tooltipSx={{
-        borderRadius: 100,
+      sx={{
+        tooltip: {
+          padding: 0,
+        },
       }}
+      onClose={onClose}
       title={
-        <div>
+        <div style={{ display: "flex", alignItems: "center" }}>
           <Button
             size="small"
             variant="contained"
@@ -40,12 +50,9 @@ export default function LineHeightTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopLeftRadius: theme.spacing(4),
-              borderBottomLeftRadius: theme.spacing(4),
             })}
             onClick={() => {
-              if (lineHeight <= 1) {
+              if (lineHeight === undefined || lineHeight <= 1) {
                 return;
               } else {
                 onUpdate(lineHeight - 10);
@@ -55,32 +62,27 @@ export default function LineHeightTooltip({
             <Remove sx={{ width: "12px" }} />
           </Button>
           <TextField
-            value={lineHeight.toString()}
+            value={value}
             onChange={handleChange}
-            disabled
             onKeyDown={(e) => {
               if (["e", "E", "+", "-"].includes(e.key)) {
                 e.preventDefault();
               }
             }}
             slotProps={{
-              root: {
-                sx: {
-                  marginTop: "2px",
-                },
-              },
               input: {
                 sx: {
                   borderRadius: 0,
-                  backgroundColor: "white",
+                  backgroundColor: "rgba(255,255,255,0.7)",
                 },
               },
               htmlInput: {
                 sx: (theme) => ({
-                  width: `${lineHeight.toString().length || 1}ch`,
+                  width: `${lineHeight?.toString().length || 1}ch`,
                   fontSize: "14px",
                   textAlign: "center",
                   padding: theme.spacing(1),
+                  color: "text.primary",
                 }),
               },
             }}
@@ -92,11 +94,12 @@ export default function LineHeightTooltip({
               minWidth: 0,
               minHeight: 0,
               padding: theme.spacing(1),
-              borderRadius: 0,
-              borderTopRightRadius: theme.spacing(4),
-              borderBottomRightRadius: theme.spacing(4),
             })}
             onClick={() => {
+              if (lineHeight === undefined) {
+                return;
+              }
+
               onUpdate(lineHeight + 10);
             }}
           >
@@ -105,7 +108,7 @@ export default function LineHeightTooltip({
         </div>
       }
     >
-      <Height sx={ICON_STYLES} />
+      <Height />
     </SettingsTooltip>
   );
 }

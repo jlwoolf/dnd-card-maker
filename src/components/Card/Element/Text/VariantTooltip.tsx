@@ -1,8 +1,8 @@
 import { CheckBoxOutlineBlankOutlined } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
-import { BUTTON_STYLES, getToggleStyles, ICON_STYLES } from "../styles";
 import BannerIcon from "./BannerIcon";
 import SettingsTooltip from "../SettingsTooltip";
+import classNames from "classnames";
 
 type Variant = "banner" | "box";
 
@@ -22,10 +22,12 @@ export default function VariantTooltip({
   return (
     <SettingsTooltip
       open={isOpen}
-      onClose={onClose}
-      tooltipSx={{
-        borderRadius: 100,
+      sx={{
+        tooltip: {
+          padding: 0,
+        },
       }}
+      onClose={onClose}
       title={
         <ButtonGroup
           sx={{
@@ -35,39 +37,25 @@ export default function VariantTooltip({
         >
           <Button
             size="small"
-            color="primary"
+            className={classNames({ toggled: variant === "banner" })}
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(variant === "banner")(theme),
-              px: 2, // Added horizontal padding for text readability
-            })}
             onClick={() => onUpdate("banner")}
           >
-            <BannerIcon sx={ICON_STYLES} />
+            <BannerIcon />
           </Button>
           <Button
             size="small"
-            color="primary"
+            className={classNames({ toggled: variant === "box" })}
             variant="contained"
-            sx={(theme) => ({
-              ...BUTTON_STYLES(theme),
-              ...getToggleStyles(variant === "box")(theme),
-              px: 2,
-            })}
             onClick={() => onUpdate("box")}
           >
-            <CheckBoxOutlineBlankOutlined sx={ICON_STYLES} />
+            <CheckBoxOutlineBlankOutlined />
           </Button>
         </ButtonGroup>
       }
     >
       {/* The trigger icon changes based on selection */}
-      {variant === "banner" ? (
-        <BannerIcon sx={ICON_STYLES} />
-      ) : (
-        <CheckBoxOutlineBlankOutlined sx={ICON_STYLES} />
-      )}
+      {variant === "banner" ? <BannerIcon /> : <CheckBoxOutlineBlankOutlined />}
     </SettingsTooltip>
   );
 }

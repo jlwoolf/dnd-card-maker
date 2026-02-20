@@ -9,7 +9,6 @@ import {
   type PopperProps,
 } from "@mui/material";
 import { Image as ImageIcon } from "@mui/icons-material";
-import { ICON_STYLES } from "../styles";
 import SettingsTooltip from "../SettingsTooltip";
 
 interface SourceTooltipProps {
@@ -68,7 +67,7 @@ const SourceTooltip = ({
                 // Left side: Link Icon
                 startAdornment: (
                   <InputAdornment position="start">
-                    <LinkIcon sx={{ color: "white", fontSize: 16 }} />
+                    <LinkIcon sx={{ fontSize: 16 }} />
                   </InputAdornment>
                 ),
                 // Right side: Divider | Folder Icon
@@ -79,7 +78,6 @@ const SourceTooltip = ({
                       variant="middle"
                       flexItem
                       sx={{
-                        borderColor: "rgba(255,255,255,0.5)",
                         height: 16,
                         mx: 1, // Margin for spacing around the pipe
                       }}
@@ -89,22 +87,12 @@ const SourceTooltip = ({
                       onClick={handleFolderClick}
                       sx={{ padding: 0 }}
                     >
-                      <FolderIcon sx={{ color: "white", fontSize: 16 }} />
+                      <FolderIcon sx={{ fontSize: 16 }} />
                     </IconButton>
                   </InputAdornment>
                 ),
                 sx: {
-                  color: "white",
                   minWidth: 200,
-                  "&:before": {
-                    borderBottomColor: "white",
-                  },
-                  "&:hover:not(.Mui-disabled):before": {
-                    borderBottomColor: "white",
-                  },
-                  "&:after": {
-                    borderBottomColor: "white",
-                  },
                 },
               },
             }}
@@ -112,7 +100,7 @@ const SourceTooltip = ({
         </Box>
       }
     >
-      <ImageIcon sx={ICON_STYLES} />
+      <ImageIcon />
     </SettingsTooltip>
   );
 };

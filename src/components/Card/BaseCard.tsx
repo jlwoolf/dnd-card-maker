@@ -1,22 +1,30 @@
-import { Box, Paper, type PaperProps, type Theme } from "@mui/material";
-import { mergeSx } from "../../utils/mergeSx";
+import { Box, Paper, type PaperProps } from "@mui/material";
+import classNames from "classnames";
+import { mergeSx } from "@src/utils/mergeSx";
 
-const BASE_STYLES = (theme: Theme) => ({
-  "&:has(~ .card-menu)": {
-    borderBottomLeftRadius: "0px",
-    borderBottomRightRadius: "0px",
-  },
-
-  aspectRatio: "5/7",
-  overflow: "hidden",
-  padding: theme.spacing(1),
-});
-
-export default function BaseCard({ children, sx }: PaperProps) {
+export default function BaseCard({ children, sx, className }: PaperProps) {
   return (
     <Paper
+      className={classNames(className, "base-card")}
       id="base-card-paper-container"
-      sx={mergeSx(BASE_STYLES, sx)}
+      sx={mergeSx(
+        {
+          padding: 1,
+          aspectRatio: "5/7",
+          overflow: "hidden",
+
+          ".card-menu + &": {
+            borderTopLeftRadius: 0,
+            borderTopRightRadius: 0,
+          },
+
+          "&:has(+ .card-menu)": {
+            borderBottomLeftRadius: 0,
+            borderBottomRightRadius: 0,
+          },
+        },
+        sx,
+      )}
       elevation={4}
     >
       <Box
