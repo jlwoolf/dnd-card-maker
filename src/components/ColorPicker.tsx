@@ -46,7 +46,7 @@ const CustomPaper = forwardRef<
         {isGenerating ? "Analyzing cards..." : "Document Colors"}
       </Typography>
 
-      <Box display="flex" flexWrap="wrap" gap={0.5}>
+      <Box display="flex" flexWrap="wrap" gap={0.55}>
         {isGenerating && colors.length === 0 ? (
           <CircularProgress size={16} />
         ) : colors.length > 0 ? (
@@ -55,8 +55,8 @@ const CustomPaper = forwardRef<
               key={color}
               onClick={() => onColorSelect(color)}
               sx={{
-                width: 24,
-                height: 24,
+                width: 26,
+                height: 26,
                 backgroundColor: color,
                 borderRadius: 1,
                 border: "1px solid",
