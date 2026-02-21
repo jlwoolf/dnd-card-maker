@@ -91,7 +91,7 @@ export function ColorPicker({
 
   // 3. Trigger generation when the picker mounts
   useEffect(() => {
-    generateAllPalettes();
+    generateAllPalettes(true);
   }, [generateAllPalettes]);
 
   // 4. Flatten all card palettes into a single array of unique colors
