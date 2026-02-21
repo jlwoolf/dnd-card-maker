@@ -1,12 +1,21 @@
-import { Box } from "@mui/material";
 import { useEffect, useState } from "react";
+import { Box } from "@mui/material";
 import { useElementRegistry } from "../useElementRegistry";
+import Element from "../Element";
+import RadiusTooltip from "./RadiusTooltip";
 import SourceTooltip from "./SourceTooltip";
 import WidthTooltip from "../WidthTooltip";
-import RadiusTooltip from "./RadiusTooltip";
-import Element from "../Element";
 
-export default function ImageElement({ id }: { id: string }) {
+interface ImageElementProps {
+  /** Unique identifier for the image element */
+  id: string;
+}
+
+/**
+ * ImageElement renders an editable image within the card editor.
+ * It provides tools for updating the image source, width, and border radius.
+ */
+export default function ImageElement({ id }: ImageElementProps) {
   const element = useElementRegistry((state) => state.getElement(id));
   const updateElement = useElementRegistry((state) => state.updateElement);
   const activeSettingsId = useElementRegistry(
@@ -22,7 +31,6 @@ export default function ImageElement({ id }: { id: string }) {
 
   useEffect(() => {
     if (id !== activeSettingsId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setSrcOpen(false);
       setWidthOpen(false);
       setRadiusOpen(false);
@@ -30,8 +38,9 @@ export default function ImageElement({ id }: { id: string }) {
   }, [id, activeSettingsId]);
 
   if (element?.type !== "image") return null;
+
   const { src, radius, width } = element.value;
-  const isVisible = !!srcOpen || !!widthOpen || !!radiusOpen;
+  const isVisible = srcOpen || widthOpen || radiusOpen;
 
   return (
     <Element
@@ -44,7 +53,7 @@ export default function ImageElement({ id }: { id: string }) {
             children: (
               <SourceTooltip
                 src={src}
-                isOpen={!!srcOpen}
+                isOpen={srcOpen}
                 onClose={() => setSrcOpen(false)}
                 onUpdate={(val) => updateElement<"image">(id, { src: val })}
               />
@@ -56,7 +65,7 @@ export default function ImageElement({ id }: { id: string }) {
             children: (
               <WidthTooltip
                 width={width}
-                isOpen={!!widthOpen}
+                isOpen={widthOpen}
                 onClose={() => setWidthOpen(false)}
                 onUpdate={(val) => updateElement<"image">(id, { width: val })}
               />
@@ -68,7 +77,7 @@ export default function ImageElement({ id }: { id: string }) {
             children: (
               <RadiusTooltip
                 radius={radius}
-                isOpen={!!radiusOpen}
+                isOpen={radiusOpen}
                 onClose={() => setRadiusOpen(false)}
                 onUpdate={(val) => updateElement<"image">(id, { radius: val })}
               />

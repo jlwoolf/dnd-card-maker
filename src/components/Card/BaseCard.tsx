@@ -2,6 +2,13 @@ import { Box, Paper, type PaperProps } from "@mui/material";
 import classNames from "classnames";
 import { mergeSx } from "@src/utils/mergeSx";
 
+/**
+ * BaseCard provides the foundational structure and styling for all card containers.
+ * It maintains a consistent 5:7 aspect ratio and handles rounding logic based on
+ * proximity to other menu components.
+ *
+ * @param props - Standard MUI PaperProps
+ */
 export default function BaseCard({ children, sx, className }: PaperProps) {
   return (
     <Paper

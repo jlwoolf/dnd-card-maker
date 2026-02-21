@@ -4,24 +4,31 @@ import {
   FormatAlignRight,
 } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
-import SettingsTooltip from "../SettingsTooltip";
 import classNames from "classnames";
+import SettingsTooltip from "../SettingsTooltip";
 
 type Alignment = "left" | "center" | "right";
 
-interface FontSizeTooltipProps {
+interface AlignmentTooltipProps {
+  /** Current text alignment */
   alignment: Alignment;
+  /** Whether the tooltip is open */
   isOpen: boolean;
+  /** Callback to close the tooltip */
   onClose: () => void;
+  /** Callback when the alignment is updated */
   onUpdate: (val: Alignment) => void;
 }
 
+/**
+ * AlignmentTooltip provides options for horizontal text alignment (Left, Center, Right).
+ */
 export default function AlignmentTooltip({
   alignment,
   isOpen,
   onClose,
   onUpdate,
-}: FontSizeTooltipProps) {
+}: AlignmentTooltipProps) {
   return (
     <SettingsTooltip
       variant="toolbar"

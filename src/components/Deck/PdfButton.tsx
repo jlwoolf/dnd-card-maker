@@ -1,15 +1,18 @@
 import { PictureAsPdf } from "@mui/icons-material";
 import { CircularProgress, Box, Backdrop, Typography } from "@mui/material";
 import useExportCards from "../useExportCards";
-import ControlButton from "./ControlButton";
 import { useSnackbar } from "../useSnackbar";
+import ControlButton from "./ControlButton";
 
+/**
+ * PdfButton triggers the PDF generation process for the entire deck.
+ * It displays progress during generation.
+ */
 export default function PdfButton() {
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const generatePdf = useExportCards((state) => state.generatePdf);
   const pdfProgress = useExportCards((state) => state.pdfProgress);
 
-  // A helper to determine if we are currently "in progress"
   const isGenerating = pdfProgress > 0 && pdfProgress < 1;
 
   const handlePdfDownload = async () => {
@@ -34,7 +37,6 @@ export default function PdfButton() {
   return (
     <>
       <ControlButton
-        // Disable the button UI while generating
         disabled={isGenerating}
         onClick={handlePdfDownload}
         icon={
@@ -43,7 +45,7 @@ export default function PdfButton() {
               <CircularProgress
                 variant="determinate"
                 value={pdfProgress * 100}
-                size={24} // Matches standard icon size
+                size={24}
                 thickness={5}
                 color="inherit"
               />
@@ -59,7 +61,7 @@ export default function PdfButton() {
           zIndex: (theme) => theme.zIndex.drawer + 1,
           flexDirection: "column",
           gap: 2,
-          backgroundColor: "rgba(0, 0, 0, 0.7)", // Slightly dark overlay
+          backgroundColor: "rgba(0, 0, 0, 0.7)",
         }}
         open={isGenerating}
       >

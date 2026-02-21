@@ -1,13 +1,7 @@
+import React, { useCallback, useEffect, useState } from "react";
 import { FormatBold, FormatItalic, OpenInFull } from "@mui/icons-material";
 import { Box } from "@mui/material";
-import { useCallback, useEffect, useState } from "react";
-import { useElementRegistry } from "../useElementRegistry";
-import FontSizeTooltip from "./FontSizeTooltip";
-import LineHeightTooltip from "./LineHeightTooltip";
-import AlignmentTooltip from "./AlignmentTooltip";
-import Element from "../Element";
-import VariantTooltip from "./VariantTooltip";
-import WidthTooltip from "../WidthTooltip";
+import classNames from "classnames";
 import {
   createEditor,
   Editor,
@@ -23,10 +17,17 @@ import {
   type RenderElementProps,
   ReactEditor,
 } from "slate-react";
+import Element from "../Element";
+import { useElementRegistry } from "../useElementRegistry";
+import WidthTooltip from "../WidthTooltip";
+import AlignmentTooltip from "./AlignmentTooltip";
+import FontSizeTooltip from "./FontSizeTooltip";
+import LineHeightTooltip from "./LineHeightTooltip";
 import type { CustomElement } from "./schema";
-import classNames from "classnames";
+import VariantTooltip from "./VariantTooltip";
 
 interface TextElementProps {
+  /** Unique identifier for the text element */
   id: string;
 }
 
@@ -36,11 +37,17 @@ interface FormatMap {
   fontSize: number;
 }
 
+/**
+ * Checks if a specific mark (bold/italic) is active at the current selection.
+ */
 const isMarkActive = (editor: Editor, format: keyof FormatMap) => {
   const marks = Editor.marks(editor);
   return marks ? marks[format] === true : false;
 };
 
+/**
+ * Toggles a mark (bold/italic) for the current selection.
+ */
 const toggleMark = (editor: Editor, format: "bold" | "italic") => {
   const isActive = isMarkActive(editor, format);
   if (isActive) {
@@ -50,11 +57,17 @@ const toggleMark = (editor: Editor, format: "bold" | "italic") => {
   }
 };
 
+/**
+ * Gets the value of a mark (like fontSize) at the current selection.
+ */
 const getMarkValue = <F extends keyof FormatMap>(editor: Editor, format: F) => {
   const marks = Editor.marks(editor);
   return marks ? marks[format] : undefined;
 };
 
+/**
+ * Sets a specific mark value (like fontSize) for the current selection.
+ */
 const setMarkValue = <F extends keyof FormatMap>(
   editor: Editor,
   format: F,
@@ -74,6 +87,9 @@ type BlockMap = {
   lineHeight: CustomElement["lineHeight"];
 };
 
+/**
+ * Gets the value of a block-level property (align/lineHeight) for the current selection.
+ */
 const getBlockValue = <F extends keyof BlockMap>(editor: Editor, format: F) => {
   const { selection } = editor;
   if (!selection) return undefined;
@@ -89,6 +105,9 @@ const getBlockValue = <F extends keyof BlockMap>(editor: Editor, format: F) => {
   return match ? (match[0] as CustomElement)[format] : undefined;
 };
 
+/**
+ * Sets a block-level property (align/lineHeight) for the selected blocks.
+ */
 const setBlockValue = <F extends keyof BlockMap>(
   editor: Editor,
   format: F,
@@ -101,6 +120,10 @@ const setBlockValue = <F extends keyof BlockMap>(
   );
 };
 
+/**
+ * TextElement renders a rich-text editor using Slate.js.
+ * It provides a floating toolbar for font size, alignment, line height, and styling.
+ */
 export default function TextElement({ id }: TextElementProps) {
   const element = useElementRegistry((state) => state.getElement(id));
   const updateElement = useElementRegistry((state) => state.updateElement);
@@ -167,11 +190,8 @@ export default function TextElement({ id }: TextElementProps) {
   }, []);
 
   useEffect(() => {
-    if (element?.type !== "text") {
-      return;
-    }
+    if (element?.type !== "text") return;
 
-    // 1. Check if the editor's current content is different from the store's value
     const isDifferent =
       JSON.stringify(editor.children) !== JSON.stringify(element.value.value);
 
@@ -180,7 +200,6 @@ export default function TextElement({ id }: TextElementProps) {
         editor.children.forEach(() =>
           Transforms.removeNodes(editor, { at: [0] }),
         );
-
         Transforms.insertNodes(editor, element.value.value as Descendant[], {
           at: [0],
         });
@@ -190,7 +209,6 @@ export default function TextElement({ id }: TextElementProps) {
 
   useEffect(() => {
     if (id !== activeSettingsId) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setWidthOpen(false);
       setVariantOpen(false);
       setFontSizeOpen(false);
@@ -199,13 +217,11 @@ export default function TextElement({ id }: TextElementProps) {
     }
   }, [id, activeSettingsId]);
 
-  if (element?.type !== "text") {
-    return null;
-  }
+  if (element?.type !== "text") return null;
 
   const {
     style: { grow },
-    value: { value, variant, expand, width },
+    value: { variant, expand, width },
   } = element;
 
   const currentAlignment = getBlockValue(editor, "align") || "left";
@@ -217,7 +233,7 @@ export default function TextElement({ id }: TextElementProps) {
   return (
     <Slate
       editor={editor}
-      initialValue={value as Descendant[]}
+      initialValue={element.value.value as Descendant[]}
       onChange={handleChange}
     >
       <Element
@@ -258,7 +274,6 @@ export default function TextElement({ id }: TextElementProps) {
                 />
               ),
               onMouseDown: (e) => {
-                // ONLY prevent default if the click didn't come from an input field
                 if ((e.target as HTMLElement).tagName !== "INPUT") {
                   e.preventDefault();
                 }
@@ -281,7 +296,6 @@ export default function TextElement({ id }: TextElementProps) {
                 />
               ),
               onMouseDown: (e) => {
-                // ONLY prevent default if the click didn't come from an input field
                 if ((e.target as HTMLElement).tagName !== "INPUT") {
                   e.preventDefault();
                 }
@@ -295,7 +309,7 @@ export default function TextElement({ id }: TextElementProps) {
                   variant={variant}
                   isOpen={variantOpen}
                   onClose={() => setVariantOpen(false)}
-                  onUpdate={(variant) => updateElement<"text">(id, { variant })}
+                  onUpdate={(v) => updateElement<"text">(id, { variant: v })}
                 />
               ),
               onMouseDown: (e) => {
@@ -308,7 +322,7 @@ export default function TextElement({ id }: TextElementProps) {
               children: (
                 <WidthTooltip
                   width={width}
-                  isOpen={!!widthOpen}
+                  isOpen={widthOpen}
                   onClose={() => setWidthOpen(false)}
                   onUpdate={(val) => updateElement<"text">(id, { width: val })}
                 />
@@ -322,7 +336,7 @@ export default function TextElement({ id }: TextElementProps) {
             {
               children: <FormatBold />,
               className: classNames({ toggled: isBold }),
-              onMouseDown: (e: React.MouseEvent) => {
+              onMouseDown: (e) => {
                 e.preventDefault();
                 toggleMark(editor, "bold");
               },
@@ -331,7 +345,7 @@ export default function TextElement({ id }: TextElementProps) {
             {
               children: <FormatItalic />,
               className: classNames({ toggled: isItalic }),
-              onMouseDown: (e: React.MouseEvent) => {
+              onMouseDown: (e) => {
                 e.preventDefault();
                 toggleMark(editor, "italic");
               },
@@ -340,7 +354,7 @@ export default function TextElement({ id }: TextElementProps) {
             {
               children: <OpenInFull />,
               className: classNames({ toggled: expand }),
-              onMouseDown: (e: React.MouseEvent) => {
+              onMouseDown: (e) => {
                 e.preventDefault();
                 updateElement<"text">(id, { expand: !expand });
               },
@@ -383,12 +397,8 @@ export default function TextElement({ id }: TextElementProps) {
           <Editable
             renderElement={renderElement}
             renderLeaf={renderLeaf}
-            onFocus={() => {
-              setIsFocused(true);
-            }}
-            onBlur={() => {
-              setIsFocused(false);
-            }}
+            onFocus={() => setIsFocused(true)}
+            onBlur={() => setIsFocused(false)}
             placeholder="Enter text..."
           />
         </Box>

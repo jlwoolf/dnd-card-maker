@@ -1,15 +1,19 @@
+import { useCallback } from "react";
 import { Save, Add } from "@mui/icons-material";
 import { Button } from "@mui/material";
-import RoundedButtonGroup from "./RoundedButtonGroup";
+import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
-import { useCallback } from "react";
 import { useSnackbar } from "../useSnackbar";
-import { usePreviewTheme } from "./Preview";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
-import Tooltip from "../Tooltip";
 import { getImageUrl as getImageUrlBase } from "./imageUtils";
+import { usePreviewTheme } from "./Preview";
+import RoundedButtonGroup from "./RoundedButtonGroup";
 
+/**
+ * CardButtons provides the floating action buttons for saving or adding
+ * the current card to the deck.
+ */
 export default function CardButtons() {
   const { element } = useSharedElement();
   const { elements, cardId } = useElementRegistry();
@@ -20,6 +24,9 @@ export default function CardButtons() {
   const { addCard, updateCard } = useExportCards();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
+  /**
+   * Generates a PNG data URL of the current preview card.
+   */
   const getImageUrl = useCallback(
     async () =>
       getImageUrlBase(element, () => {
@@ -28,6 +35,9 @@ export default function CardButtons() {
     [element, showSnackbar],
   );
 
+  /**
+   * Saves changes to an existing card in the deck.
+   */
   const handleSave = useCallback(async () => {
     if (cardId) {
       const dataUrl = await getImageUrl();
@@ -38,6 +48,9 @@ export default function CardButtons() {
     }
   }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
 
+  /**
+   * Adds the current card as a new entry in the deck.
+   */
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (dataUrl) {

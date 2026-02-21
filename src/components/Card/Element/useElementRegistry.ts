@@ -1,12 +1,13 @@
+import { v4 as uuid } from "uuid";
 import z from "zod";
 import { create } from "zustand";
-// Assuming these schemas exist based on your imports
-import { TextElementSchema } from "./Text";
 import { ImageElementSchema } from "./Image";
-import { v4 as uuid } from "uuid";
+import { TextElementSchema } from "./Text";
 
-// --- Schema Definitions ---
-
+/**
+ * Zod schema for a card element, including its unique ID, layout style,
+ * and a discriminated union for its type-specific values.
+ */
 export const ElementSchema = z
   .object({
     id: z.string(),
@@ -35,44 +36,44 @@ export const ElementSchema = z
 
 export type Element = z.infer<typeof ElementSchema>;
 
-// Helper to extract the inner 'value' type based on the discriminating 'type'
 export type ElementValue<T extends Element["type"]> = Extract<
   Element,
   { type: T }
 >["value"];
 
-// --- Store Types ---
-
 type ElementRegistry = {
+  /** List of elements currently on the card */
   elements: Element[];
+  /** Optional ID of the card being edited */
   cardId?: string;
+  /** ID of the element whose settings are currently active */
   activeSettingsId?: string;
 
-  // Actions
+  /** Sets the active settings element ID */
   setActiveSettingsId: (id?: string) => void;
+  /** Registers a new element of the specified type */
   registerElement<T extends Element["type"]>(
     type: T,
     initialValue?: Partial<ElementValue<T>>,
   ): void;
-
+  /** Unregisters an element by its ID */
   unregisterElement(id: string): void;
-
+  /** Moves an element from one index to another */
   moveElement(fromIndex: number, toIndex: number): void;
-
-  // Generalized update function instead of attaching setters to objects
+  /** Updates the value of a specific element */
   updateElement<T extends Element["type"]>(
     id: string,
     value: Partial<ElementValue<T>>,
   ): void;
-
+  /** Updates the layout style of a specific element */
   updateStyle(id: string, value: Partial<Element["style"]>): void;
-
+  /** Retrieves an element by its ID */
   getElement(id: string): Element | undefined;
+  /** Loads a card into the registry */
   loadCard(elements: Element[], cardId: string): void;
+  /** Resets the registry to a blank state or the default card */
   reset(withDefault?: boolean): void;
 };
-
-// --- Store Implementation ---
 
 const DEFAULT_CARD: Element[] = [
   {
@@ -163,13 +164,13 @@ const DEFAULT_CARD: Element[] = [
       expand: true,
       width: 95,
     },
-    style: {
-      grow: true,
-      align: "center",
-    },
+    style: { grow: true, align: "center" },
   },
 ];
 
+/**
+ * useElementRegistry is a Zustand store that manages the state of elements on the current card.
+ */
 export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   elements: DEFAULT_CARD,
   activeSettingsId: undefined,
@@ -177,12 +178,9 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   setActiveSettingsId: (id) => set({ activeSettingsId: id }),
 
   registerElement: (type, initialValue = {}) => {
-    // We generate the ID here
     const id = `${type}-${uuid()}`;
-
     let newElement: Element;
 
-    // We can explicitly parse based on type to ensure validity
     if (type === "text") {
       newElement = ElementSchema.parse({
         id,
@@ -212,7 +210,6 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
 
   moveElement: (fromIndex, toIndex) => {
     set((state) => {
-      // Validate indices to prevent runtime crashes
       if (
         fromIndex < 0 ||
         fromIndex >= state.elements.length ||
@@ -233,21 +230,16 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   updateElement: (id, value) => {
     set((state) => {
       const index = state.elements.findIndex((e) => e.id === id);
-
-      // FIX: Use explicit -1 check.
-      // The original `if (!index)` failed when index was 0.
       if (index === -1) return state;
 
       const currentElement = state.elements[index];
-
-      // Create a new element with the merged value
       const updatedElement = {
         ...currentElement,
         value: {
           ...currentElement.value,
           ...value,
         },
-      } as Element; // Cast needed due to TS discrimination limitations in generic updates
+      } as Element;
 
       const newElements = [...state.elements];
       newElements[index] = updatedElement;
@@ -255,24 +247,20 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
       return { elements: newElements };
     });
   },
+
   updateStyle: (id, style) => {
     set((state) => {
       const index = state.elements.findIndex((e) => e.id === id);
-
-      // FIX: Use explicit -1 check.
-      // The original `if (!index)` failed when index was 0.
       if (index === -1) return state;
 
       const currentElement = state.elements[index];
-
-      // Create a new element with the merged value
       const updatedElement = {
         ...currentElement,
         style: {
           ...currentElement.style,
           ...style,
         },
-      } as Element; // Cast needed due to TS discrimination limitations in generic updates
+      } as Element;
 
       const newElements = [...state.elements];
       newElements[index] = updatedElement;
@@ -286,6 +274,7 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   },
 
   loadCard: (elements, cardId) => set(() => ({ elements, cardId })),
+
   reset(withDefault = false) {
     set(() => ({
       elements: withDefault ? DEFAULT_CARD : [],

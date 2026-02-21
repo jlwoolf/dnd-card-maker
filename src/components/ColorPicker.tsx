@@ -11,15 +11,21 @@ import {
 } from "@mui/material";
 import { useCardPalettes } from "./useCardPalettes";
 
-// Updated type to reflect the nested Record structure
 type PaletteGroups = Record<string, Record<string, string[]>>;
 
 type CustomPaperProps = PaperProps & {
+  /** Map of element IDs to their categorized color palettes */
   palettes: PaletteGroups;
+  /** Callback when a color from a palette is selected */
   onColorSelect: (color: string) => void;
+  /** Whether palettes are currently being generated */
   isGenerating: boolean;
 };
 
+/**
+ * CustomPaper extends the default PopoverPaper to include a color palette panel
+ * generated from images on the card.
+ */
 const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
   ({ palettes, onColorSelect, isGenerating, children, ...rest }, ref) => {
     const cardEntries = Object.entries(palettes);
@@ -34,7 +40,7 @@ const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
           borderColor="divider"
           bgcolor="background.default"
           width="300px"
-          maxHeight="300px" // Slightly increased to handle more rows
+          maxHeight="300px"
           sx={{ overflowY: "auto" }}
         >
           <Typography
@@ -74,7 +80,6 @@ const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
                     Image {elementId.slice(-4)}
                   </Typography>
 
-                  {/* Nested Loop for each Key within the card */}
                   <Stack spacing={1}>
                     {Object.entries(categories).map(([keyName, colors]) => (
                       <Box key={keyName}>
@@ -84,7 +89,7 @@ const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
                               key={`${elementId}-${keyName}-${color}-${index}`}
                               onClick={() => onColorSelect(color)}
                               sx={{
-                                width: 22, // Slightly smaller to fit rows better
+                                width: 22,
                                 height: 22,
                                 backgroundColor: color,
                                 borderRadius: 0.5,
@@ -116,6 +121,11 @@ const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
   },
 );
 
+CustomPaper.displayName = "CustomPaper";
+
+/**
+ * ColorPicker is a specialized MuiColorInput that includes an image-based color palette suggestion tool.
+ */
 export function ColorPicker({
   value,
   onChange,
@@ -131,7 +141,6 @@ export function ColorPicker({
     generateAllPalettes(true);
   }, [generateAllPalettes]);
 
-  // Updated filter to check nested objects
   const groupedPalettes = useMemo(() => {
     return Object.fromEntries(
       Object.entries(palettes).filter(([, categories]) =>
@@ -166,7 +175,7 @@ export function ColorPicker({
             palettes: groupedPalettes,
             isGenerating,
             onColorSelect: onChange,
-          } as CustomPaperProps, // 'as any' is usually needed here so TS doesn't complain about custom props on MUI's Paper
+          } as CustomPaperProps,
         },
       }}
     />

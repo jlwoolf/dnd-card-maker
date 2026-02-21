@@ -2,20 +2,19 @@ import React, { useRef } from "react";
 import { useSnackbar } from "../useSnackbar";
 import ControlButton from "./ControlButton";
 
-// Define the props interface
 interface UploadButtonProps<T> {
+  /** Callback when JSON data is successfully parsed */
   onUpload: (data: T) => void;
+  /** Icon to display inside the button */
   icon: React.ReactNode;
-  // Allows for extra ControlButton props like 'title' or 'className'
+  /** Additional props for the ControlButton */
   [key: string]: unknown;
 }
 
 /**
- * A reusable component that triggers a file upload via a hidden input.
- * @template T The expected type of the JSON data.
+ * UploadButton triggers a file picker for JSON files and passes the parsed data to `onUpload`.
  */
 function UploadButton<T>({ onUpload, icon, ...props }: UploadButtonProps<T>) {
-  // Explicitly type the ref for an HTMLInputElement
   const fileInputRef = useRef<HTMLInputElement>(null);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
@@ -39,8 +38,6 @@ function UploadButton<T>({ onUpload, icon, ...props }: UploadButtonProps<T>) {
     };
 
     reader.readAsText(file);
-
-    // Reset the input value so the same file can be re-uploaded if modified
     event.target.value = "";
   };
 

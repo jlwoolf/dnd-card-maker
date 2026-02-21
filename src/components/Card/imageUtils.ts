@@ -1,7 +1,12 @@
 import { toPng } from "html-to-image";
 
+/**
+ * Converts a URL (remote or blob) to a base64 data URL.
+ *
+ * @param url - The URL to convert.
+ * @returns A promise that resolves to a data URL.
+ */
 export async function toDataUrl(url: string): Promise<string> {
-  // Check if it's already a data URL to avoid re-fetching
   if (url.startsWith("data:")) return url;
 
   try {
@@ -15,62 +20,67 @@ export async function toDataUrl(url: string): Promise<string> {
     });
   } catch (err) {
     console.error("Failed to convert image to DataURL", err);
-    return url; // Fallback to original URL
+    return url;
   }
 }
 
+/**
+ * Processes an image source URL, applying a proxy if it is remote,
+ * and converts it to a data URL.
+ *
+ * @param src - The source URL to process.
+ * @returns A promise that resolves to a data URL or undefined.
+ */
 export async function convertUrl(src: string) {
-  // Skip processing if it's already a data URL
   if (src.startsWith("data:")) return;
 
   let urlToFetch = src;
 
-  // ONLY apply the proxy if it is a remote web URL.
-  // Do NOT apply proxy to "blob:" urls.
   if (src.startsWith("http") || src.startsWith("https")) {
     const proxyUrl = "https://cors-anywhere.com/";
     urlToFetch = proxyUrl + src;
   }
 
-  // fetch() works on blob: URLs natively, converting them to blobs,
-  // which FileReader then converts to base64.
-  const dataUrl = await toDataUrl(urlToFetch);
-  return dataUrl;
+  return await toDataUrl(urlToFetch);
 }
 
+/**
+ * Captures a DOM element as a PNG image, ensuring all internal images
+ * are converted to data URLs first to prevent CORS issues.
+ *
+ * @param element - The DOM element to capture.
+ * @param onError - Optional error callback.
+ * @returns A promise that resolves to a PNG data URL.
+ */
 export async function getImageUrl(
   element: HTMLElement | null,
   onError?: (err: unknown) => void,
 ) {
   if (element === null) return;
 
-  // Find all images within the ref
   const images = element.querySelectorAll("img");
   const originalSrcs = new Map<HTMLImageElement, string>();
 
   try {
-    // Convert ALL images (Remote AND Blobs) to DataURLs
     const conversionPromises = Array.from(images).map(async (img) => {
-      // Store original src for cleanup
       originalSrcs.set(img, img.src);
-      img.src = (await convertUrl(img.src)) ?? img.src;
+      const converted = await convertUrl(img.src);
+      if (converted) {
+        img.src = converted;
+      }
     });
 
     await Promise.all(conversionPromises);
 
-    // Perform the capture
-    const dataUrl = await toPng(element, {
+    return await toPng(element, {
       cacheBust: true,
       skipFonts: false,
     });
-
-    return dataUrl;
   } catch (err) {
     console.error("Oops, something went wrong!", err);
     onError?.(err);
     return;
   } finally {
-    // Cleanup: Revert images back to original URLs (blobs or http links)
     originalSrcs.forEach((src, img) => {
       img.src = src;
     });

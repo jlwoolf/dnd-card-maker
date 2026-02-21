@@ -1,3 +1,4 @@
+import React from "react";
 import {
   Tooltip,
   ClickAwayListener,
@@ -6,17 +7,23 @@ import {
   type SxProps,
   type Theme,
 } from "@mui/material";
-import usePopperRef from "./usePopperRef";
-import React from "react";
 import { mergeSx } from "@src/utils/mergeSx";
+import usePopperRef from "./usePopperRef";
 
 interface SettingsTooltipProps {
+  /** Whether the tooltip is open */
   open: boolean;
+  /** Callback to close the tooltip */
   onClose: () => void;
+  /** Content to display inside the tooltip */
   title: React.ReactNode;
+  /** The element that triggers the tooltip */
   children: React.ReactElement;
+  /** Optional custom Popper ref */
   popperRef?: PopperProps["popperRef"];
+  /** Visual variant of the tooltip */
   variant?: "menu" | "toolbar";
+  /** Optional custom styles for tooltip parts */
   sx?: {
     tooltip?: SxProps<Theme>;
     arrow?: SxProps<Theme>;
@@ -24,8 +31,9 @@ interface SettingsTooltipProps {
 }
 
 /**
- * A standardized Tooltip component for Element settings.
- * Handles the Popper reference, ClickAwayListener, and common styling.
+ * SettingsTooltip is a standardized MUI Tooltip wrapper for element configuration.
+ * It handles automatic positioning updates and provides consistent styling for
+ * "toolbar" (grey) and "menu" (primary) variants.
  */
 export default function SettingsTooltip({
   open,

@@ -1,15 +1,22 @@
+import React, { useEffect, useState } from "react";
 import { Add, Height, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
-import { useEffect, useState } from "react";
 
 interface LineHeightTooltipProps {
+  /** Current line height percentage */
   lineHeight: number | undefined;
+  /** Whether the tooltip is open */
   isOpen: boolean;
+  /** Callback to close the tooltip */
   onClose: () => void;
+  /** Callback when the line height is updated */
   onUpdate: (val: number | undefined) => void;
 }
 
+/**
+ * LineHeightTooltip provides controls for adjusting text line height (spacing) via input or buttons.
+ */
 export default function LineHeightTooltip({
   lineHeight,
   isOpen,
@@ -17,6 +24,7 @@ export default function LineHeightTooltip({
   onUpdate,
 }: LineHeightTooltipProps) {
   const [value, setValue] = useState(lineHeight?.toString() ?? "120");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
@@ -26,15 +34,14 @@ export default function LineHeightTooltip({
     }
 
     if (/^[0-9\b]+$/.test(val)) {
-      const lineHeight = parseInt(val);
-      setValue(lineHeight.toString());
-      onUpdate(lineHeight);
+      const parsedLineHeight = parseInt(val);
+      setValue(parsedLineHeight.toString());
+      onUpdate(parsedLineHeight);
     }
   };
 
   useEffect(() => {
     if (lineHeight !== undefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue(lineHeight.toString());
     }
   }, [lineHeight]);
@@ -60,12 +67,10 @@ export default function LineHeightTooltip({
             })}
             onMouseDown={(e) => {
               e.preventDefault();
-              if (lineHeight === undefined || lineHeight <= 1) {
-                return;
-              } else {
-                setValue((lineHeight - 10).toString());
-                onUpdate(lineHeight - 10);
-              }
+              if (lineHeight === undefined || lineHeight <= 10) return;
+              const newValue = lineHeight - 10;
+              setValue(newValue.toString());
+              onUpdate(newValue);
             }}
           >
             <Remove sx={{ width: "12px" }} />
@@ -106,12 +111,10 @@ export default function LineHeightTooltip({
             })}
             onMouseDown={(e) => {
               e.preventDefault();
-              if (lineHeight === undefined) {
-                return;
-              }
-
-              setValue((lineHeight + 10).toString());
-              onUpdate(lineHeight + 10);
+              if (lineHeight === undefined) return;
+              const newValue = lineHeight + 10;
+              setValue(newValue.toString());
+              onUpdate(newValue);
             }}
           >
             <Add sx={{ width: "12px" }} />

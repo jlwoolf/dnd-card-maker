@@ -1,17 +1,24 @@
 import { Edit, Delete, Download } from "@mui/icons-material";
 import { useElementRegistry } from "../Card/Element/useElementRegistry";
 import { usePreviewTheme } from "../Card/Preview";
+import { useSnackbar } from "../useSnackbar";
 import useExportCards, { type Card } from "../useExportCards";
 import ActionButton from "./ActionButton";
-import { useSnackbar } from "../useSnackbar";
 
 interface CardButtonsProps {
+  /** The card data associated with these buttons */
   card: Card;
+  /** Optional callback when the card is deleted */
   onDelete?: (card: Card) => void;
+  /** Optional callback when the card is edited */
   onEdit?: (card: Card) => void;
+  /** Optional callback when the card is downloaded as an image */
   onDownload?: (card: Card) => void;
 }
 
+/**
+ * CardButtons provides the action icons overlay for a card in the deck stack.
+ */
 export default function CardButtons({
   card,
   onDelete,

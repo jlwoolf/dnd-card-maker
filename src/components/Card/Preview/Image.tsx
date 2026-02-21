@@ -1,7 +1,8 @@
+import React from "react";
 import { Box, styled } from "@mui/material";
 import { usePreviewTheme } from "./usePreviewTheme";
 
-interface TextProps {
+interface ImageProps {
   children?: React.ReactNode;
   radius?: number;
   width?: number;
@@ -17,7 +18,10 @@ const SvgBackground = styled("svg")({
   overflow: "visible",
 });
 
-const Image = ({ children, radius = 0, width = 100 }: TextProps) => {
+/**
+ * Image component for the preview card. Renders an image with a styled SVG border.
+ */
+const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
   const { fill, stroke } = usePreviewTheme();
 
   return (
@@ -25,11 +29,11 @@ const Image = ({ children, radius = 0, width = 100 }: TextProps) => {
       <Box
         sx={{
           position: "relative",
-          display: "inline-flex", // Changed to inline-flex to shrink-wrap
-          justifyContent: "center", // Horizontal center
-          alignItems: "center", // Vertical center
+          display: "inline-flex",
+          justifyContent: "center",
+          alignItems: "center",
           width: `calc(${width}% - 4px)`,
-          minHeight: "50px", // Added min-height to ensure there's space to center in
+          minHeight: "50px",
         }}
       >
         <SvgBackground preserveAspectRatio="none">
@@ -49,8 +53,8 @@ const Image = ({ children, radius = 0, width = 100 }: TextProps) => {
             zIndex: 1,
             margin: "2px",
             borderRadius: `${radius * 3.8}px`,
-            width: "100%", // Use 100% of the parent container
-            display: "flex", // Nested flex for internal centering
+            width: "100%",
+            display: "flex",
             justifyContent: "center",
             alignItems: "center",
             overflow: "hidden",

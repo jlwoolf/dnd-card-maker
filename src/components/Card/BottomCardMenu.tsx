@@ -1,3 +1,4 @@
+import { useState } from "react";
 import {
   DoDisturb,
   Image,
@@ -6,21 +7,41 @@ import {
   TextFields,
 } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import { useElementRegistry } from "./Element/useElementRegistry";
-import { useSnackbar } from "../useSnackbar";
-import { useState } from "react";
 import ColorSettingsModal from "../ColorSettingsModal";
-import CardMenu from "./CardMenu";
 import Tooltip from "../Tooltip";
+import { useSnackbar } from "../useSnackbar";
+import CardMenu from "./CardMenu";
+import { useElementRegistry } from "./Element/useElementRegistry";
 
-export default function BottomCardMenu({
-  anchorEl,
-}: {
+interface BottomCardMenuProps {
+  /** The element used to anchor the color settings modal */
   anchorEl: HTMLElement | null;
-}) {
+}
+
+/**
+ * BottomCardMenu provides the main action buttons for modifying the card,
+ * such as adding elements, configuring colors, and resetting the card state.
+ */
+export default function BottomCardMenu({ anchorEl }: BottomCardMenuProps) {
   const { registerElement, reset } = useElementRegistry();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const [colorModalOpen, setColorModalOpen] = useState(false);
+
+  /**
+   * Resets the card to its default state.
+   */
+  const handleResetToDefault = () => {
+    reset(true);
+    showSnackbar("Reset to default card", "info");
+  };
+
+  /**
+   * Clears all elements from the card.
+   */
+  const handleClearCard = () => {
+    reset();
+    showSnackbar("Card cleared", "warning");
+  };
 
   return (
     <>
@@ -41,26 +62,17 @@ export default function BottomCardMenu({
           </IconButton>
         </Tooltip>
         <Tooltip title="Reset to Default">
-          <IconButton
-            onClick={() => {
-              reset(true);
-              showSnackbar("Reset to default card", "info");
-            }}
-          >
+          <IconButton onClick={handleResetToDefault}>
             <Replay />
           </IconButton>
         </Tooltip>
         <Tooltip title="Clear">
-          <IconButton
-            onClick={() => {
-              reset();
-              showSnackbar("Card cleared", "warning");
-            }}
-          >
+          <IconButton onClick={handleClearCard}>
             <DoDisturb />
           </IconButton>
         </Tooltip>
       </CardMenu>
+
       <ColorSettingsModal
         open={colorModalOpen}
         onClose={() => setColorModalOpen(false)}

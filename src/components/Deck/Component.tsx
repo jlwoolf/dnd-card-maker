@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { motion, AnimatePresence } from "framer-motion";
 import {
   ChevronLeft,
   ChevronRight,
@@ -7,19 +6,24 @@ import {
   ExpandMore,
   Upload,
 } from "@mui/icons-material";
-import ControlButton from "./ControlButton";
-import UploadButton from "./UploadButton";
+import { Box, useMediaQuery, useTheme } from "@mui/material";
+import { motion, AnimatePresence } from "framer-motion";
+import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
-import { Box, useMediaQuery, useTheme } from "@mui/material";
+import CardButtons from "./CardButtons";
+import ControlButton from "./ControlButton";
 import DownloadButton from "./DownloadButton";
 import PdfButton from "./PdfButton";
-import CardButtons from "./CardButtons";
-import Tooltip from "../Tooltip";
+import UploadButton from "./UploadButton";
 
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
+/**
+ * Deck component renders the visual stack of saved cards and provides controls
+ * for navigation, export, and import.
+ */
 const Deck = () => {
   const cards = useExportCards((state) => state.cards);
   const loadFile = useExportCards((state) => state.loadFile);
@@ -40,7 +44,6 @@ const Deck = () => {
       sx={{
         position: "fixed",
         bottom: 60,
-        // Keep the deck container itself on the left for mobile
         left: { xs: 20, md: "unset" },
         right: { xs: "unset", md: 40 },
         zIndex: 500,
@@ -72,7 +75,6 @@ const Deck = () => {
                 zIndex: zIndex,
               },
               active: {
-                // Modified X for mobile so it expands toward the center/right
                 x: isDesktop ? -120 : 60,
                 y: isDesktop ? -250 : -200,
                 scale: 2.2,
@@ -132,7 +134,6 @@ const Deck = () => {
         );
       })}
 
-      {/* --- THE CONTROLS --- */}
       <Box
         sx={{
           position: { xs: "fixed", md: "absolute" },
@@ -153,7 +154,6 @@ const Deck = () => {
           pointerEvents: "none",
         }}
       >
-        {/* Collapse button anchored to the left on mobile */}
         {!isDesktop && (
           <Box
             sx={{
@@ -190,7 +190,6 @@ const Deck = () => {
               <Tooltip title="Upload File">
                 <UploadButton
                   onUpload={(data) => {
-                    // Replace 'any' with your specific Data Type
                     loadFile(data);
                     showSnackbar("Deck loaded successfully", "success");
                   }}

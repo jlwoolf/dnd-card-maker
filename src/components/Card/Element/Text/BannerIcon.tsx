@@ -1,11 +1,13 @@
 import React from "react";
 import { SvgIcon, type SvgIconProps } from "@mui/material";
 
+/**
+ * BannerIcon is a custom SVG icon representing a banner shape.
+ */
 const BannerIcon: React.FC<SvgIconProps> = (props) => {
   return (
     <SvgIcon
       {...props}
-      // Updated viewBox to match the 200x200 Inkscape export
       viewBox="0 0 52.916669 52.916675"
       sx={{
         width: "auto",

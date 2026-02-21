@@ -3,17 +3,27 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 interface TooltipProps {
+  /** The element that triggers the tooltip on hover */
   children: React.ReactElement;
+  /** The text content of the tooltip */
   title: string;
-  delay?: number; // Optional delay prop
+  /** Delay in milliseconds before showing the tooltip */
+  delay?: number;
 }
 
+/**
+ * Tooltip is a custom implementation that uses Framer Motion for animations
+ * and portals the content to the body for proper z-index handling.
+ */
 const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0 });
   const triggerRef = useRef<HTMLDivElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
+  /**
+   * Updates the tooltip position based on the trigger element's bounding box.
+   */
   const updatePosition = () => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
@@ -37,16 +47,13 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   }, [isVisible]);
 
   const handleMouseEnter = () => {
-    // Clear any existing timer to avoid conflicts
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
-
     timeoutRef.current = setTimeout(() => {
       setIsVisible(true);
     }, delay);
   };
 
   const handleMouseLeave = () => {
-    // Clear the timer so it doesn't show up after the mouse has already left
     if (timeoutRef.current) clearTimeout(timeoutRef.current);
     setIsVisible(false);
   };

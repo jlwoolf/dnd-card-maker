@@ -1,9 +1,13 @@
 import { Box } from "@mui/material";
-import { PreviewCard } from "./Preview";
+import CardButtons from "./CardButtons";
 import EditCard from "./EditCard";
 import { ElementRefProvider } from "./ElementRefContext";
-import CardButtons from "./CardButtons";
+import { PreviewCard } from "./Preview";
 
+/**
+ * Main Card component that orchestrates the editor and preview views.
+ * Wraps children in an ElementRefProvider to share DOM references for image generation.
+ */
 export default function Card() {
   return (
     <ElementRefProvider>

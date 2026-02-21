@@ -1,11 +1,19 @@
 import { type ReactNode, useState, useCallback } from "react";
 import { ElementRefContext } from "./Context";
 
-export const ElementRefProvider = ({ children }: { children: ReactNode }) => {
-  const [element, setElementState] = useState<HTMLElement | null>(null);
-  const [settingsAnchor, setSettingsAnchorState] = useState<HTMLElement | null>(null);
+interface ElementRefProviderProps {
+  children: ReactNode;
+}
 
-  // We use useCallback for the ref setter to maintain reference equality
+/**
+ * ElementRefProvider manages the state of shared DOM references for card components.
+ */
+export const ElementRefProvider = ({ children }: ElementRefProviderProps) => {
+  const [element, setElementState] = useState<HTMLElement | null>(null);
+  const [settingsAnchor, setSettingsAnchorState] = useState<HTMLElement | null>(
+    null,
+  );
+
   const setElement = useCallback((node: HTMLElement | null) => {
     setElementState(node);
   }, []);
@@ -15,7 +23,9 @@ export const ElementRefProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   return (
-    <ElementRefContext.Provider value={{ element, setElement, settingsAnchor, setSettingsAnchor }}>
+    <ElementRefContext.Provider
+      value={{ element, setElement, settingsAnchor, setSettingsAnchor }}
+    >
       {children}
     </ElementRefContext.Provider>
   );

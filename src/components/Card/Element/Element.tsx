@@ -1,14 +1,20 @@
-import { Box, type BoxProps } from "@mui/material";
-import { Menu, type MenuProps } from "./Menu";
 import { useState } from "react";
-import useBottomObstructed from "./useBottomObstructed";
+import { Box, type BoxProps } from "@mui/material";
 import classNames from "classnames";
+import { Menu, type MenuProps } from "./Menu";
+import useBottomObstructed from "./useBottomObstructed";
 
 interface ElementProps extends BoxProps {
+  /** Props for the floating action menu */
   menuProps: Omit<MenuProps, "id">;
+  /** Unique identifier for the element */
   id: string;
 }
 
+/**
+ * Element is a wrapper component for card items (Text/Image) that provides
+ * hover states and a floating action menu.
+ */
 export default function Element({
   menuProps: { visible, ...menuProps },
   id,
@@ -46,12 +52,7 @@ export default function Element({
       {...rest}
     >
       {children}
-      <Menu
-        id={id}
-        visible={isHovered || visible}
-        // obstructed={isObstructed}
-        {...menuProps}
-      />
+      <Menu id={id} visible={isHovered || visible} {...menuProps} />
     </Box>
   );
 }

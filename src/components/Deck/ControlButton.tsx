@@ -1,13 +1,20 @@
-import { motion } from "framer-motion";
 import React from "react";
+import { motion } from "framer-motion";
 
 interface ControlButtonProps {
+  /** Callback when the button is clicked */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
+  /** Accessibility label */
   label?: string;
+  /** Icon to display inside the button */
   icon: React.ReactNode;
+  /** Whether the button is disabled */
   disabled?: boolean;
 }
 
+/**
+ * ControlButton is a circular, dark-themed button used for deck navigation and global actions.
+ */
 const ControlButton = ({
   onClick,
   icon,

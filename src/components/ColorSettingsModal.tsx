@@ -11,11 +11,17 @@ import { usePreviewTheme, DEFAULT_THEME } from "./Card/Preview";
 import { ColorPicker } from "./ColorPicker";
 
 interface ColorSettingsModalProps {
+  /** Whether the modal is open */
   open: boolean;
+  /** Callback to close the modal */
   onClose: () => void;
+  /** Anchor element for the popover */
   anchorEl: HTMLElement | null;
 }
 
+/**
+ * ColorSettingsModal provides a panel to adjust all thematic colors of the card.
+ */
 export default function ColorSettingsModal({
   open,
   onClose,

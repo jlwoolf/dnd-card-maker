@@ -6,6 +6,10 @@ import {
 } from "@mui/material";
 import { mergeSx } from "../../utils/mergeSx";
 
+/**
+ * RoundedButtonGroup provides a styled button group with responsive orientation
+ * and rounded corners.
+ */
 export default function RoundedButtonGroup({
   sx,
   children,
@@ -18,8 +22,7 @@ export default function RoundedButtonGroup({
   const responsiveSx = {
     borderRadius: "50px",
     "& .MuiButtonBase-root": {
-          width,
-      // Base reset for all buttons
+      width,
       borderRadius: "50px",
       aspectRatio: "1/1",
     },
@@ -28,7 +31,6 @@ export default function RoundedButtonGroup({
       borderColor: "primary.light",
     },
 
-    // --- First Button Rounding ---
     "& .MuiButtonGroup-firstButton": {
       borderRadius: "unset",
       borderTopLeftRadius: "50px",
@@ -36,7 +38,6 @@ export default function RoundedButtonGroup({
       borderTopRightRadius: isMobile ? "50px" : "0px",
     },
 
-    // --- Last Button Rounding ---
     "& .MuiButtonGroup-lastButton": {
       borderRadius: "unset",
       borderBottomRightRadius: "50px",
@@ -44,7 +45,6 @@ export default function RoundedButtonGroup({
       borderBottomLeftRadius: isMobile ? "50px" : "0px",
     },
 
-    // --- Middle Buttons ---
     "& .MuiButtonGroup-middleButton": {
       borderRadius: "0px",
     },

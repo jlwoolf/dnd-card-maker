@@ -1,12 +1,15 @@
 import { convertUrl } from "./Card";
 
+interface RGB {
+  r: number;
+  g: number;
+  b: number;
+}
+
 /**
  * Calculates the Euclidean distance between two RGB colors in 3D space.
  */
-function getColorDistance(
-  c1: { r: number; g: number; b: number },
-  c2: { r: number; g: number; b: number },
-): number {
+function getColorDistance(c1: RGB, c2: RGB): number {
   return Math.sqrt(
     Math.pow(c1.r - c2.r, 2) +
       Math.pow(c1.g - c2.g, 2) +
@@ -14,6 +17,9 @@ function getColorDistance(
   );
 }
 
+/**
+ * Converts RGB components to a Hex color string.
+ */
 function rgbToHex(r: number, g: number, b: number): string {
   const toHex = (c: number) =>
     Math.min(255, Math.max(0, Math.round(c)))
@@ -22,6 +28,10 @@ function rgbToHex(r: number, g: number, b: number): string {
   return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 }
 
+/**
+ * Adjusts a color's brightness.
+ * @param factor - Positive for light, negative for dark.
+ */
 function adjustColor(r: number, g: number, b: number, factor: number): string {
   const adjust = (val: number) =>
     factor > 0 ? val + (255 - val) * factor : val + val * factor;
@@ -29,18 +39,11 @@ function adjustColor(r: number, g: number, b: number, factor: number): string {
 }
 
 /**
- * Reduces the saturation of a color.
+ * Reduces the saturation of a color towards gray.
  * @param factor - 0 is original, 1 is completely gray.
  */
-function desaturate(
-  r: number,
-  g: number,
-  b: number,
-  factor: number = 0.3,
-): { r: number; g: number; b: number } {
-  // Calculate the "Luminance" or a simple average to find the gray target
+function desaturate(r: number, g: number, b: number, factor: number = 0.3): RGB {
   const gray = (r + g + b) / 3;
-
   return {
     r: r + (gray - r) * factor,
     g: g + (gray - g) * factor,
@@ -48,6 +51,13 @@ function desaturate(
   };
 }
 
+/**
+ * Analyzes an image and generates several color palettes: lights, darks, muted base, and most popular colors.
+ *
+ * @param imageUrl - URL or data URL of the image to analyze.
+ * @param paletteSize - Number of colors to extract.
+ * @returns A promise resolving to the generated palettes.
+ */
 export default async function generatePalette(
   imageUrl: string,
   paletteSize: number = 5,
@@ -63,7 +73,7 @@ export default async function generatePalette(
 
   return new Promise((resolve, reject) => {
     const img = new Image();
-    img.crossOrigin = "Anonymous"; // Ensure CORS is handled
+    img.crossOrigin = "Anonymous";
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -82,23 +92,16 @@ export default async function generatePalette(
         canvas.height,
       );
 
-      // --- RETRY LOGIC CONFIGURATION ---
       let attempts = 0;
       let currentBinSize = 10;
       let currentDistanceThreshold = 75;
-      let uniquePalette: Array<{ r: number; g: number; b: number }> = [];
-      let sortedColors: Array<{
-        r: number;
-        g: number;
-        b: number;
-        count: number;
-      }> = [];
+      let uniquePalette: Array<RGB> = [];
+      let sortedColors: Array<RGB & { count: number }> = [];
 
       while (attempts < 3) {
         const colorCounts: Record<string, number> = {};
         uniquePalette = [];
 
-        // 1. Bin colors based on current resolution
         for (let i = 0; i < pixels.length; i += 4) {
           if (pixels[i + 3] < 125) continue;
           const r = Math.round(pixels[i] / currentBinSize) * currentBinSize;
@@ -115,7 +118,6 @@ export default async function generatePalette(
           })
           .sort((a, b) => b.count - a.count);
 
-        // 2. Extract Diverse Palette
         for (const color of sortedColors) {
           if (uniquePalette.length >= paletteSize) break;
           const isDifferentEnough = uniquePalette.every(
@@ -125,18 +127,13 @@ export default async function generatePalette(
           if (isDifferentEnough) uniquePalette.push(color);
         }
 
-        // Check if we met the goal
-        if (uniquePalette.length >= paletteSize) {
-          break; // Success!
-        }
+        if (uniquePalette.length >= paletteSize) break;
 
-        // 3. Increment resolution for next attempt
         attempts++;
-        currentBinSize = Math.max(1, currentBinSize - 3); // Smaller bins = higher res
-        currentDistanceThreshold *= 0.7; // Lower threshold allows similar colors
+        currentBinSize = Math.max(1, currentBinSize - 3);
+        currentDistanceThreshold *= 0.7;
       }
 
-      // --- DATA FORMATTING (Post-Loop) ---
       const popularityPalette = sortedColors.slice(0, paletteSize);
       const mutedDiverse = uniquePalette.map((c) => desaturate(c.r, c.g, c.b));
 

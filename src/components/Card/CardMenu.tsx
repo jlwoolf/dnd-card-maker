@@ -1,12 +1,12 @@
-import {
-  Paper,
-  type PaperProps,
-} from "@mui/material";
+import React from "react";
+import { Paper, type PaperProps } from "@mui/material";
+import classNames from "classnames";
 import { mergeSx } from "@src/utils/mergeSx";
 
-import React from "react";
-import classNames from "classnames";
-
+/**
+ * CardMenu is a specialized Paper container used for card toolbars and menus.
+ * It includes logic to handle border rounding when placed adjacent to a BaseCard.
+ */
 const CardMenu = React.forwardRef<HTMLDivElement, Omit<PaperProps, "ref">>(
   ({ children, sx, className, ...props }, ref) => {
     return (
@@ -38,5 +38,7 @@ const CardMenu = React.forwardRef<HTMLDivElement, Omit<PaperProps, "ref">>(
     );
   },
 );
+
+CardMenu.displayName = "CardMenu";
 
 export default CardMenu;

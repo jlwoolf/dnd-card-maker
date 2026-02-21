@@ -14,10 +14,10 @@ const SvgBackground = styled("svg")({
 
 const StyledPaper = styled(Paper)(() => ({
   position: "relative",
-  justifyContent: "center", // Horizontal center
-  alignItems: "center", // Vertical center
-  backgroundColor: "transparent", // Let the SVG handle the background
-  boxShadow: "none", // Disable default elevation if using the SVG shadow
+  justifyContent: "center",
+  alignItems: "center",
+  backgroundColor: "transparent",
+  boxShadow: "none",
   aspectRatio: "5/7",
   borderRadius: 20,
   overflow: "hidden",
@@ -27,23 +27,24 @@ interface BackgroundProps {
   children: React.ReactNode;
 }
 
+/**
+ * Background renders the main SVG-based container for the preview card.
+ * It uses the preview theme for fill and stroke colors.
+ */
 const Background = forwardRef<HTMLDivElement, BackgroundProps>(
   ({ children }: BackgroundProps, ref) => {
     const { fill, stroke } = usePreviewTheme();
 
     return (
       <StyledPaper ref={ref}>
-        {/* The SVG Layer */}
         <SvgBackground viewBox={`0 0 500 700`} preserveAspectRatio="none">
           <g>
-            {/* Bottom Shadow Rectangle */}
             <rect
               width={500}
               height={700}
               fill={fill}
               vectorEffect="non-scaling-stroke"
             />
-            {/* Top Main Rectangle */}
             <rect
               width={500}
               height={700}
@@ -58,6 +59,7 @@ const Background = forwardRef<HTMLDivElement, BackgroundProps>(
 
         <Box
           sx={{
+            position: "relative",
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
@@ -74,5 +76,7 @@ const Background = forwardRef<HTMLDivElement, BackgroundProps>(
     );
   },
 );
+
+Background.displayName = "Background";
 
 export default Background;

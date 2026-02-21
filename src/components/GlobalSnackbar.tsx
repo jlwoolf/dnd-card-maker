@@ -1,6 +1,9 @@
 import { Alert, Snackbar, useMediaQuery, useTheme } from "@mui/material";
 import { useSnackbar } from "./useSnackbar";
 
+/**
+ * GlobalSnackbar provides a system-wide notification overlay using MUI Snackbar and Alert.
+ */
 export default function GlobalSnackbar() {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
@@ -10,9 +13,7 @@ export default function GlobalSnackbar() {
     _event?: React.SyntheticEvent | Event,
     reason?: string,
   ) => {
-    if (reason === "clickaway") {
-      return;
-    }
+    if (reason === "clickaway") return;
     closeSnackbar();
   };
 

@@ -1,23 +1,32 @@
 import { useRef, type ChangeEvent } from "react";
-import { Link as LinkIcon, Folder as FolderIcon } from "@mui/icons-material";
+import {
+  Link as LinkIcon,
+  Folder as FolderIcon,
+  Image as ImageIcon,
+} from "@mui/icons-material";
 import {
   Box,
   TextField,
   InputAdornment,
   IconButton,
   Divider,
-  type PopperProps,
 } from "@mui/material";
-import { Image as ImageIcon } from "@mui/icons-material";
 import SettingsTooltip from "../SettingsTooltip";
 
 interface SourceTooltipProps {
+  /** Current image source URL or data URL */
   src: string;
+  /** Whether the tooltip is open */
   isOpen: boolean;
-  onClose: (popperRef?: PopperProps["popperRef"]) => void;
+  /** Callback to close the tooltip */
+  onClose: () => void;
+  /** Callback when the source value is updated */
   onUpdate: (val: string) => void;
 }
 
+/**
+ * SourceTooltip allows users to provide an image source via URL or by uploading a local file.
+ */
 const SourceTooltip = ({
   src,
   isOpen,
@@ -26,16 +35,19 @@ const SourceTooltip = ({
 }: SourceTooltipProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
-  // Trigger the hidden file input click
+  /**
+   * Triggers the hidden file input.
+   */
   const handleFolderClick = () => {
     fileInputRef.current?.click();
   };
 
-  // Handle file selection
+  /**
+   * Handles local file selection and generates a blob URL.
+   */
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
-      // Create a local URL for the file to display immediately
       const objectUrl = URL.createObjectURL(file);
       onUpdate(objectUrl);
     }
@@ -47,7 +59,6 @@ const SourceTooltip = ({
       onClose={onClose}
       title={
         <Box p={1} display="flex" alignItems="center">
-          {/* Hidden File Input */}
           <input
             type="file"
             hidden
@@ -64,23 +75,18 @@ const SourceTooltip = ({
             onChange={(e) => onUpdate(e.target.value)}
             slotProps={{
               input: {
-                // Left side: Link Icon
                 startAdornment: (
                   <InputAdornment position="start">
                     <LinkIcon sx={{ fontSize: 16 }} />
                   </InputAdornment>
                 ),
-                // Right side: Divider | Folder Icon
                 endAdornment: (
                   <InputAdornment position="end" sx={{ marginLeft: 1 }}>
                     <Divider
                       orientation="vertical"
                       variant="middle"
                       flexItem
-                      sx={{
-                        height: 16,
-                        mx: 1, // Margin for spacing around the pipe
-                      }}
+                      sx={{ height: 16, mx: 1 }}
                     />
                     <IconButton
                       size="small"
@@ -91,9 +97,7 @@ const SourceTooltip = ({
                     </IconButton>
                   </InputAdornment>
                 ),
-                sx: {
-                  minWidth: 200,
-                },
+                sx: { minWidth: 200 },
               },
             }}
           />

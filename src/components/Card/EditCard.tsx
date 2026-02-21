@@ -1,12 +1,16 @@
+import { useState } from "react";
 import { Box } from "@mui/material";
+import BaseCard from "./BaseCard";
 import BottomCardMenu from "./BottomCardMenu";
+import CardMenu from "./CardMenu";
 import { ImageElement, TextElement } from "./Element";
 import { useElementRegistry } from "./Element/useElementRegistry";
-import BaseCard from "./BaseCard";
-import { useState } from "react";
 import { useSharedElement } from "./ElementRefContext";
-import CardMenu from "./CardMenu";
 
+/**
+ * EditCard provides the interactive editing interface for a card.
+ * It renders the list of elements within a BaseCard and manages the settings toolbar anchor.
+ */
 export default function EditCard() {
   const { elements } = useElementRegistry();
   const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
@@ -14,9 +18,7 @@ export default function EditCard() {
 
   return (
     <Box
-      ref={(node: HTMLElement) => {
-        setContainerEl(node);
-      }}
+      ref={setContainerEl}
       display="flex"
       position="relative"
       flexDirection="column"
@@ -28,25 +30,20 @@ export default function EditCard() {
         <Box ref={setSettingsAnchor} className="settings-menu" />
       </CardMenu>
       <BaseCard>
-        {elements
-          .map((element) => {
-            switch (element.type) {
-              case "text":
-                return [element, <TextElement id={element.id} />] as const;
-              case "image":
-                return [element, <ImageElement id={element.id} />] as const;
-            }
-          })
-          .map(([element, children]) => (
-            <Box
-              width="100%"
-              flexGrow={element.style.grow ? 1 : 0}
-              alignContent={element.style.align}
-              key={element.id}
-            >
-              {children}
-            </Box>
-          ))}
+        {elements.map((element) => (
+          <Box
+            key={element.id}
+            width="100%"
+            flexGrow={element.style.grow ? 1 : 0}
+            alignContent={element.style.align}
+          >
+            {element.type === "text" ? (
+              <TextElement id={element.id} />
+            ) : (
+              <ImageElement id={element.id} />
+            )}
+          </Box>
+        ))}
       </BaseCard>
       <BottomCardMenu anchorEl={containerEl} />
     </Box>

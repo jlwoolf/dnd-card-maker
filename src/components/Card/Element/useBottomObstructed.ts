@@ -1,5 +1,13 @@
 import { useEffect, useState, useRef } from "react";
 
+/**
+ * useBottomObstructed detects if an element's bottom edge is outside the visible area
+ * of a parent container matched by the provided selector.
+ *
+ * @param selector - CSS selector of the scrollable parent container.
+ * @param options - IntersectionObserver options.
+ * @returns A tuple containing the ref to attach and a boolean indicating if the element is obstructed.
+ */
 export default function useBottomObstructed(selector: string, options = {}) {
   const [isObstructed, setIsObstructed] = useState(false);
   const targetRef = useRef<HTMLElement>(null);
@@ -21,7 +29,7 @@ export default function useBottomObstructed(selector: string, options = {}) {
         setIsObstructed(isBelowBottom || (isClipped && isBelowBottom));
       },
       {
-        root: parentElement, // Observe relative to this element
+        root: parentElement,
         threshold: Array.from({ length: 101 }, (_, i) => i / 100),
         ...options,
       },

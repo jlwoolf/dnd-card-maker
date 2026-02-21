@@ -1,3 +1,4 @@
+import React from "react";
 import { Box as MuiBox, styled } from "@mui/material";
 import { usePreviewTheme } from "./usePreviewTheme";
 
@@ -18,7 +19,10 @@ const SvgBackground = styled("svg")({
   overflow: "visible",
 });
 
-const Box = ({ children }: TextProps) => {
+/**
+ * Renders a box-styled container for preview text.
+ */
+const BoxVariant = ({ children }: TextProps) => {
   const { boxFill, fill, stroke, boxText } = usePreviewTheme();
 
   return (
@@ -33,9 +37,6 @@ const Box = ({ children }: TextProps) => {
           vectorEffect="non-scaling-stroke"
         />
       </SvgBackground>
-      {/* Background SVG Layer */}
-
-      {/* Foreground Text Layer */}
       <MuiBox style={{ position: "relative", color: boxText }}>
         {children}
       </MuiBox>
@@ -43,15 +44,17 @@ const Box = ({ children }: TextProps) => {
   );
 };
 
-const Banner = ({ children }: TextProps) => {
+/**
+ * Renders a banner-styled container for preview text.
+ */
+const BannerVariant = ({ children }: TextProps) => {
   const { bannerFill, fill, stroke, bannerText } = usePreviewTheme();
 
   return (
     <>
-      {/* Background SVG Layer */}
       <svg
         viewBox="0 0 175 24.5"
-        preserveAspectRatio="none" // Essential for stretching
+        preserveAspectRatio="none"
         style={{
           position: "absolute",
           top: 0,
@@ -67,12 +70,10 @@ const Banner = ({ children }: TextProps) => {
             fill={bannerFill ?? fill}
             stroke={stroke}
             strokeWidth={4}
-            vectorEffect="non-scaling-stroke" // Prevents the border from getting fat
+            vectorEffect="non-scaling-stroke"
           />
         </g>
       </svg>
-
-      {/* Foreground Text Layer */}
       <MuiBox
         sx={{ position: "relative", padding: "0px 8px", color: bannerText }}
       >
@@ -82,6 +83,9 @@ const Banner = ({ children }: TextProps) => {
   );
 };
 
+/**
+ * Text component for the preview card. Handles different background variants and layout.
+ */
 export default function Text({
   width = 100,
   variant,
@@ -92,14 +96,19 @@ export default function Text({
     <MuiBox
       sx={{
         position: "relative",
-        display: "inline-block", // Shrinks container to fit text width
+        display: "inline-block",
         padding: "8px 8px",
-        width: `calc(${width}% - 16px)`,
+        width: `calc(${width}%)`,
         height: expand ? "calc(100% - 16px)" : undefined,
         margin: `0px calc((100% - ${width}%) / 2)`,
+        boxSizing: "border-box",
       }}
     >
-      {variant === "banner" ? <Banner {...props} /> : <Box {...props} />}
+      {variant === "banner" ? (
+        <BannerVariant {...props} />
+      ) : (
+        <BoxVariant {...props} />
+      )}
     </MuiBox>
   );
 }

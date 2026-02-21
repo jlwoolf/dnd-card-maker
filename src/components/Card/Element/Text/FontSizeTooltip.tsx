@@ -1,15 +1,22 @@
+import React, { useEffect, useState } from "react";
 import { Add, FormatSize, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
-import { useEffect, useState } from "react";
 
 interface FontSizeTooltipProps {
+  /** Current font size in pixels */
   size: number | undefined;
+  /** Whether the tooltip is open */
   isOpen: boolean;
+  /** Callback to close the tooltip */
   onClose: () => void;
+  /** Callback when the font size is updated */
   onUpdate: (val: number | undefined) => void;
 }
 
+/**
+ * FontSizeTooltip provides controls for adjusting text font size via input or increment/decrement buttons.
+ */
 export default function FontSizeTooltip({
   size,
   isOpen,
@@ -17,6 +24,7 @@ export default function FontSizeTooltip({
   onUpdate,
 }: FontSizeTooltipProps) {
   const [value, setValue] = useState(size?.toString() ?? "16");
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
@@ -26,15 +34,14 @@ export default function FontSizeTooltip({
     }
 
     if (/^[0-9\b]+$/.test(val)) {
-      const size = parseInt(val);
-      setValue(size.toString());
-      onUpdate(size);
+      const parsedSize = parseInt(val);
+      setValue(parsedSize.toString());
+      onUpdate(parsedSize);
     }
   };
 
   useEffect(() => {
     if (size !== undefined) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
       setValue(size.toString());
     }
   }, [size]);
@@ -60,12 +67,10 @@ export default function FontSizeTooltip({
             })}
             onMouseDown={(e) => {
               e.preventDefault();
-              if (size === undefined || size <= 1) {
-                return;
-              } else {
-                setValue((size - 1).toString());
-                onUpdate(size - 1);
-              }
+              if (size === undefined || size <= 1) return;
+              const newSize = size - 1;
+              setValue(newSize.toString());
+              onUpdate(newSize);
             }}
           >
             <Remove sx={{ width: "12px" }} />
@@ -106,12 +111,10 @@ export default function FontSizeTooltip({
             })}
             onMouseDown={(e) => {
               e.preventDefault();
-              if (size === undefined) {
-                return;
-              }
-
-              setValue((size + 1).toString());
-              onUpdate(size + 1);
+              if (size === undefined) return;
+              const newSize = size + 1;
+              setValue(newSize.toString());
+              onUpdate(newSize);
             }}
           >
             <Add sx={{ width: "12px" }} />

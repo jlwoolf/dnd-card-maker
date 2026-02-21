@@ -4,18 +4,25 @@ import {
   VerticalAlignTop,
 } from "@mui/icons-material";
 import { Button, ButtonGroup } from "@mui/material";
-import SettingsTooltip from "../SettingsTooltip";
 import classNames from "classnames";
+import SettingsTooltip from "../SettingsTooltip";
 
 type VerticalAlignment = "start" | "center" | "end";
 
 interface VerticalAlignmentTooltipProps {
+  /** Current vertical alignment */
   alignment: VerticalAlignment;
+  /** Whether the tooltip is open */
   isOpen: boolean;
+  /** Callback to close the tooltip */
   onClose: () => void;
+  /** Callback when the alignment is updated */
   onUpdate: (val: VerticalAlignment) => void;
 }
 
+/**
+ * VerticalAlignmentTooltip provides options to set an element's vertical alignment (Top, Center, Bottom).
+ */
 export default function VerticalAlignmentTooltip({
   alignment,
   isOpen,

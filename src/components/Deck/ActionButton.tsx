@@ -1,26 +1,36 @@
-import { motion } from "framer-motion";
 import React from "react";
+import { motion } from "framer-motion";
 import Tooltip from "../Tooltip";
 
+interface ActionButtonProps {
+  /** Icon to display inside the button */
+  icon: React.ReactNode;
+  /** Background color of the button */
+  color: string;
+  /** Callback when the button is clicked */
+  onClick: () => void;
+  /** Whether the button is disabled */
+  disabled?: boolean;
+  /** Tooltip text to display on hover */
+  tooltip: string;
+}
+
+/**
+ * ActionButton is a small, animated button used for quick actions on deck cards (Edit, Delete, Download).
+ */
 const ActionButton = ({
   icon,
   color,
   onClick,
   disabled,
   tooltip,
-}: {
-  icon: React.ReactNode;
-  color: string;
-  onClick: () => void;
-  disabled?: boolean;
-  tooltip: string;
-}) => (
+}: ActionButtonProps) => (
   <Tooltip title={tooltip}>
     <motion.button
       whileHover={{ scale: 1.1 }}
       whileTap={{ scale: 0.9 }}
       onClick={(e) => {
-        e.stopPropagation(); // Prevent card clicks
+        e.stopPropagation();
         onClick();
       }}
       disabled={disabled}
