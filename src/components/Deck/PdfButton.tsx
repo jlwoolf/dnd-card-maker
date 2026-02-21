@@ -15,7 +15,6 @@ export default function PdfButton() {
       if (!url) {
         return;
       }
-      console.log(url);
       link.href = url;
       link.download = "deck-of-cards.pdf";
       link.click();

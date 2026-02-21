@@ -3,7 +3,7 @@ import { ElementSchema, type Element } from "./Card";
 import z from "zod";
 import { v4 as uuid } from "uuid";
 import { PreviewThemeSchema, type PreviewTheme } from "./Card/Preview";
-import { jsPDF } from "jspdf"; 
+import { jsPDF } from "jspdf";
 
 const CardSchema = z.object({
   elements: z.array(ElementSchema),
@@ -74,22 +74,25 @@ const useExportCards = create<{
 
     const CARD_W = 2.5;
     const CARD_H = 3.5;
-    // Centering calculations:
-    // Page Width 11" - (4 cols * 2.5") = 1" remaining / 2 = 0.5" margin
-    const MARGIN_X = 0.5; 
-    // Page Height 8.5" - (2 rows * 3.5") = 1.5" remaining / 2 = 0.75" margin
-    const MARGIN_Y = 0.75; 
-    
+    const MARGIN_X = 0.5;
+    const MARGIN_Y = 0.75;
     const COLS = 4;
     const CARDS_PER_PAGE = 8;
 
-    cards.forEach((card, index) => {
+    // 1. Switched to a standard for-loop so we can use `await`
+    for (let index = 0; index < cards.length; index++) {
+      const card = cards[index];
+
       // Safety check: ensure we actually have data
-      if (!card.imgUrl) return;
+      if (!card.imgUrl) continue; // Use 'continue' in a for-loop, not 'return'
 
       // Add a new page if we exceed the limit per page
       if (index > 0 && index % CARDS_PER_PAGE === 0) {
         doc.addPage();
+
+        // 2. Yield to the main thread every page break
+        // This prevents the browser UI from freezing during generation
+        await new Promise((resolve) => setTimeout(resolve, 0));
       }
 
       // Calculate grid position
@@ -100,12 +103,17 @@ const useExportCards = create<{
       const x = MARGIN_X + colIndex * CARD_W;
       const y = MARGIN_Y + rowIndex * CARD_H;
 
-      // DIRECT INJECTION: Pass the Data URL string directly.
-      // We explicitly tell jsPDF this is a "PNG".
+      // Add the image
       doc.addImage(card.imgUrl, "PNG", x, y, CARD_W, CARD_H);
-    });
+    }
 
-    return doc.output("dataurlstring");
+    // 3. Output as a Blob instead of a dataurlstring to save massive amounts of memory
+    const pdfBlob = doc.output("blob");
+
+    // Create a temporary, memory-safe URL to return
+    const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    return pdfUrl;
   },
 }));
 
