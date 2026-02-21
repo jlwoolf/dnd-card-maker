@@ -3,7 +3,7 @@ import generatePalette from "./generatePalette";
 import { useElementRegistry } from "./Card/Element";
 import { map, pick } from "lodash";
 
-type PaletteMap = Record<string, string[]>;
+type PaletteMap = Record<string, Record<string, string[]>>;
 
 export function useCardPalettes(paletteSize: number = 5) {
   // Subscribe to the cards in your Zustand store
@@ -44,7 +44,7 @@ export function useCardPalettes(paletteSize: number = 5) {
               error,
             );
             // Optional: Assign a fallback palette or empty array on failure
-            updatedPalettes[element.id] = [];
+            updatedPalettes[element.id] = {};
           }
         }
 

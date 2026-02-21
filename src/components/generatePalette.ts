@@ -51,13 +51,19 @@ function desaturate(
 export default async function generatePalette(
   imageUrl: string,
   paletteSize: number = 5,
-): Promise<string[]> {
+): Promise<{
+  lights: string[];
+  darks: string[];
+  base: string[];
+  populars: string[];
+}> {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
     imageUrl = (await convertUrl(imageUrl)) ?? imageUrl;
   }
 
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = "Anonymous"; // Ensure CORS is handled
     img.onload = () => {
       const canvas = document.createElement("canvas");
       const ctx = canvas.getContext("2d");
@@ -75,53 +81,71 @@ export default async function generatePalette(
         canvas.width,
         canvas.height,
       );
-      const colorCounts: Record<string, number> = {};
-      const binSize = 10;
 
-      for (let i = 0; i < pixels.length; i += 4) {
-        if (pixels[i + 3] < 125) continue;
-        const r = Math.round(pixels[i] / binSize) * binSize;
-        const g = Math.round(pixels[i + 1] / binSize) * binSize;
-        const b = Math.round(pixels[i + 2] / binSize) * binSize;
-        const rgbStr = `${r},${g},${b}`;
-        colorCounts[rgbStr] = (colorCounts[rgbStr] || 0) + 1;
+      // --- RETRY LOGIC CONFIGURATION ---
+      let attempts = 0;
+      let currentBinSize = 10;
+      let currentDistanceThreshold = 75;
+      let uniquePalette: Array<{ r: number; g: number; b: number }> = [];
+      let sortedColors: Array<{
+        r: number;
+        g: number;
+        b: number;
+        count: number;
+      }> = [];
+
+      while (attempts < 3) {
+        const colorCounts: Record<string, number> = {};
+        uniquePalette = [];
+
+        // 1. Bin colors based on current resolution
+        for (let i = 0; i < pixels.length; i += 4) {
+          if (pixels[i + 3] < 125) continue;
+          const r = Math.round(pixels[i] / currentBinSize) * currentBinSize;
+          const g = Math.round(pixels[i + 1] / currentBinSize) * currentBinSize;
+          const b = Math.round(pixels[i + 2] / currentBinSize) * currentBinSize;
+          const rgbStr = `${r},${g},${b}`;
+          colorCounts[rgbStr] = (colorCounts[rgbStr] || 0) + 1;
+        }
+
+        sortedColors = Object.entries(colorCounts)
+          .map(([rgbStr, count]) => {
+            const [r, g, b] = rgbStr.split(",").map(Number);
+            return { r, g, b, count };
+          })
+          .sort((a, b) => b.count - a.count);
+
+        // 2. Extract Diverse Palette
+        for (const color of sortedColors) {
+          if (uniquePalette.length >= paletteSize) break;
+          const isDifferentEnough = uniquePalette.every(
+            (picked) =>
+              getColorDistance(color, picked) > currentDistanceThreshold,
+          );
+          if (isDifferentEnough) uniquePalette.push(color);
+        }
+
+        // Check if we met the goal
+        if (uniquePalette.length >= paletteSize) {
+          break; // Success!
+        }
+
+        // 3. Increment resolution for next attempt
+        attempts++;
+        currentBinSize = Math.max(1, currentBinSize - 3); // Smaller bins = higher res
+        currentDistanceThreshold *= 0.7; // Lower threshold allows similar colors
       }
 
-      // 1. Sort ALL colors by frequency (Popularity)
-      const sortedColors = Object.entries(colorCounts)
-        .map(([rgbStr, count]) => {
-          const [r, g, b] = rgbStr.split(",").map(Number);
-          return { r, g, b, count };
-        })
-        .sort((a, b) => b.count - a.count);
-
-      // 2. Extract Diverse Palette
-      const uniquePalette: Array<{ r: number; g: number; b: number }> = [];
-      const DISTANCE_THRESHOLD = 75;
-
-      for (const color of sortedColors) {
-        if (uniquePalette.length >= paletteSize) break;
-        const isDifferentEnough = uniquePalette.every(
-          (picked) => getColorDistance(color, picked) > DISTANCE_THRESHOLD,
-        );
-        if (isDifferentEnough) uniquePalette.push(color);
-      }
-
-      // 3. Extract Raw Popularity Palette (First N colors found)
+      // --- DATA FORMATTING (Post-Loop) ---
       const popularityPalette = sortedColors.slice(0, paletteSize);
-
       const mutedDiverse = uniquePalette.map((c) => desaturate(c.r, c.g, c.b));
 
-      // 2. Generate the results using the muted versions
-      const baseDiverse = mutedDiverse.map((c) => rgbToHex(c.r, c.g, c.b));
-      const darks = uniquePalette.map((c) => adjustColor(c.r, c.g, c.b, -0.5));
-      const lights = uniquePalette.map((c) => adjustColor(c.r, c.g, c.b, 0.5));
-
-      // 5. Generate hexes for the POPULARITY palette
-      const populars = popularityPalette.map((c) => rgbToHex(c.r, c.g, c.b));
-
-      // Result: Array of length (paletteSize * 4)
-      resolve([...lights, ...baseDiverse, ...darks, ...populars]);
+      resolve({
+        lights: uniquePalette.map((c) => adjustColor(c.r, c.g, c.b, 0.5)),
+        darks: uniquePalette.map((c) => adjustColor(c.r, c.g, c.b, -0.5)),
+        base: mutedDiverse.map((c) => rgbToHex(c.r, c.g, c.b)),
+        populars: popularityPalette.map((c) => rgbToHex(c.r, c.g, c.b)),
+      });
     };
 
     img.onerror = () => reject(new Error(`Failed to load image`));
