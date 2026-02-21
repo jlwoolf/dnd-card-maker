@@ -1,6 +1,7 @@
 import { useState, useCallback } from "react";
 import generatePalette from "./generatePalette";
 import { useElementRegistry } from "./Card/Element";
+import { map, pick } from "lodash";
 
 type PaletteMap = Record<string, string[]>;
 
@@ -47,7 +48,9 @@ export function useCardPalettes(paletteSize: number = 5) {
           }
         }
 
-        setPalettes(updatedPalettes);
+        const validIds = map(elements, "id");
+        const filteredPalettes = pick(updatedPalettes, validIds);
+        setPalettes(filteredPalettes);
       } finally {
         setIsGenerating(false);
       }
