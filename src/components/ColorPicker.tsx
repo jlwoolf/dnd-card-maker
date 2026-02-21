@@ -87,7 +87,7 @@ export function ColorPicker({
   onChange: (color: string) => void;
 }) {
   // 2. Consume the hook
-  const { palettes, isGenerating, generateAllPalettes } = useCardPalettes(5);
+  const { palettes, isGenerating, generateAllPalettes } = useCardPalettes(10);
 
   // 3. Trigger generation when the picker mounts
   useEffect(() => {
