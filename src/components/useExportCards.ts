@@ -14,8 +14,9 @@ const CardSchema = z.object({
 
 export type Card = z.infer<typeof CardSchema>;
 
-const useExportCards = create<{
+interface ExportState {
   cards: Card[];
+  pdfProgress: number; // 0 to 1
   addCard(elements: Element[], imgUrl: string, theme: PreviewTheme): void;
   updateCard(
     id: string,
@@ -24,48 +25,46 @@ const useExportCards = create<{
   removeCard(id: string): void;
   loadFile(data: unknown): void;
   generatePdf(): Promise<string | undefined>;
-}>((set, get) => ({
+}
+
+const useExportCards = create<ExportState>((set, get) => ({
   cards: [],
+  pdfProgress: 0, // Initialize progress at 0
+
   addCard(elements, imgUrl, theme) {
     set((state) => ({
       cards: [...state.cards, { elements, imgUrl, id: uuid(), theme }],
     }));
   },
+
   removeCard(id) {
     set((state) => ({ cards: state.cards.filter((card) => card.id !== id) }));
   },
+
   updateCard(id, data) {
     set((state) => {
       const cardIndex = state.cards.findIndex((card) => card.id === id);
-      if (cardIndex === -1) {
-        return {};
-      }
-
-      const currentCard = state.cards[cardIndex];
-      const newCard = {
-        ...currentCard,
-        ...data,
-        id,
-      };
+      if (cardIndex === -1) return {};
 
       const newCards = [...state.cards];
-      newCards[cardIndex] = newCard;
+      newCards[cardIndex] = { ...newCards[cardIndex], ...data, id };
 
       return { cards: newCards };
     });
   },
+
   loadFile(unknownData) {
     const { success, data } = z.array(CardSchema).safeParse(unknownData);
-    if (success) {
-      set(() => ({ cards: data }));
-    }
+    if (success) set({ cards: data });
   },
 
   generatePdf: async () => {
     const { cards } = get();
     if (cards.length === 0) return;
 
-    // Setup PDF: Landscape, Inches, Letter (11x8.5)
+    // Reset progress at the start
+    set({ pdfProgress: 0 });
+
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "in",
@@ -79,39 +78,35 @@ const useExportCards = create<{
     const COLS = 4;
     const CARDS_PER_PAGE = 8;
 
-    // 1. Switched to a standard for-loop so we can use `await`
     for (let index = 0; index < cards.length; index++) {
       const card = cards[index];
 
-      // Safety check: ensure we actually have data
-      if (!card.imgUrl) continue; // Use 'continue' in a for-loop, not 'return'
+      if (card.imgUrl) {
+        if (index > 0 && index % CARDS_PER_PAGE === 0) {
+          doc.addPage();
+          // Yield to UI thread so the progress bar actually animates
+          await new Promise((resolve) => setTimeout(resolve, 0));
+        }
 
-      // Add a new page if we exceed the limit per page
-      if (index > 0 && index % CARDS_PER_PAGE === 0) {
-        doc.addPage();
+        const positionOnPage = index % CARDS_PER_PAGE;
+        const colIndex = positionOnPage % COLS;
+        const rowIndex = Math.floor(positionOnPage / COLS);
 
-        // 2. Yield to the main thread every page break
-        // This prevents the browser UI from freezing during generation
-        await new Promise((resolve) => setTimeout(resolve, 0));
+        const x = MARGIN_X + colIndex * CARD_W;
+        const y = MARGIN_Y + rowIndex * CARD_H;
+
+        doc.addImage(card.imgUrl, "PNG", x, y, CARD_W, CARD_H);
       }
 
-      // Calculate grid position
-      const positionOnPage = index % CARDS_PER_PAGE;
-      const colIndex = positionOnPage % COLS;
-      const rowIndex = Math.floor(positionOnPage / COLS);
-
-      const x = MARGIN_X + colIndex * CARD_W;
-      const y = MARGIN_Y + rowIndex * CARD_H;
-
-      // Add the image
-      doc.addImage(card.imgUrl, "PNG", x, y, CARD_W, CARD_H);
+      // Update progress: (current index + 1) / total
+      set({ pdfProgress: (index + 1) / cards.length });
     }
 
-    // 3. Output as a Blob instead of a dataurlstring to save massive amounts of memory
     const pdfBlob = doc.output("blob");
-
-    // Create a temporary, memory-safe URL to return
     const pdfUrl = URL.createObjectURL(pdfBlob);
+
+    // Optional: Reset progress after a short delay so the user sees "100%"
+    setTimeout(() => set({ pdfProgress: 0 }), 1000);
 
     return pdfUrl;
   },

@@ -5,10 +5,17 @@ interface ControlButtonProps {
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   label?: string;
   icon: React.ReactNode;
+  disabled?: boolean;
 }
 
-const ControlButton = ({ onClick, icon, label }: ControlButtonProps) => (
+const ControlButton = ({
+  onClick,
+  icon,
+  label,
+  disabled,
+}: ControlButtonProps) => (
   <motion.button
+    disabled={disabled}
     whileHover={{ scale: 1.1 }}
     whileTap={{ scale: 0.9 }}
     onClick={onClick}
@@ -24,7 +31,7 @@ const ControlButton = ({ onClick, icon, label }: ControlButtonProps) => (
       justifyContent: "center",
       cursor: "pointer",
       boxShadow: "0 4px 12px rgba(0,0,0,0.3)",
-      pointerEvents: 'auto'
+      pointerEvents: "auto",
     }}
     aria-label={label}
   >
