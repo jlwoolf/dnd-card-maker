@@ -7,23 +7,14 @@ import {
   Box,
   Button,
 } from "@mui/material";
-import { MuiColorInput } from "mui-color-input";
 import { usePreviewTheme, DEFAULT_THEME } from "./Card/Preview";
+import { ColorPicker } from "./ColorPicker";
 
 interface ColorSettingsModalProps {
   open: boolean;
   onClose: () => void;
   anchorEl: HTMLElement | null;
 }
-
-const DEFAULT_CP_SP = {
-  input: {
-    sx: { paddingLeft: 1 },
-  },
-  htmlInput: {
-    sx: { padding: 1 },
-  },
-};
 
 export default function ColorSettingsModal({
   open,
@@ -61,12 +52,12 @@ export default function ColorSettingsModal({
             borderRadius: 2,
             display: "flex",
             flexDirection: "column",
-            pointerEvents: 'auto',
+            pointerEvents: "auto",
           },
         },
         root: {
-          sx: { pointerEvents: 'none'}
-        }
+          sx: { pointerEvents: "none" },
+        },
       }}
     >
       <Box
@@ -86,11 +77,8 @@ export default function ColorSettingsModal({
           <Typography variant="h5" gutterBottom>
             Background Fill
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
+          <ColorPicker
             value={fill}
-            slotProps={DEFAULT_CP_SP}
             onChange={(color) => setTheme({ fill: color })}
           />
         </Box>
@@ -98,11 +86,8 @@ export default function ColorSettingsModal({
           <Typography variant="h5" gutterBottom>
             Stroke / Border
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
+          <ColorPicker
             value={stroke}
-            slotProps={DEFAULT_CP_SP}
             onChange={(color) => setTheme({ stroke: color })}
           />
         </Box>
@@ -113,21 +98,15 @@ export default function ColorSettingsModal({
           <Typography variant="caption" gutterBottom>
             Background
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
-            slotProps={DEFAULT_CP_SP}
+          <ColorPicker
             value={bannerFill}
             onChange={(color) => setTheme({ bannerFill: color })}
           />
           <Typography variant="caption" gutterBottom>
             Text
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
+          <ColorPicker
             value={bannerText}
-            slotProps={DEFAULT_CP_SP}
             onChange={(color) => setTheme({ bannerText: color })}
           />
         </Box>
@@ -138,21 +117,15 @@ export default function ColorSettingsModal({
           <Typography variant="caption" gutterBottom>
             Background
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
+          <ColorPicker
             value={boxFill}
-            slotProps={DEFAULT_CP_SP}
             onChange={(color) => setTheme({ boxFill: color })}
           />
           <Typography variant="caption" gutterBottom>
             Text
           </Typography>
-          <MuiColorInput
-            fullWidth
-            format="hex"
+          <ColorPicker
             value={boxText}
-            slotProps={DEFAULT_CP_SP}
             onChange={(color) => setTheme({ boxText: color })}
           />
         </Box>
