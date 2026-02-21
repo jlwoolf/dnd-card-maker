@@ -14,99 +14,107 @@ import { useCardPalettes } from "./useCardPalettes";
 // Updated type to reflect the nested Record structure
 type PaletteGroups = Record<string, Record<string, string[]>>;
 
-const CustomPaper = forwardRef<
-  HTMLDivElement,
-  PaperProps & {
-    palettes: PaletteGroups;
-    onColorSelect: (color: string) => void;
-    isGenerating: boolean;
-  }
->(({ palettes, onColorSelect, isGenerating, children, ...rest }, ref) => {
-  const cardEntries = Object.entries(palettes);
+type CustomPaperProps = PaperProps & {
+  palettes: PaletteGroups;
+  onColorSelect: (color: string) => void;
+  isGenerating: boolean;
+};
 
-  return (
-    <PopoverPaper {...rest} ref={ref}>
-      {children}
+const CustomPaper = forwardRef<HTMLDivElement, CustomPaperProps>(
+  ({ palettes, onColorSelect, isGenerating, children, ...rest }, ref) => {
+    const cardEntries = Object.entries(palettes);
 
-      <Box
-        p={1.5}
-        borderTop="1px solid"
-        borderColor="divider"
-        bgcolor="background.default"
-        width="300px"
-        maxHeight="300px" // Slightly increased to handle more rows
-        sx={{ overflowY: "auto" }}
-      >
-        <Typography
-          variant="caption"
-          color="text.secondary"
-          fontWeight="bold"
-          display="block"
-          mb={1.5}
+    return (
+      <PopoverPaper {...rest} ref={ref}>
+        {children}
+
+        <Box
+          p={1.5}
+          borderTop="1px solid"
+          borderColor="divider"
+          bgcolor="background.default"
+          width="300px"
+          maxHeight="300px" // Slightly increased to handle more rows
+          sx={{ overflowY: "auto" }}
         >
-          {isGenerating ? "Analyzing cards..." : "Colors by Card"}
-        </Typography>
+          <Typography
+            variant="caption"
+            color="text.secondary"
+            fontWeight="bold"
+            display="block"
+            mb={1.5}
+          >
+            {isGenerating ? "Analyzing cards..." : "Colors by Card"}
+          </Typography>
 
-        <Stack spacing={2}>
-          {isGenerating && cardEntries.length === 0 ? (
-            <CircularProgress size={16} />
-          ) : cardEntries.length > 0 ? (
-            cardEntries.map(([elementId, categories]) => (
-              <Box
-                key={elementId}
-                sx={{ borderLeft: "2px solid", borderColor: "divider", pl: 1 }}
-              >
-                <Typography
-                  variant="caption"
-                  color="primary"
-                  fontWeight="medium"
+          <Stack spacing={2}>
+            {isGenerating && cardEntries.length === 0 ? (
+              <CircularProgress size={16} />
+            ) : cardEntries.length > 0 ? (
+              cardEntries.map(([elementId, categories]) => (
+                <Box
+                  key={elementId}
                   sx={{
-                    fontSize: "0.7rem",
-                    textTransform: "uppercase",
-                    display: "block",
-                    mb: 0.5,
+                    borderLeft: "2px solid",
+                    borderColor: "divider",
+                    pl: 1,
                   }}
                 >
-                  Image {elementId.slice(-4)}
-                </Typography>
+                  <Typography
+                    variant="caption"
+                    color="primary"
+                    fontWeight="medium"
+                    sx={{
+                      fontSize: "0.7rem",
+                      textTransform: "uppercase",
+                      display: "block",
+                      mb: 0.5,
+                    }}
+                  >
+                    Image {elementId.slice(-4)}
+                  </Typography>
 
-                {/* Nested Loop for each Key within the card */}
-                <Stack spacing={1}>
-                  {Object.entries(categories).map(([keyName, colors]) => (
-                    <Box key={keyName}>
-                      <Box display="flex" flexWrap="wrap" gap={0.5} mt={0.2}>
-                        {colors.map((color, index) => (
-                          <ButtonBase
-                            key={`${elementId}-${keyName}-${color}-${index}`}
-                            onClick={() => onColorSelect(color)}
-                            sx={{
-                              width: 22, // Slightly smaller to fit rows better
-                              height: 22,
-                              backgroundColor: color,
-                              borderRadius: 0.5,
-                              border: "1px solid",
-                              borderColor: "divider",
-                              "&:hover": { transform: "scale(1.2)", zIndex: 1 },
-                            }}
-                            title={`${keyName}: ${color}`}
-                          />
-                        ))}
+                  {/* Nested Loop for each Key within the card */}
+                  <Stack spacing={1}>
+                    {Object.entries(categories).map(([keyName, colors]) => (
+                      <Box key={keyName}>
+                        <Box display="flex" flexWrap="wrap" gap={0.5} mt={0.2}>
+                          {colors.map((color, index) => (
+                            <ButtonBase
+                              key={`${elementId}-${keyName}-${color}-${index}`}
+                              onClick={() => onColorSelect(color)}
+                              sx={{
+                                width: 22, // Slightly smaller to fit rows better
+                                height: 22,
+                                backgroundColor: color,
+                                borderRadius: 0.5,
+                                border: "1px solid",
+                                borderColor: "divider",
+                                "&:hover": {
+                                  transform: "scale(1.2)",
+                                  zIndex: 1,
+                                },
+                              }}
+                              title={`${keyName}: ${color}`}
+                            />
+                          ))}
+                        </Box>
                       </Box>
-                    </Box>
-                  ))}
-                </Stack>
-              </Box>
-            ))
-          ) : (
-            <Typography variant="caption" color="text.disabled">
-              No colors found.
-            </Typography>
-          )}
-        </Stack>
-      </Box>
-    </PopoverPaper>
-  );
-});
+                    ))}
+                  </Stack>
+                </Box>
+              ))
+            ) : (
+              <Typography variant="caption" color="text.disabled">
+                No colors found.
+              </Typography>
+            )}
+          </Stack>
+        </Box>
+      </PopoverPaper>
+    );
+  },
+);
 
 export function ColorPicker({
   value,
@@ -139,22 +147,26 @@ export function ColorPicker({
       format="hex"
       value={value}
       onChange={onChange}
+      isAlphaHidden
       slotProps={{
         input: { sx: { paddingLeft: 1 } },
         htmlInput: { sx: { padding: 1 } },
         ...slotProps,
       }}
       PopoverProps={{
+        ...PopoverProps,
         slots: {
-          ...PopoverProps,
-          paper: (paperProps) => (
-            <CustomPaper
-              {...paperProps}
-              palettes={groupedPalettes}
-              isGenerating={isGenerating}
-              onColorSelect={(color) => onChange?.(color)}
-            />
-          ),
+          ...PopoverProps?.slots,
+          paper: CustomPaper,
+        },
+        slotProps: {
+          ...PopoverProps?.slotProps,
+          paper: {
+            ...PopoverProps?.slotProps?.paper,
+            palettes: groupedPalettes,
+            isGenerating,
+            onColorSelect: onChange,
+          } as CustomPaperProps, // 'as any' is usually needed here so TS doesn't complain about custom props on MUI's Paper
         },
       }}
     />
