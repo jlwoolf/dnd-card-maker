@@ -1,4 +1,4 @@
-import { Edit, Delete, Download } from "@mui/icons-material";
+import { Edit, Delete, Download, ContentCopy } from "@mui/icons-material";
 import { useElementRegistry } from "../Card/Element/useElementRegistry";
 import { usePreviewTheme } from "../Card/Preview";
 import { useSnackbar } from "../useSnackbar";
@@ -14,6 +14,8 @@ interface CardButtonsProps {
   onEdit?: (card: Card) => void;
   /** Optional callback when the card is downloaded as an image */
   onDownload?: (card: Card) => void;
+  /** Optional callback when the card is copied */
+  onCopy?: (card: Card) => void;
 }
 
 /**
@@ -24,6 +26,7 @@ export default function CardButtons({
   onDelete,
   onDownload,
   onEdit,
+  onCopy,
 }: CardButtonsProps) {
   const setTheme = usePreviewTheme((state) => state.setTheme);
   const removeCard = useExportCards((state) => state.removeCard);
@@ -41,6 +44,17 @@ export default function CardButtons({
           setTheme(card.theme);
           onEdit?.(card);
           showSnackbar("Card loaded into editor", "info");
+        }}
+      />
+      <ActionButton
+        tooltip="Copy to Editor"
+        icon={<ContentCopy style={{ fontSize: 14 }} />}
+        color="#8b5cf6"
+        onClick={() => {
+          loadCard(card.elements);
+          setTheme(card.theme);
+          onCopy?.(card);
+          showSnackbar("Card data copied to editor", "info");
         }}
       />
       <ActionButton

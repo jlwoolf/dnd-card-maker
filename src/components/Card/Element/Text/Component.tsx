@@ -368,6 +368,8 @@ export default function TextElement({ id }: TextElementProps) {
           sx={(theme) => ({
             padding: theme.spacing(1),
             width: `${width}%`,
+            height: expand ? "100%" : undefined,
+            boxSizing: "border-box",
             cursor: "text",
             border: "1px solid",
             margin: "1px",
@@ -391,6 +393,7 @@ export default function TextElement({ id }: TextElementProps) {
             "& [data-slate-editor]": {
               outline: "none",
               minHeight: "1em",
+              height: expand ? "100%" : undefined,
             },
           })}
         >

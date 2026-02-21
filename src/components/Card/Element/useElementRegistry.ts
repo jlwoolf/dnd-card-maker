@@ -69,8 +69,8 @@ type ElementRegistry = {
   updateStyle(id: string, value: Partial<Element["style"]>): void;
   /** Retrieves an element by its ID */
   getElement(id: string): Element | undefined;
-  /** Loads a card into the registry */
-  loadCard(elements: Element[], cardId: string): void;
+  /** Loads a card into the registry, optionally associating it with an ID */
+  loadCard(elements: Element[], cardId?: string): void;
   /** Resets the registry to a blank state or the default card */
   reset(withDefault?: boolean): void;
 };

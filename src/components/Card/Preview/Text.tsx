@@ -99,7 +99,7 @@ export default function Text({
         display: "inline-block",
         padding: "8px 8px",
         width: `calc(${width}%)`,
-        height: expand ? "calc(100% - 16px)" : undefined,
+        height: expand ? "100%" : undefined,
         margin: `0px calc((100% - ${width}%) / 2)`,
         boxSizing: "border-box",
       }}
