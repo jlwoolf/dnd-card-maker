@@ -2,7 +2,7 @@ services:
   frontend:
     build:
       context: .
-      dockerfile: Dockerfile
+      dockerfile: ./frontend/Dockerfile
     container_name: dnd-card-maker
     ports:
       - "8080:80"
