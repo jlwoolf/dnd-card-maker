@@ -1,45 +1,12 @@
 import { v4 as uuid } from "uuid";
-import z from "zod";
 import { create } from "zustand";
-import { ImageElementSchema } from "./Image";
-import { TextElementSchema } from "./Text";
-
-/**
- * Zod schema for a card element, including its unique ID, layout style,
- * and a discriminated union for its type-specific values.
- */
-export const ElementSchema = z
-  .object({
-    id: z.string(),
-    style: z
-      .object({
-        grow: z.boolean().default(false),
-        align: z.enum(["start", "center", "end"]).default("center"),
-      })
-      .default({
-        grow: false,
-        align: "center",
-      }),
-  })
-  .and(
-    z.discriminatedUnion("type", [
-      z.object({
-        type: z.literal("text"),
-        value: TextElementSchema,
-      }),
-      z.object({
-        type: z.literal("image"),
-        value: ImageElementSchema,
-      }),
-    ]),
-  );
-
-export type Element = z.infer<typeof ElementSchema>;
-
-export type ElementValue<T extends Element["type"]> = Extract<
-  Element,
-  { type: T }
->["value"];
+import {
+  ElementSchema,
+  ImageElementSchema,
+  TextElementSchema,
+  type Element,
+  type ElementValue,
+} from "@src/schemas";
 
 type ElementRegistry = {
   /** List of elements currently on the card */

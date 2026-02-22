@@ -1,2 +1,2 @@
-export { ImageElementSchema } from "./schema";
+export { ImageElementSchema } from "@src/schemas";
 export { default as ImageElement } from "./Component";

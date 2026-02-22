@@ -13,7 +13,7 @@ import {
   type RenderElementProps,
   type RenderLeafProps,
 } from "slate-react";
-import type { CustomElement } from "./schema";
+import { type CustomElement } from "@src/schemas";
 
 interface FormatMap {
   bold: boolean;

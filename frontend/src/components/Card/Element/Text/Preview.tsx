@@ -1,6 +1,6 @@
 import { Text as SlateText, type Descendant } from "slate";
+import { type CustomElement } from "@src/schemas";
 import { Text as PreviewText } from "../../Preview";
-import type { CustomElement } from "./schema";
 
 /**
  * Recursively renders Slate.js nodes into a static React tree for the preview card.

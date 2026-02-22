@@ -1,9 +1,9 @@
 import React from "react";
+import { type Element, type ElementValue } from "@src/schemas";
 import { ImageElement } from "./Image";
 import ImagePreview from "./Image/Preview";
 import { TextElement } from "./Text";
 import TextPreview from "./Text/Preview";
-import { type Element, type ElementValue } from "./useElementRegistry";
 
 /**
  * Metadata for a card element type, including its editor and preview components.

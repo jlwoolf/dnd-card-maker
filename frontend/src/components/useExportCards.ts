@@ -2,24 +2,12 @@ import { jsPDF } from "jspdf";
 import { v4 as uuid } from "uuid";
 import z from "zod";
 import { create } from "zustand";
-import { ElementSchema, type Element } from "./Card";
-import { PreviewThemeSchema, type PreviewTheme } from "./Card/Preview";
-
-/**
- * Zod schema for a saved card in the deck.
- */
-const CardSchema = z.object({
-  /** Elements configuration for the card */
-  elements: z.array(ElementSchema),
-  /** PNG data URL of the card preview */
-  imgUrl: z.string(),
-  /** Unique card ID */
-  id: z.string(),
-  /** The theme applied to this card */
-  theme: PreviewThemeSchema,
-});
-
-export type Card = z.infer<typeof CardSchema>;
+import {
+  CardSchema,
+  type Card,
+  type Element,
+  type PreviewTheme,
+} from "@src/schemas";
 
 interface ExportState {
   /** List of cards in the deck */

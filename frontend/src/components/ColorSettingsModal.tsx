@@ -7,8 +7,9 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { DEFAULT_THEME, usePreviewTheme } from "./Card/Preview";
+import { usePreviewTheme } from "./Card/Preview";
 import { ColorPicker } from "./ColorPicker";
+import { DEFAULT_THEME } from "@src/schemas";
 
 interface ColorSettingsModalProps {
   /** Whether the modal is open */
