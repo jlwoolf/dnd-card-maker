@@ -37,6 +37,8 @@ interface ExportState {
   removeCard(id: string): void;
   /** Loads a deck from raw data (e.g., from a JSON file) */
   loadFile(data: unknown): void;
+  /** Sets the entire cards array */
+  setCards(cards: Card[]): void;
   /** Generates a PDF of specified cards (or the entire deck) and returns a blob URL */
   generatePdf(cardIds?: string[]): Promise<string | undefined>;
 }
@@ -68,6 +70,10 @@ const useExportCards = create<ExportState>((set, get) => ({
 
       return { cards: newCards };
     });
+  },
+
+  setCards(cards) {
+    set({ cards });
   },
 
   loadFile(unknownData) {
