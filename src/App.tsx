@@ -1,20 +1,24 @@
+import { useState } from "react";
 import { Box } from "@mui/material";
-import { Card, Deck, GlobalSnackbar } from "./components";
+import { Card, Deck, DeckView, GlobalSnackbar } from "./components";
 
 function App() {
+  const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
+
   return (
     <Box
       display="flex"
       width="100vw"
       sx={{
-        height: { xs: undefined, md: '100vh'}
+        height: { xs: undefined, md: "100vh" },
       }}
       justifyContent="center"
       alignItems="center"
     >
       <GlobalSnackbar />
       <Card />
-      <Deck />
+      <Deck onOpenDeckView={() => setIsDeckViewOpen(true)} />
+      {isDeckViewOpen && <DeckView onClose={() => setIsDeckViewOpen(false)} />}
     </Box>
   );
 }

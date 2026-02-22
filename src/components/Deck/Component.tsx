@@ -5,6 +5,7 @@ import {
   ExpandLess,
   ExpandMore,
   Upload,
+  GridView,
 } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,11 +21,16 @@ import UploadButton from "./UploadButton";
 const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
+interface DeckProps {
+  /** Optional callback to open the full deck grid view */
+  onOpenDeckView?: () => void;
+}
+
 /**
  * Deck component renders the visual stack of saved cards and provides controls
  * for navigation, export, and import.
  */
-const Deck = () => {
+const Deck = ({ onOpenDeckView }: DeckProps) => {
   const cards = useExportCards((state) => state.cards);
   const loadFile = useExportCards((state) => state.loadFile);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
@@ -138,22 +144,19 @@ const Deck = () => {
         sx={{
           position: { xs: "fixed", md: "absolute" },
           bottom: { xs: 20, md: -40 },
-          left: 0,
-          width: "100%",
-          md: {
-            position: "absolute",
-            left: "unset",
-            right: 30,
-            width: "auto",
-          },
+          left: { xs: 0, md: "unset" },
+          right: { xs: "unset", md: -20 },
+          width: { xs: "100%", md: "auto" },
           height: "40px",
           display: "flex",
           justifyContent: { xs: "center", md: "flex-end" },
           alignItems: "center",
           zIndex: 600,
           pointerEvents: "none",
+          gap: { xs: "unset", md: "8px" },
         }}
       >
+        {/* Collapse button anchored to the left on mobile */}
         {!isDesktop && (
           <Box
             sx={{
@@ -174,15 +177,45 @@ const Deck = () => {
         <AnimatePresence>
           {!isCollapsed && (
             <motion.div
-              initial={{ opacity: 0, scale: 0.8 }}
-              animate={{ opacity: 1, scale: 1 }}
-              exit={{ opacity: 0, scale: 0.8 }}
+              initial={{
+                opacity: 0,
+                scale: 0.8,
+                x: isDesktop ? 0 : "-50%",
+                y: 10,
+              }}
+              animate={{
+                opacity: 1,
+                scale: 1,
+                x: isDesktop ? 0 : "-50%",
+                y: 0,
+              }}
+              exit={{
+                opacity: 0,
+                scale: 0.8,
+                x: isDesktop ? 0 : "-50%",
+                y: 10,
+              }}
               style={{
                 display: "flex",
-                gap: isDesktop ? "12px" : "2px",
+                flexWrap: isDesktop ? "nowrap" : "wrap",
+                justifyContent: "center",
+                maxWidth: isDesktop ? "none" : "190px",
+                gap: isDesktop ? "12px" : "8px",
                 alignItems: "center",
+                pointerEvents: "auto",
+                position: isDesktop ? "static" : "absolute",
+                bottom: 0,
+                left: isDesktop ? "auto" : "50%",
               }}
             >
+              <Tooltip title="View Grid">
+                <ControlButton
+                  onClick={onOpenDeckView}
+                  label="View Grid"
+                  icon={<GridView />}
+                />
+              </Tooltip>
+
               <Tooltip title="Download JSON">
                 <DownloadButton />
               </Tooltip>
