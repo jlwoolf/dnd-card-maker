@@ -1,13 +1,13 @@
 import { useCallback } from "react";
 import { Add, Save } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import { ImageProcessor } from "@src/services/ImageProcessor";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
-import { getImageUrl as getImageUrlBase } from "./imageUtils";
 import { usePreviewTheme } from "./Preview";
 
 /**
@@ -32,8 +32,10 @@ export default function CardButtons() {
    */
   const getImageUrl = useCallback(
     async () =>
-      getImageUrlBase(element, () => {
-        showSnackbar("Failed to generate image preview", "error");
+      ImageProcessor.captureElement(element, {
+        onError: () => {
+          showSnackbar("Failed to generate image preview", "error");
+        },
       }),
     [element, showSnackbar],
   );

@@ -1,4 +1,4 @@
-import { convertUrl } from "./Card";
+import { ImageProcessor } from "@src/services/ImageProcessor";
 
 interface RGB {
   r: number;
@@ -88,7 +88,7 @@ export default async function generatePalette(
   populars: string[];
 }> {
   if (imageUrl.startsWith("http://") || imageUrl.startsWith("https://")) {
-    imageUrl = (await convertUrl(imageUrl)) ?? imageUrl;
+    imageUrl = (await ImageProcessor.getSafeUrl(imageUrl)) ?? imageUrl;
   }
 
   return new Promise((resolve, reject) => {
