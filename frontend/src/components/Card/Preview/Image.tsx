@@ -1,6 +1,5 @@
 import React from "react";
 import { Box, styled } from "@mui/material";
-import { usePreviewTheme } from "./usePreviewTheme";
 
 interface ImageProps {
   /** The image content to display */
@@ -26,8 +25,6 @@ const SvgBackground = styled("svg")({
  * Renders an image within a stylized vector frame that matches the card's theme.
  */
 const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
-  const { fill, stroke } = usePreviewTheme();
-
   return (
     <Box display="flex" justifyContent="center">
       <Box
@@ -45,8 +42,8 @@ const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
           <rect
             rx={`${radius * 4}px`}
             style={{ width: "100%", height: "100%" }}
-            fill={fill}
-            stroke={stroke}
+            fill="var(--card-fill)"
+            stroke="var(--card-stroke)"
             strokeWidth={4}
             vectorEffect="non-scaling-stroke"
           />

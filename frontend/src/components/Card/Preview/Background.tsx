@@ -34,25 +34,37 @@ interface BackgroundProps {
  */
 const Background = forwardRef<HTMLDivElement, BackgroundProps>(
   ({ children }: BackgroundProps, ref) => {
-    const { fill, stroke } = usePreviewTheme();
+    const theme = usePreviewTheme();
 
     return (
-      <StyledPaper ref={ref}>
+      <StyledPaper
+        ref={ref}
+        style={
+          {
+            "--card-fill": theme.fill,
+            "--card-stroke": theme.stroke,
+            "--banner-fill": theme.bannerFill,
+            "--banner-text": theme.bannerText,
+            "--box-fill": theme.boxFill,
+            "--box-text": theme.boxText,
+          } as React.CSSProperties
+        }
+      >
         {/* Render the card frame using SVG for crisp vector scaling */}
         <SvgBackground viewBox={`0 0 500 700`} preserveAspectRatio="none">
           <g>
             <rect
               width={500}
               height={700}
-              fill={fill}
+              fill="var(--card-fill)"
               vectorEffect="non-scaling-stroke"
             />
             <rect
               width={500}
               height={700}
               rx={32}
-              fill={fill}
-              stroke={stroke}
+              fill="var(--card-fill)"
+              stroke="var(--card-stroke)"
               strokeWidth={16}
               vectorEffect="non-scaling-stroke"
             />

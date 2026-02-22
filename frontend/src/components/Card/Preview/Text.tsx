@@ -1,6 +1,5 @@
 import React from "react";
 import { Box as MuiBox, styled } from "@mui/material";
-import { usePreviewTheme } from "./usePreviewTheme";
 
 interface TextProps {
   /** The text or rich-text nodes to render */
@@ -29,21 +28,19 @@ const SvgBackground = styled("svg")({
  * @param props - TextProps for children and styling.
  */
 const BoxVariant = ({ children }: TextProps) => {
-  const { boxFill, fill, stroke, boxText } = usePreviewTheme();
-
   return (
     <>
       <SvgBackground viewBox={`0 0 500 500`} preserveAspectRatio="none">
         <rect
           width={500}
           height={500}
-          fill={boxFill ?? fill}
-          stroke={stroke}
+          fill="var(--box-fill, var(--card-fill))"
+          stroke="var(--card-stroke)"
           strokeWidth={4}
           vectorEffect="non-scaling-stroke"
         />
       </SvgBackground>
-      <MuiBox style={{ position: "relative", color: boxText }}>
+      <MuiBox style={{ position: "relative", color: "var(--box-text)" }}>
         {children}
       </MuiBox>
     </>
@@ -56,8 +53,6 @@ const BoxVariant = ({ children }: TextProps) => {
  * @param props - TextProps for children and styling.
  */
 const BannerVariant = ({ children }: TextProps) => {
-  const { bannerFill, fill, stroke, bannerText } = usePreviewTheme();
-
   return (
     <>
       <svg
@@ -75,15 +70,15 @@ const BannerVariant = ({ children }: TextProps) => {
         <g transform="translate(0, -0.5)">
           <path
             d="M 5.23,0.78 C 5.23,0.78 0.82,1.4 0.78,12.63 0.74,23.86 5.23,24.74 5.23,24.74 h 82.23 82.23 c 0,0 4.49,-0.87 4.45,-12.11 -0.04,-11.23 -4.45,-11.86 -4.45,-11.86 h -82.23 z"
-            fill={bannerFill ?? fill}
-            stroke={stroke}
+            fill="var(--banner-fill, var(--card-fill))"
+            stroke="var(--card-stroke)"
             strokeWidth={4}
             vectorEffect="non-scaling-stroke"
           />
         </g>
       </svg>
       <MuiBox
-        sx={{ position: "relative", padding: "0px 8px", color: bannerText }}
+        sx={{ position: "relative", padding: "0px 8px", color: "var(--banner-text)" }}
       >
         {children}
       </MuiBox>
