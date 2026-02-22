@@ -8,7 +8,7 @@ import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
 import { getImageUrl as getImageUrlBase } from "./imageUtils";
 import { usePreviewTheme } from "./Preview";
-import RoundedButtonGroup from "./RoundedButtonGroup";
+import RoundedButtonGroup from "../RoundedButtonGroup";
 
 /**
  * CardButtons provides the floating action buttons for saving or adding

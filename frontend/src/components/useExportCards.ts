@@ -37,8 +37,8 @@ interface ExportState {
   removeCard(id: string): void;
   /** Loads a deck from raw data (e.g., from a JSON file) */
   loadFile(data: unknown): void;
-  /** Generates a PDF of the entire deck and returns a blob URL */
-  generatePdf(): Promise<string | undefined>;
+  /** Generates a PDF of specified cards (or the entire deck) and returns a blob URL */
+  generatePdf(cardIds?: string[]): Promise<string | undefined>;
 }
 
 /**
@@ -75,9 +75,13 @@ const useExportCards = create<ExportState>((set, get) => ({
     if (success) set({ cards: data });
   },
 
-  generatePdf: async () => {
-    const { cards } = get();
-    if (cards.length === 0) return;
+  generatePdf: async (cardIds) => {
+    const allCards = get().cards;
+    const cardsToExport = cardIds 
+      ? allCards.filter(card => cardIds.includes(card.id))
+      : allCards;
+
+    if (cardsToExport.length === 0) return;
 
     set({ pdfProgress: 0 });
 
@@ -94,8 +98,8 @@ const useExportCards = create<ExportState>((set, get) => ({
     const COLS = 4;
     const CARDS_PER_PAGE = 8;
 
-    for (let index = 0; index < cards.length; index++) {
-      const card = cards[index];
+    for (let index = 0; index < cardsToExport.length; index++) {
+      const card = cardsToExport[index];
 
       if (card.imgUrl) {
         if (index > 0 && index % CARDS_PER_PAGE === 0) {
@@ -113,7 +117,7 @@ const useExportCards = create<ExportState>((set, get) => ({
         doc.addImage(card.imgUrl, "PNG", x, y, CARD_W, CARD_H);
       }
 
-      set({ pdfProgress: (index + 1) / cards.length });
+      set({ pdfProgress: (index + 1) / cardsToExport.length });
     }
 
     const pdfBlob = doc.output("blob");

@@ -65,6 +65,7 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
         style={{ display: "inline-block" }}
         onMouseEnter={handleMouseEnter}
         onMouseLeave={handleMouseLeave}
+        onClick={handleMouseLeave}
       >
         {children}
       </div>

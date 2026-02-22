@@ -4,7 +4,7 @@ import {
   useTheme,
   type ButtonGroupProps,
 } from "@mui/material";
-import { mergeSx } from "../../utils/mergeSx";
+import { mergeSx } from "../utils/mergeSx";
 
 /**
  * RoundedButtonGroup provides a styled button group with responsive orientation
@@ -22,9 +22,9 @@ export default function RoundedButtonGroup({
   const responsiveSx = {
     borderRadius: "50px",
     "& .MuiButtonBase-root": {
-      width,
+      minWidth: width,
+      height: width,
       borderRadius: "50px",
-      aspectRatio: "1/1",
     },
     "& .MuiButtonGroup-grouped": {
       px: 3,

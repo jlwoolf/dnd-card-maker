@@ -22,29 +22,28 @@ export default function DeckView({ onClose }: DeckViewProps) {
         left: 0,
         width: "100vw",
         height: "100dvh", // Use dynamic viewport height for mobile
-        bgcolor: "background.paper",
+        bgcolor: "grey.900",
         zIndex: 1000,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
-        backgroundColor: "grey.900",
       }}
     >
       {/* Grid Container */}
       <Box
         sx={{
           flexGrow: 1,
-          minHeight: 0, // CRITICAL: allows flex child to shrink below content for scroll
+          minHeight: 0,
           overflowY: "auto",
           p: 3,
-          pb: 12, // Extra padding at bottom for FAB
+          pb: 12,
           display: "grid",
           gridTemplateColumns: {
-            xs: "repeat(auto-fill, minmax(140px, 1fr))",
-            sm: "repeat(auto-fill, minmax(200px, 1fr))",
-            md: "repeat(auto-fill, minmax(250px, 1fr))",
+            xs: "repeat(auto-fill, minmax(100px, 1fr))",
+            sm: "repeat(auto-fill, minmax(150px, 1fr))",
+            md: "repeat(auto-fill, minmax(200px, 1fr))",
           },
-          gridAutoRows: "max-content", // Ensure rows take up full height of cards
+          gridAutoRows: "max-content",
           gap: 3,
           alignContent: "start",
         }}
@@ -137,7 +136,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
       <Box
         sx={{
           position: "absolute",
-          bottom: 24,
+          bottom: 20,
           left: "50%",
           transform: "translateX(-50%)",
           zIndex: 1100,
