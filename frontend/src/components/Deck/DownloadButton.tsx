@@ -2,6 +2,7 @@ import { Download } from "@mui/icons-material";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import ControlButton from "./ControlButton";
+import Tooltip from "../Tooltip";
 
 /**
  * Compresses a data URL image to a high-definition JPEG.
@@ -94,5 +95,9 @@ export default function DownloadButton() {
     }
   };
 
-  return <ControlButton icon={<Download />} onClick={handleDownload} />;
+  return (
+    <Tooltip title="Download JSON">
+      <ControlButton icon={<Download />} onClick={handleDownload} />
+    </Tooltip>
+  );
 }

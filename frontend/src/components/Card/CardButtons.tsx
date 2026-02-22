@@ -71,13 +71,13 @@ export default function CardButtons() {
     >
       {validCard && (
         <Tooltip title="Save card">
-          <Button onClick={handleSave}>
+          <Button onClick={handleSave} sx={{ padding: "8px !important" }}>
             <Save />
           </Button>
         </Tooltip>
       )}
       <Tooltip title="Add card to deck">
-        <Button onClick={handleAdd}>
+        <Button onClick={handleAdd} sx={{ padding: "8px !important" }}>
           <Add />
         </Button>
       </Tooltip>

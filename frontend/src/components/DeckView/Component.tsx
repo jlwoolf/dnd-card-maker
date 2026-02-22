@@ -103,8 +103,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
             p: 3,
             display: "grid",
             gridTemplateColumns: {
-              xs: "repeat(auto-fill, minmax(100px, 1fr))",
-              sm: "repeat(auto-fill, minmax(150px, 1fr))",
+              xs: "repeat(auto-fill, minmax(140px, 1fr))",
               md: "repeat(auto-fill, minmax(200px, 1fr))",
             },
             gridAutoRows: "max-content",

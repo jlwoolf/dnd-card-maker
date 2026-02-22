@@ -17,13 +17,14 @@ export default function RoundedButtonGroup({
 }: ButtonGroupProps) {
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
-  const width = isMobile ? "40px" : "80px";
+  const size = isMobile ? "40px" : "80px";
 
   const responsiveSx = {
     borderRadius: "50px",
     "& .MuiButtonBase-root": {
-      minWidth: width,
-      height: width,
+      minWidth: isMobile ? "unset" : size,
+      minHeight: isMobile ? size : "unset",
+      height: size,
       borderRadius: "50px",
     },
     "& .MuiButtonGroup-grouped": {

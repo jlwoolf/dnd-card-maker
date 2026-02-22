@@ -96,7 +96,13 @@ export default function ExportModal() {
           borderColor: "grey.800",
         }}
       >
-        <Typography variant="h6" color="white">
+        <Typography
+          variant="h6"
+          color="white"
+          sx={{
+            fontSize: { xs: 16, md: 20 },
+          }}
+        >
           Select Cards to Export ({selectedIds.length} / {cards.length})
         </Typography>
         <Stack direction="row" spacing={1}>
@@ -129,8 +135,7 @@ export default function ExportModal() {
           pb: 12,
           display: "grid",
           gridTemplateColumns: {
-            xs: "repeat(auto-fill, minmax(100px, 1fr))",
-            sm: "repeat(auto-fill, minmax(150px, 1fr))",
+            xs: "repeat(auto-fill, minmax(140px, 1fr))",
             md: "repeat(auto-fill, minmax(200px, 1fr))",
           },
           gridAutoRows: "max-content",

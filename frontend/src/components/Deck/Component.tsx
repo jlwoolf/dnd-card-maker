@@ -216,9 +216,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                 />
               </Tooltip>
 
-              <Tooltip title="Download JSON">
-                <DownloadButton />
-              </Tooltip>
+              <DownloadButton />
 
               <Tooltip title="Upload File">
                 <UploadButton
@@ -230,9 +228,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                 />
               </Tooltip>
 
-              <Tooltip title="Export to PDF">
-                <PdfButton />
-              </Tooltip>
+              <PdfButton />
 
               <Tooltip title="Previous Card">
                 <ControlButton
