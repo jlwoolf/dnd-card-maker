@@ -1,6 +1,7 @@
 import { useCallback } from "react";
-import { Save, Add } from "@mui/icons-material";
+import { Add, Save } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import RoundedButtonGroup from "../RoundedButtonGroup";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
@@ -8,11 +9,11 @@ import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
 import { getImageUrl as getImageUrlBase } from "./imageUtils";
 import { usePreviewTheme } from "./Preview";
-import RoundedButtonGroup from "../RoundedButtonGroup";
 
 /**
- * CardButtons provides the floating action buttons for saving or adding
- * the current card to the deck.
+ * CardButtons provides the floating action buttons for the editor.
+ * It manages the persistence of the current card state into the global deck, 
+ * handling both new additions and updates to existing cards.
  */
 export default function CardButtons() {
   const { element } = useSharedElement();
@@ -25,7 +26,9 @@ export default function CardButtons() {
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   /**
-   * Generates a PNG data URL of the current preview card.
+   * Captures the current preview DOM element as a PNG data URL.
+   * 
+   * @returns A promise resolving to the image data URL.
    */
   const getImageUrl = useCallback(
     async () =>
@@ -36,7 +39,8 @@ export default function CardButtons() {
   );
 
   /**
-   * Saves changes to an existing card in the deck.
+   * Saves changes to an existing card in the deck. 
+   * Triggers image re-generation to ensure the deck preview is up-to-date.
    */
   const handleSave = useCallback(async () => {
     if (cardId) {
@@ -49,7 +53,7 @@ export default function CardButtons() {
   }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
 
   /**
-   * Adds the current card as a new entry in the deck.
+   * Adds the current editor state as a new unique card entry in the deck.
    */
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();

@@ -5,16 +5,17 @@ import SettingsTooltip from "../SettingsTooltip";
 interface RadiusTooltipProps {
   /** Current radius value in pixels */
   radius: number;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the radius value is updated */
+  /** Callback triggered when the radius value is committed */
   onUpdate: (val: number) => void;
 }
 
 /**
- * RadiusTooltip provides a slider to adjust the border radius of an image element.
+ * RadiusTooltip provides a specialized slider interface for adjusting 
+ * the border-radius of image elements.
  */
 const RadiusTooltip = ({
   radius,
@@ -22,6 +23,10 @@ const RadiusTooltip = ({
   onClose,
   onUpdate,
 }: RadiusTooltipProps) => {
+  /**
+   * Handles the slider change event only when the user releases the handle
+   * to avoid excessive state updates and re-renders during active dragging.
+   */
   const handleSliderChange: SliderOwnProps<number>["onChangeCommitted"] = (
     _,
     newValue,

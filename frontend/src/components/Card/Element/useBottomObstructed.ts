@@ -1,12 +1,15 @@
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 /**
- * useBottomObstructed detects if an element's bottom edge is outside the visible area
- * of a parent container matched by the provided selector.
+ * useBottomObstructed utilizes the IntersectionObserver API to detect if an 
+ * element's bottom edge is currently clipped or hidden by a scrollable parent.
+ * This is primarily used to determine if floating menus should flip their 
+ * orientation to remain visible.
  *
- * @param selector - CSS selector of the scrollable parent container.
- * @param options - IntersectionObserver options.
- * @returns A tuple containing the ref to attach and a boolean indicating if the element is obstructed.
+ * @param selector - The CSS selector of the scrollable container to check against.
+ * @param options - Standard IntersectionObserver options.
+ * @returns A tuple containing the React ref to attach to the target element 
+ *          and a boolean indicating if the bottom is obstructed.
  */
 export default function useBottomObstructed(selector: string, options = {}) {
   const [isObstructed, setIsObstructed] = useState(false);
@@ -30,6 +33,7 @@ export default function useBottomObstructed(selector: string, options = {}) {
       },
       {
         root: parentElement,
+        // High granularity threshold to catch subtle clipping
         threshold: Array.from({ length: 101 }, (_, i) => i / 100),
         ...options,
       },

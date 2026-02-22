@@ -4,11 +4,11 @@ import {
   ChevronRight,
   ExpandLess,
   ExpandMore,
-  Upload,
   GridView,
+  Upload,
 } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
@@ -22,13 +22,15 @@ const CARD_WIDTH = 100;
 const CARD_HEIGHT = 140;
 
 interface DeckProps {
-  /** Optional callback to open the full deck grid view */
+  /** Callback triggered when the user wants to open the full-screen grid view */
   onOpenDeckView?: () => void;
 }
 
 /**
- * Deck component renders the visual stack of saved cards and provides controls
- * for navigation, export, and import.
+ * Deck renders an interactive, animated stack of cards.
+ * It provides high-level controls for navigating the deck, importing/exporting 
+ * data, and opening the full-screen management view. It features responsive 
+ * positioning and animations using Framer Motion.
  */
 const Deck = ({ onOpenDeckView }: DeckProps) => {
   const cards = useExportCards((state) => state.cards);
@@ -38,7 +40,10 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
   const [isHoveringActive, setIsHoveringActive] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
 
+  /** Advances the stack to the next card */
   const nextCard = () => setActiveIndex((prev) => (prev + 1) % cards.length);
+  
+  /** Moves the stack to the previous card */
   const prevCard = () =>
     setActiveIndex((prev) => (prev - 1 + cards.length) % cards.length);
 
@@ -156,7 +161,6 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
           gap: { xs: "unset", md: "8px" },
         }}
       >
-        {/* Collapse button anchored to the left on mobile */}
         {!isDesktop && (
           <Box
             sx={{

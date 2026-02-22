@@ -5,8 +5,10 @@ import { ElementRefProvider } from "./ElementRefContext";
 import { PreviewCard } from "./Preview";
 
 /**
- * Main Card component that orchestrates the editor and preview views.
- * Wraps children in an ElementRefProvider to share DOM references for image generation.
+ * The main Card orchestrator component. 
+ * It coordinates the layout between the interactive editor (EditCard) and the 
+ * high-fidelity preview (PreviewCard). It also wraps everything in an ElementRefProvider 
+ * to share DOM references required for image capture and portal-based menu positioning.
  */
 export default function Card() {
   return (

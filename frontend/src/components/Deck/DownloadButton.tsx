@@ -1,15 +1,17 @@
 import { Download } from "@mui/icons-material";
+import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import ControlButton from "./ControlButton";
-import Tooltip from "../Tooltip";
 
 /**
- * Compresses a data URL image to a high-definition JPEG.
+ * Compresses a data URL image to a high-definition JPEG using an off-screen canvas.
+ * This is used to reduce the size of exported JSON files while maintaining 
+ * printable quality.
  *
- * @param url - Source image URL.
- * @param quality - JPEG quality (0 to 1).
- * @returns A promise resolving to a compressed data URL.
+ * @param url - Source image data URL or blob URL.
+ * @param quality - JPEG compression quality (0 to 1). Defaults to 0.8.
+ * @returns A promise resolving to a compressed JPEG data URL.
  */
 const compressToHD = async (url: string, quality = 0.8): Promise<string> => {
   return new Promise((resolve, reject) => {
@@ -22,6 +24,7 @@ const compressToHD = async (url: string, quality = 0.8): Promise<string> => {
       let width = img.width;
       let height = img.height;
 
+      // Maintain aspect ratio while ensuring the image fits within MAX_AXIS
       if (width > MAX_AXIS || height > MAX_AXIS) {
         const ratio = Math.min(MAX_AXIS / width, MAX_AXIS / height);
         width = Math.floor(width * ratio);
@@ -32,7 +35,7 @@ const compressToHD = async (url: string, quality = 0.8): Promise<string> => {
       canvas.height = height;
 
       const ctx = canvas.getContext("2d");
-      if (!ctx) return reject(new Error("Error creating canvas"));
+      if (!ctx) return reject(new Error("Error creating canvas context"));
 
       ctx.imageSmoothingEnabled = true;
       ctx.imageSmoothingQuality = "high";
@@ -47,16 +50,24 @@ const compressToHD = async (url: string, quality = 0.8): Promise<string> => {
 };
 
 /**
- * DownloadButton exports the entire deck as a JSON file, including compressed preview images.
+ * DownloadButton handles the full-deck JSON export.
+ * It iterates through all saved cards, compresses transient blob URLs into 
+ * persistent JPEG data URLs, and triggers a browser download of the combined 
+ * JSON data.
  */
 export default function DownloadButton() {
   const cards = useExportCards((state) => state.cards);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
+  /**
+   * Orchestrates the export process: image processing, JSON serialization, 
+   * and file download triggering.
+   */
   const handleDownload = async () => {
     try {
-      showSnackbar("Compressing images...", "info");
+      showSnackbar("Compressing images for export...", "info");
 
+      // Deep clone cards to avoid mutating the live application state
       const processedCards = JSON.parse(JSON.stringify(cards));
 
       for (const card of processedCards) {
@@ -90,7 +101,7 @@ export default function DownloadButton() {
 
       showSnackbar("Export complete!", "success");
     } catch (error) {
-      console.error(error);
+      console.error("Export failed:", error);
       showSnackbar("Export failed", "error");
     }
   };

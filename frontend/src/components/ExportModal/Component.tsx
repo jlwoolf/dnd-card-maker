@@ -1,20 +1,23 @@
-import { useEffect, useState } from "react";
-import {
-  Box,
-  Typography,
-  Button,
-  Stack,
-  CircularProgress,
-  Backdrop,
-} from "@mui/material";
+import { useState } from "react";
 import { Check, Close, PictureAsPdf } from "@mui/icons-material";
-import useExportCards from "../useExportCards";
-import { useSnackbar } from "../useSnackbar";
+import {
+  Backdrop,
+  Box,
+  Button,
+  CircularProgress,
+  Stack,
+  Typography,
+} from "@mui/material";
 import RoundedButtonGroup from "../RoundedButtonGroup";
+import { useSnackbar } from "../useSnackbar";
+import useExportCards from "../useExportCards";
 import { useExportModal } from "./ExportContext";
 
 /**
- * ExportModal allows users to select specific cards from the deck for PDF export.
+ * ExportModal provides a specialized selection interface for PDF export.
+ * It allows users to pick exactly which cards they want to include in the 
+ * final document, with "Select All" and "Deselect All" helpers. 
+ * It features a persistent progress overlay during document generation.
  */
 export default function ExportModal() {
   const [isModalOpen, setIsModalOpen] = useExportModal();
@@ -24,9 +27,25 @@ export default function ExportModal() {
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
+  const [prevIsModalOpen, setPrevIsModalOpen] = useState(isModalOpen);
+
+  /**
+   * Synchronize selection state when the modal opens or cards list changes.
+   */
+  if (isModalOpen && !prevIsModalOpen) {
+    setPrevIsModalOpen(true);
+    setSelectedIds(cards.map((c) => c.id));
+  } else if (!isModalOpen && prevIsModalOpen) {
+    setPrevIsModalOpen(false);
+  }
 
   const isGenerating = pdfProgress > 0 && pdfProgress < 1;
 
+  /**
+   * Toggles the selection state of a single card.
+   * 
+   * @param id - The unique card ID.
+   */
   const toggleSelection = (id: string) => {
     setSelectedIds((prev) =>
       prev.includes(id) ? prev.filter((i) => i !== id) : [...prev, id],
@@ -36,6 +55,9 @@ export default function ExportModal() {
   const selectAll = () => setSelectedIds(cards.map((c) => c.id));
   const deselectAll = () => setSelectedIds([]);
 
+  /**
+   * Triggers the PDF generation process for the selected subset of cards.
+   */
   const handleExport = async () => {
     if (selectedIds.length === 0) {
       showSnackbar("Please select at least one card to export", "warning");
@@ -55,16 +77,9 @@ export default function ExportModal() {
       setIsModalOpen(false);
     } catch (e) {
       showSnackbar("Error exporting deck to PDF", "error");
-      console.error("Failed to generate PDF", e);
+      console.error("PDF Export Error:", e);
     }
   };
-
-  useEffect(() => {
-    if (isModalOpen) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      setSelectedIds(cards.map((c) => c.id));
-    }
-  }, [cards, isModalOpen]);
 
   if (!isModalOpen) {
     return null;
@@ -85,7 +100,7 @@ export default function ExportModal() {
         overflow: "hidden",
       }}
     >
-      {/* Header */}
+      {/* Header with selection summaries and global toggles */}
       <Box
         sx={{
           p: 2,
@@ -125,7 +140,7 @@ export default function ExportModal() {
         </Stack>
       </Box>
 
-      {/* Grid Container */}
+      {/* Grid of selectable card previews */}
       <Box
         sx={{
           flexGrow: 1,
@@ -213,7 +228,7 @@ export default function ExportModal() {
         })}
       </Box>
 
-      {/* Footer / Actions */}
+      {/* Footer action buttons */}
       <Box
         sx={{
           position: "absolute",
@@ -243,6 +258,7 @@ export default function ExportModal() {
         </RoundedButtonGroup>
       </Box>
 
+      {/* Progress backdrop visible during heavy processing */}
       <Backdrop
         sx={{
           color: "#fff",

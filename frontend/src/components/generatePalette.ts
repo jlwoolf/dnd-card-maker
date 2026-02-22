@@ -8,6 +8,10 @@ interface RGB {
 
 /**
  * Calculates the Euclidean distance between two RGB colors in 3D space.
+ * 
+ * @param c1 - The first color.
+ * @param c2 - The second color.
+ * @returns The distance between the colors.
  */
 function getColorDistance(c1: RGB, c2: RGB): number {
   return Math.sqrt(
@@ -19,6 +23,11 @@ function getColorDistance(c1: RGB, c2: RGB): number {
 
 /**
  * Converts RGB components to a Hex color string.
+ * 
+ * @param r - Red component (0-255).
+ * @param g - Green component (0-255).
+ * @param b - Blue component (0-255).
+ * @returns A hex color string (e.g., "#ffffff").
  */
 function rgbToHex(r: number, g: number, b: number): string {
   const toHex = (c: number) =>
@@ -29,8 +38,13 @@ function rgbToHex(r: number, g: number, b: number): string {
 }
 
 /**
- * Adjusts a color's brightness.
- * @param factor - Positive for light, negative for dark.
+ * Adjusts a color's brightness towards white (positive factor) or black (negative factor).
+ * 
+ * @param r - Red component.
+ * @param g - Green component.
+ * @param b - Blue component.
+ * @param factor - Adjustment factor from -1 (black) to 1 (white).
+ * @returns The adjusted hex color string.
  */
 function adjustColor(r: number, g: number, b: number, factor: number): string {
   const adjust = (val: number) =>
@@ -39,8 +53,13 @@ function adjustColor(r: number, g: number, b: number, factor: number): string {
 }
 
 /**
- * Reduces the saturation of a color towards gray.
- * @param factor - 0 is original, 1 is completely gray.
+ * Reduces the saturation of a color towards its grayscale equivalent.
+ * 
+ * @param r - Red component.
+ * @param g - Green component.
+ * @param b - Blue component.
+ * @param factor - Desaturation factor, where 0 is original and 1 is pure gray.
+ * @returns The desaturated RGB object.
  */
 function desaturate(r: number, g: number, b: number, factor: number = 0.3): RGB {
   const gray = (r + g + b) / 3;
@@ -52,11 +71,12 @@ function desaturate(r: number, g: number, b: number, factor: number = 0.3): RGB 
 }
 
 /**
- * Analyzes an image and generates several color palettes: lights, darks, muted base, and most popular colors.
+ * Analyzes an image to extract and generate thematic color palettes.
+ * It produces categorizations for lights, darks, muted base tones, and popular colors.
  *
- * @param imageUrl - URL or data URL of the image to analyze.
- * @param paletteSize - Number of colors to extract.
- * @returns A promise resolving to the generated palettes.
+ * @param imageUrl - The source URL or data URL of the image.
+ * @param paletteSize - The maximum number of colors to extract for each category.
+ * @returns A promise resolving to an object containing categorized palettes.
  */
 export default async function generatePalette(
   imageUrl: string,

@@ -1,14 +1,14 @@
-import { useMemo, useEffect, forwardRef } from "react";
-import { MuiColorInput, type MuiColorInputProps } from "mui-color-input";
+import { forwardRef, useEffect, useMemo } from "react";
 import {
   Box,
   ButtonBase,
-  Typography,
   CircularProgress,
   PopoverPaper,
-  type PaperProps,
   Stack,
+  Typography,
+  type PaperProps,
 } from "@mui/material";
+import { MuiColorInput, type MuiColorInputProps } from "mui-color-input";
 import { useCardPalettes } from "./useCardPalettes";
 
 type PaletteGroups = Record<string, Record<string, string[]>>;
@@ -125,6 +125,9 @@ CustomPaper.displayName = "CustomPaper";
 
 /**
  * ColorPicker is a specialized MuiColorInput that includes an image-based color palette suggestion tool.
+ * It automatically extracts prominent colors from card images to assist with thematic styling.
+ * 
+ * @param props - MuiColorInputProps excluding onChange, plus a simplified onChange callback.
  */
 export function ColorPicker({
   value,

@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Add, FormatSize, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
@@ -6,16 +6,17 @@ import SettingsTooltip from "../SettingsTooltip";
 interface FontSizeTooltipProps {
   /** Current font size in pixels */
   size: number | undefined;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the font size is updated */
+  /** Callback triggered when the font size is updated */
   onUpdate: (val: number | undefined) => void;
 }
 
 /**
- * FontSizeTooltip provides controls for adjusting text font size via input or increment/decrement buttons.
+ * FontSizeTooltip provides an interactive interface for adjusting text font size.
+ * It supports manual numeric input and incremental adjustments via buttons.
  */
 export default function FontSizeTooltip({
   size,
@@ -24,7 +25,19 @@ export default function FontSizeTooltip({
   onUpdate,
 }: FontSizeTooltipProps) {
   const [value, setValue] = useState(size?.toString() ?? "16");
+  const [prevSize, setPrevSize] = useState(size);
 
+  /**
+   * Synchronize local input state if the size prop changes externally.
+   */
+  if (size !== prevSize) {
+    setPrevSize(size);
+    setValue(size?.toString() ?? "16");
+  }
+
+  /**
+   * Processes manual input, ensuring only numeric values are accepted.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
@@ -39,12 +52,6 @@ export default function FontSizeTooltip({
       onUpdate(parsedSize);
     }
   };
-
-  useEffect(() => {
-    if (size !== undefined) {
-      setValue(size.toString());
-    }
-  }, [size]);
 
   return (
     <SettingsTooltip

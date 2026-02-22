@@ -1,8 +1,8 @@
 import React from "react";
 import {
-  Tooltip,
-  ClickAwayListener,
   Box,
+  ClickAwayListener,
+  Tooltip,
   type PopperProps,
   type SxProps,
   type Theme,
@@ -11,19 +11,22 @@ import { mergeSx } from "@src/utils/mergeSx";
 import usePopperRef from "./usePopperRef";
 
 interface SettingsTooltipProps {
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   open: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Content to display inside the tooltip */
+  /** Content to display inside the tooltip (usually an input or slider) */
   title: React.ReactNode;
   /** The element that triggers the tooltip */
   children: React.ReactElement;
-  /** Optional custom Popper ref */
+  /** Optional custom Popper ref for manual position management */
   popperRef?: PopperProps["popperRef"];
-  /** Visual variant of the tooltip */
+  /** 
+   * Visual variant of the tooltip. 
+   * "toolbar" is grey/dark (for top bar), "menu" is primary (for inline popups).
+   */
   variant?: "menu" | "toolbar";
-  /** Optional custom styles for tooltip parts */
+  /** Optional custom styles for nested tooltip parts */
   sx?: {
     tooltip?: SxProps<Theme>;
     arrow?: SxProps<Theme>;
@@ -31,9 +34,9 @@ interface SettingsTooltipProps {
 }
 
 /**
- * SettingsTooltip is a standardized MUI Tooltip wrapper for element configuration.
- * It handles automatic positioning updates and provides consistent styling for
- * "toolbar" (grey) and "menu" (primary) variants.
+ * SettingsTooltip is a specialized MUI Tooltip wrapper designed for complex 
+ * element configuration. It handles automatic positioning updates and provides 
+ * consistent visual themes for both global toolbar and inline element menus.
  */
 export default function SettingsTooltip({
   open,

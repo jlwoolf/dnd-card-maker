@@ -6,16 +6,22 @@ interface SnackbarState {
   open: boolean;
   /** Notification message content */
   message: string;
-  /** Visual severity level */
+  /** Visual severity level (info, success, warning, error) */
   severity: AlertColor;
-  /** Shows the snackbar with the specified message and severity */
+  /**
+   * Shows the snackbar with a specific message and visual style.
+   * 
+   * @param message - The text to display.
+   * @param severity - The MUI Alert severity level. Defaults to "info".
+   */
   showSnackbar: (message: string, severity?: AlertColor) => void;
-  /** Closes the snackbar */
+  /** Closes the snackbar and resets its state */
   closeSnackbar: () => void;
 }
 
 /**
- * useSnackbar is a global store for managing notification messages.
+ * useSnackbar is a global Zustand store for managing transient notification messages 
+ * across the entire application. It centralizes the state for the GlobalSnackbar component.
  */
 export const useSnackbar = create<SnackbarState>((set) => ({
   open: false,

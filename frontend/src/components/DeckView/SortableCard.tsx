@@ -1,8 +1,8 @@
-import { Box } from "@mui/material";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
-import type { Card } from "../useExportCards";
+import { Box } from "@mui/material";
 import CardButtons from "../Deck/CardButtons";
+import type { Card } from "../useExportCards";
 
 /**
  * Props for the SortableCard component.
@@ -15,8 +15,10 @@ export interface SortableCardProps {
 }
 
 /**
- * A draggable and sortable card component.
- * Utilizes @dnd-kit/sortable to handle drag-and-drop interactions and animations.
+ * SortableCard is a draggable grid item designed for the DeckView.
+ * It utilizes @dnd-kit/sortable for smooth drag interactions and features 
+ * an overlay with quick action buttons (edit, delete, etc.) that appears 
+ * on hover.
  */
 export default function SortableCard({ card, onClose }: SortableCardProps) {
   const {
@@ -29,14 +31,13 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
   } = useSortable({ id: card.id });
 
   /**
-   * Applies the transformation and transition provided by dnd-kit.
-   * Note: Using CSS.Translate instead of CSS.Transform prevents the card
-   * from distorting or stretching while being dragged in a grid layout.
+   * Applies the transformation provided by dnd-kit.
+   * Using CSS.Translate instead of CSS.Transform ensures the card maintains 
+   * its aspect ratio without distortion during drag operations.
    */
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-    // Elevate the currently dragged item above siblings
     zIndex: isDragging ? 1001 : 1,
     opacity: isDragging ? 0.5 : 1,
   };
@@ -60,7 +61,6 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
         cursor: isDragging ? "grabbing" : "grab",
         "&:hover": {
           boxShadow: 6,
-          // Reveal the overlay actions on hover
           "& .card-actions": {
             opacity: 1,
           },
@@ -69,18 +69,17 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
     >
       <img
         src={card.imgUrl}
-        alt={`Card ${card.id}`} // Provided a fallback alt text for accessibility
+        alt={`Card ${card.id}`}
         draggable="false"
         style={{
           width: "100%",
           height: "100%",
           objectFit: "cover",
-          // Prevent the browser's default image drag behavior from interfering
           pointerEvents: "none",
         }}
       />
 
-      {/* Overlay Actions Container */}
+      {/* Overlay Actions Container - revealed on hover */}
       <Box
         className="card-actions"
         sx={{
@@ -96,14 +95,9 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
           gap: 1,
           opacity: 0,
           transition: "opacity 0.2s ease-in-out",
-          // Disable pointer events while dragging to prevent accidental clicks
           pointerEvents: isDragging ? "none" : "auto",
         }}
       >
-        {/* Inner Container for Buttons 
-          This stops the pointer event from bubbling up to dnd-kit,
-          allowing users to click buttons without triggering a drag.
-        */}
         <Box
           onPointerDown={(e) => e.stopPropagation()}
           sx={{

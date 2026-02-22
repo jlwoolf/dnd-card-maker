@@ -13,6 +13,10 @@ interface PaletteState {
   /**
    * Generates palettes for all image elements.
    * Uses a lock to prevent concurrent redundant runs.
+   * 
+   * @param elements - The list of card elements to analyze.
+   * @param paletteSize - The number of colors to extract per image.
+   * @param forceRegenerate - If true, ignores cache and re-analyzes all images.
    */
   generateAllPalettes: (
     elements: Element[],
@@ -23,7 +27,8 @@ interface PaletteState {
 
 /**
  * usePaletteStore is a global store that caches generated palettes for image elements.
- * This prevents redundant analysis when multiple ColorPicker instances are mounted.
+ * This prevents redundant analysis when multiple ColorPicker instances are mounted 
+ * or when switching between elements.
  */
 export const usePaletteStore = create<PaletteState>((set, get) => ({
   palettes: {},
@@ -32,13 +37,11 @@ export const usePaletteStore = create<PaletteState>((set, get) => ({
   generateAllPalettes: async (elements, paletteSize, forceRegenerate = false) => {
     const { isGenerating, palettes } = get();
 
-    // Prevent redundant concurrent runs unless forced
     if (isGenerating && !forceRegenerate) return;
 
     const images = elements.filter((e) => e.type === "image");
     if (images.length === 0) return;
 
-    // Check if there's actually work to do
     const needsGeneration =
       forceRegenerate || images.some((img) => !palettes[img.id]);
     if (!needsGeneration) return;
@@ -52,7 +55,6 @@ export const usePaletteStore = create<PaletteState>((set, get) => ({
       for (const element of images) {
         if (element.type !== "image") continue;
 
-        // Skip if already generated and not forced
         if (!forceRegenerate && updatedPalettes[element.id]) continue;
 
         try {
@@ -64,14 +66,12 @@ export const usePaletteStore = create<PaletteState>((set, get) => ({
             `Failed to generate palette for element ${element.id}:`,
             error,
           );
-          // Don't mark as changed if it failed, or we could just set empty
           updatedPalettes[element.id] = {};
           hasChanges = true;
         }
       }
 
       if (hasChanges) {
-        // Cleanup: Only keep palettes for elements that still exist
         const validIds = new Set(elements.map((e) => e.id));
         const filteredPalettes: PaletteMap = {};
         for (const id in updatedPalettes) {
@@ -89,9 +89,10 @@ export const usePaletteStore = create<PaletteState>((set, get) => ({
 
 /**
  * useCardPalettes is a hook that interfaces with the global PaletteStore.
- * It provides the current palettes and an optimized generation trigger.
+ * It provides the current palettes and an optimized generation trigger 
+ * tied to the current card's elements.
  *
- * @param paletteSize - The number of colors to extract per image.
+ * @param paletteSize - The number of colors to extract per image. Defaults to 5.
  */
 export function useCardPalettes(paletteSize: number = 5) {
   const elements = useElementRegistry((state) => state.elements);

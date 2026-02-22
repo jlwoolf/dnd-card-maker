@@ -14,13 +14,14 @@ import CardMenu from "./CardMenu";
 import { useElementRegistry } from "./Element/useElementRegistry";
 
 interface BottomCardMenuProps {
-  /** The element used to anchor the color settings modal */
+  /** The element used to anchor the color settings modal popover */
   anchorEl: HTMLElement | null;
 }
 
 /**
- * BottomCardMenu provides the main action buttons for modifying the card,
- * such as adding elements, configuring colors, and resetting the card state.
+ * BottomCardMenu provides the primary action suite for the card editor.
+ * It allows users to insert new elements (Text/Image), configure the overall 
+ * card theme colors, and perform reset or clear operations.
  */
 export default function BottomCardMenu({ anchorEl }: BottomCardMenuProps) {
   const { registerElement, reset } = useElementRegistry();
@@ -28,7 +29,7 @@ export default function BottomCardMenu({ anchorEl }: BottomCardMenuProps) {
   const [colorModalOpen, setColorModalOpen] = useState(false);
 
   /**
-   * Resets the card to its default state.
+   * Resets the card elements and theme to the system default state.
    */
   const handleResetToDefault = () => {
     reset(true);
@@ -36,7 +37,7 @@ export default function BottomCardMenu({ anchorEl }: BottomCardMenuProps) {
   };
 
   /**
-   * Clears all elements from the card.
+   * Removes all elements from the current card, resulting in a blank canvas.
    */
   const handleClearCard = () => {
     reset();

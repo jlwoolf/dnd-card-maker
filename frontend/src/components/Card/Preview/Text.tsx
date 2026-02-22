@@ -3,9 +3,13 @@ import { Box as MuiBox, styled } from "@mui/material";
 import { usePreviewTheme } from "./usePreviewTheme";
 
 interface TextProps {
+  /** The text or rich-text nodes to render */
   children?: React.ReactNode;
+  /** Visual container style (Banner or Box) */
   variant?: "banner" | "box";
+  /** Whether the element should expand vertically */
   expand?: boolean;
+  /** Width as a percentage of the card container */
   width?: number;
 }
 
@@ -20,7 +24,9 @@ const SvgBackground = styled("svg")({
 });
 
 /**
- * Renders a box-styled container for preview text.
+ * Renders a rectangular box container for preview text.
+ * 
+ * @param props - TextProps for children and styling.
  */
 const BoxVariant = ({ children }: TextProps) => {
   const { boxFill, fill, stroke, boxText } = usePreviewTheme();
@@ -45,7 +51,9 @@ const BoxVariant = ({ children }: TextProps) => {
 };
 
 /**
- * Renders a banner-styled container for preview text.
+ * Renders a stylized banner container with curved edges for preview text.
+ * 
+ * @param props - TextProps for children and styling.
  */
 const BannerVariant = ({ children }: TextProps) => {
   const { bannerFill, fill, stroke, bannerText } = usePreviewTheme();
@@ -84,7 +92,9 @@ const BannerVariant = ({ children }: TextProps) => {
 };
 
 /**
- * Text component for the preview card. Handles different background variants and layout.
+ * Text component for the preview card. 
+ * Handles different background variants (Banner, Box) and applies 
+ * theme-consistent typography colors.
  */
 export default function Text({
   width = 100,

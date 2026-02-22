@@ -8,7 +8,11 @@ import Image from "./Image";
 import Text from "./Text";
 
 /**
- * Recursively renders Slate.js nodes for the preview card.
+ * Recursively renders Slate.js nodes into a static React tree for the preview card.
+ * This function translates Slate's JSON-based AST into styled spans and divs.
+ * 
+ * @param nodes - Array of Slate Descendant nodes.
+ * @returns A React node tree.
  */
 const renderSlateNodes = (nodes: Descendant[]) => {
   return nodes.map((node, index) => {
@@ -46,7 +50,8 @@ const renderSlateNodes = (nodes: Descendant[]) => {
 };
 
 /**
- * PreviewCard renders a high-fidelity preview of the card currently being edited.
+ * PreviewCard renders a read-only, high-fidelity visual representation of 
+ * the card being edited. It is designed to be captured as an image for export.
  */
 export default function PreviewCard() {
   const { elements } = useElementRegistry();

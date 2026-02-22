@@ -1,10 +1,10 @@
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { Box } from "@mui/material";
-import { useElementRegistry } from "../useElementRegistry";
 import Element from "../Element";
+import { useElementRegistry } from "../useElementRegistry";
+import WidthTooltip from "../WidthTooltip";
 import RadiusTooltip from "./RadiusTooltip";
 import SourceTooltip from "./SourceTooltip";
-import WidthTooltip from "../WidthTooltip";
 
 interface ImageElementProps {
   /** Unique identifier for the image element */
@@ -12,8 +12,9 @@ interface ImageElementProps {
 }
 
 /**
- * ImageElement renders an editable image within the card editor.
- * It provides tools for updating the image source, width, and border radius.
+ * ImageElement provides an editable image component for the card.
+ * It integrates with the ElementRegistry to manage its source URL, 
+ * display width, and border radius through interactive tooltips.
  */
 export default function ImageElement({ id }: ImageElementProps) {
   const element = useElementRegistry((state) => state.getElement(id));
@@ -28,14 +29,16 @@ export default function ImageElement({ id }: ImageElementProps) {
   const [srcOpen, setSrcOpen] = useState(false);
   const [widthOpen, setWidthOpen] = useState(false);
   const [radiusOpen, setRadiusOpen] = useState(false);
+  const [prevActiveId, setPrevActiveId] = useState(activeSettingsId);
 
-  useEffect(() => {
+  if (activeSettingsId !== prevActiveId) {
+    setPrevActiveId(activeSettingsId);
     if (id !== activeSettingsId) {
       setSrcOpen(false);
       setWidthOpen(false);
       setRadiusOpen(false);
     }
-  }, [id, activeSettingsId]);
+  }
 
   if (element?.type !== "image") return null;
 

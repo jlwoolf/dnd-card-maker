@@ -1,12 +1,12 @@
 import React, {
-  useState,
-  useRef,
-  useLayoutEffect,
-  useEffect,
   useCallback,
+  useEffect,
+  useLayoutEffect,
+  useRef,
+  useState,
 } from "react";
 import { createPortal } from "react-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
 
 interface TooltipProps {
   /** The element that triggers the tooltip on hover */
@@ -17,10 +17,14 @@ interface TooltipProps {
   }> & { ref?: React.Ref<HTMLElement> };
   /** The text content of the tooltip */
   title: string;
-  /** Delay in milliseconds before showing the tooltip */
+  /** Delay in milliseconds before showing the tooltip. Defaults to 500ms. */
   delay?: number;
 }
 
+/**
+ * Tooltip is a custom-built, portal-based tooltip component that uses Framer Motion
+ * for animations. It features smart positioning with edge-of-screen detection.
+ */
 const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   const [isVisible, setIsVisible] = useState(false);
   const [coords, setCoords] = useState({ top: 0, left: 0, alignCenter: true });
@@ -28,8 +32,8 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   /**
-   * Wrapped in useCallback to ensure a stable reference.
-   * Handles edge detection for both left and right screen boundaries.
+   * Updates the tooltip position based on the trigger's bounding rectangle.
+   * Includes logic to prevent the tooltip from going off-screen by adjusting alignment.
    */
   const updatePosition = useCallback(() => {
     if (triggerRef.current) {
@@ -45,13 +49,10 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
       let newAlignCenter = false;
 
       if (isNearRight) {
-        // Stick to the right edge of the trigger
         newLeft = rect.right + window.scrollX;
       } else if (isNearLeft) {
-        // Stick to the left edge of the trigger
         newLeft = rect.left + window.scrollX;
       } else {
-        // Default: Center of the trigger
         newLeft = rect.left + rect.width / 2 + window.scrollX;
         newAlignCenter = true;
       }
@@ -81,7 +82,6 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
     };
   }, [isVisible, updatePosition]);
 
-  // Strict Mode Fix: Ensure pending async tasks are cleared if the component unmounts
   useEffect(() => {
     return () => {
       if (timeoutRef.current) clearTimeout(timeoutRef.current);
@@ -100,14 +100,11 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
     setIsVisible(false);
   };
 
-  // Strict Mode Fix: Safely merge the original ref with our triggerRef
   const originalRef = children.ref;
   const mergedRef = useCallback(
     (node: HTMLElement) => {
-      // Assign to our internal ref
       (triggerRef as React.RefObject<HTMLElement | null>).current = node;
 
-      // Forward to the child's original ref if it exists
       if (typeof originalRef === "function") {
         originalRef(node);
       } else if (originalRef) {

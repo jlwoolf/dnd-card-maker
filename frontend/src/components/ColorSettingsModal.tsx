@@ -1,13 +1,13 @@
 import { Close, Restore } from "@mui/icons-material";
 import {
-  Popover,
-  IconButton,
-  Stack,
-  Typography,
   Box,
   Button,
+  IconButton,
+  Popover,
+  Stack,
+  Typography,
 } from "@mui/material";
-import { usePreviewTheme, DEFAULT_THEME } from "./Card/Preview";
+import { DEFAULT_THEME, usePreviewTheme } from "./Card/Preview";
 import { ColorPicker } from "./ColorPicker";
 
 interface ColorSettingsModalProps {
@@ -20,7 +20,9 @@ interface ColorSettingsModalProps {
 }
 
 /**
- * ColorSettingsModal provides a panel to adjust all thematic colors of the card.
+ * ColorSettingsModal provides a comprehensive panel to adjust the thematic colors of the card.
+ * Users can customize background fills, stroke/border colors, and specific styles for 
+ * banner and box text elements.
  */
 export default function ColorSettingsModal({
   open,
@@ -30,6 +32,9 @@ export default function ColorSettingsModal({
   const { fill, stroke, bannerFill, boxFill, boxText, bannerText, setTheme } =
     usePreviewTheme();
 
+  /**
+   * Resets all theme colors to their default values.
+   */
   const handleReset = () => {
     setTheme(DEFAULT_THEME);
   };

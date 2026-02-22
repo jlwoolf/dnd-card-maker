@@ -1,12 +1,15 @@
 import { PictureAsPdf } from "@mui/icons-material";
-import { CircularProgress, Box } from "@mui/material";
-import useExportCards from "../useExportCards";
-import ControlButton from "./ControlButton";
+import { Box, CircularProgress } from "@mui/material";
 import { useExportModal } from "../ExportModal";
 import Tooltip from "../Tooltip";
+import useExportCards from "../useExportCards";
+import ControlButton from "./ControlButton";
 
 /**
- * PdfButton opens a modal to select cards for PDF export.
+ * PdfButton triggers the PDF export workflow.
+ * It opens the selection modal where users can choose which cards to include 
+ * in the final document. It also displays a circular progress indicator during 
+ * the generation phase.
  */
 export default function PdfButton() {
   const [, setIsModalOpen] = useExportModal();

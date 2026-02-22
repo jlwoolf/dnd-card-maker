@@ -4,10 +4,10 @@ import { mergeSx } from "@src/utils/mergeSx";
 
 /**
  * BaseCard provides the foundational structure and styling for all card containers.
- * It maintains a consistent 5:7 aspect ratio and handles rounding logic based on
- * proximity to other menu components.
+ * It maintains a consistent 5:7 aspect ratio, handles overflow, and includes 
+ * sophisticated CSS logic to adjust border rounding when adjacent to menu toolbars.
  *
- * @param props - Standard MUI PaperProps
+ * @param props - Standard MUI PaperProps.
  */
 export default function BaseCard({ children, sx, className }: PaperProps) {
   return (

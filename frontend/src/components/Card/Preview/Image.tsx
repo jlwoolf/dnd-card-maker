@@ -3,8 +3,11 @@ import { Box, styled } from "@mui/material";
 import { usePreviewTheme } from "./usePreviewTheme";
 
 interface ImageProps {
+  /** The image content to display */
   children?: React.ReactNode;
+  /** Border radius in pixels */
   radius?: number;
+  /** Width as a percentage of the card container */
   width?: number;
 }
 
@@ -19,7 +22,8 @@ const SvgBackground = styled("svg")({
 });
 
 /**
- * Image component for the preview card. Renders an image with a styled SVG border.
+ * Image component for the preview card. 
+ * Renders an image within a stylized vector frame that matches the card's theme.
  */
 const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
   const { fill, stroke } = usePreviewTheme();
@@ -36,6 +40,7 @@ const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
           minHeight: "50px",
         }}
       >
+        {/* Background frame with theme-consistent stroke and fill */}
         <SvgBackground preserveAspectRatio="none">
           <rect
             rx={`${radius * 4}px`}

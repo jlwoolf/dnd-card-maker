@@ -3,19 +3,20 @@ import { FormatBold, FormatItalic, OpenInFull } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import classNames from "classnames";
 import {
-  createEditor,
   Editor,
   Element as SlateElement,
   Transforms,
+  createEditor,
+  type BaseSelection,
   type Descendant,
 } from "slate";
 import {
-  Slate,
   Editable,
-  withReact,
-  type RenderLeafProps,
-  type RenderElementProps,
   ReactEditor,
+  Slate,
+  withReact,
+  type RenderElementProps,
+  type RenderLeafProps,
 } from "slate-react";
 import Element from "../Element";
 import { useElementRegistry } from "../useElementRegistry";
@@ -42,7 +43,7 @@ interface FormatMap {
  */
 const isMarkActive = (editor: Editor, format: keyof FormatMap) => {
   const marks = Editor.marks(editor);
-  return marks ? marks[format] === true : false;
+  return marks ? (marks as unknown as FormatMap)[format] === true : false;
 };
 
 /**
@@ -62,7 +63,7 @@ const toggleMark = (editor: Editor, format: "bold" | "italic") => {
  */
 const getMarkValue = <F extends keyof FormatMap>(editor: Editor, format: F) => {
   const marks = Editor.marks(editor);
-  return marks ? marks[format] : undefined;
+  return marks ? (marks as unknown as FormatMap)[format] : undefined;
 };
 
 /**
@@ -73,10 +74,9 @@ const setMarkValue = <F extends keyof FormatMap>(
   format: F,
   value: FormatMap[F],
 ) => {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  if (!editor.selection && (editor as any).lastSelection) {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Transforms.select(editor, (editor as any).lastSelection);
+  // Restore selection if it was lost during toolbar interaction
+  if (!editor.selection && (editor as unknown as { lastSelection: BaseSelection }).lastSelection) {
+    Transforms.select(editor, (editor as unknown as { lastSelection: BaseSelection }).lastSelection);
   }
 
   Editor.addMark(editor, format, value);
@@ -121,8 +121,9 @@ const setBlockValue = <F extends keyof BlockMap>(
 };
 
 /**
- * TextElement renders a rich-text editor using Slate.js.
- * It provides a floating toolbar for font size, alignment, line height, and styling.
+ * TextElement is a sophisticated rich-text editor built on Slate.js.
+ * It provides a comprehensive floating toolbar for character-level (font size, bold, italic)
+ * and block-level (alignment, line height) formatting, plus card-specific layout options.
  */
 export default function TextElement({ id }: TextElementProps) {
   const element = useElementRegistry((state) => state.getElement(id));
@@ -141,9 +142,24 @@ export default function TextElement({ id }: TextElementProps) {
   const [variantOpen, setVariantOpen] = useState(false);
   const [widthOpen, setWidthOpen] = useState(false);
   const [, setSelectionTick] = useState(0);
+  const [prevActiveId, setPrevActiveId] = useState(activeSettingsId);
+
+  if (activeSettingsId !== prevActiveId) {
+    setPrevActiveId(activeSettingsId);
+    if (id !== activeSettingsId) {
+      setWidthOpen(false);
+      setVariantOpen(false);
+      setFontSizeOpen(false);
+      setAlignmentOpen(false);
+      setLineHeightOpen(false);
+    }
+  }
 
   const [editor] = useState(() => withReact(createEditor()));
 
+  /**
+   * Synchronizes internal Slate state with the global ElementRegistry.
+   */
   const handleChange = useCallback(
     (newValue: Descendant[]) => {
       setSelectionTick((s) => s + 1);
@@ -189,6 +205,10 @@ export default function TextElement({ id }: TextElementProps) {
     );
   }, []);
 
+  /**
+   * Effect to update Slate's internal content if the global state changes externally 
+   * (e.g., when loading a new card).
+   */
   useEffect(() => {
     if (element?.type !== "text") return;
 
@@ -206,16 +226,6 @@ export default function TextElement({ id }: TextElementProps) {
       });
     }
   }, [element, editor]);
-
-  useEffect(() => {
-    if (id !== activeSettingsId) {
-      setWidthOpen(false);
-      setVariantOpen(false);
-      setFontSizeOpen(false);
-      setAlignmentOpen(false);
-      setLineHeightOpen(false);
-    }
-  }, [id, activeSettingsId]);
 
   if (element?.type !== "text") return null;
 

@@ -1,22 +1,22 @@
 import { useMemo } from "react";
-import { Box, Typography, Fab } from "@mui/material";
-import { Close } from "@mui/icons-material";
 import {
   DndContext,
-  closestCenter,
   KeyboardSensor,
   PointerSensor,
+  closestCenter,
   useSensor,
   useSensors,
   type DragEndEvent,
 } from "@dnd-kit/core";
-import {
-  arrayMove,
-  SortableContext,
-  sortableKeyboardCoordinates,
-  rectSortingStrategy,
-} from "@dnd-kit/sortable";
 import { restrictToWindowEdges } from "@dnd-kit/modifiers";
+import {
+  SortableContext,
+  arrayMove,
+  rectSortingStrategy,
+  sortableKeyboardCoordinates,
+} from "@dnd-kit/sortable";
+import { Close } from "@mui/icons-material";
+import { Box, Fab, Typography } from "@mui/material";
 import useExportCards from "../useExportCards";
 import SortableCard from "./SortableCard";
 
@@ -24,29 +24,30 @@ import SortableCard from "./SortableCard";
  * Props for the DeckView component.
  */
 export interface DeckViewProps {
-  /** Callback to close the deck view and return to the editor */
+  /** Callback to close the deck view and return to the primary editor */
   onClose: () => void;
 }
 
 /**
- * DeckView renders a full-screen, scrollable grid of all cards in the deck.
- * Users can drag and drop cards to reorder them in the global state.
+ * DeckView provides a full-screen, immersive management interface for the 
+ * current deck. It features a responsive grid layout where cards can be 
+ * reordered via drag-and-drop, using @dnd-kit for high-performance 
+ * interactions and accessible sorting.
  */
 export default function DeckView({ onClose }: DeckViewProps) {
-  // Global state management
   const cards = useExportCards((state) => state.cards);
   const setCards = useExportCards((state) => state.setCards);
 
-  // Extract primitive IDs to prevent unnecessary re-renders in SortableContext
   const cardIds = useMemo(() => cards.map((card) => card.id), [cards]);
 
   /**
-   * Configure sensors for mouse/touch and keyboard interactions.
+   * Configure sophisticated input sensors. 
+   * PointerSensor handles mouse/touch with an 8px distance constraint to 
+   * distinguish drags from clicks on action buttons.
    */
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: {
-        // Require dragging 8px before activation to distinguish from simple clicks
         distance: 8,
       },
     }),
@@ -56,19 +57,18 @@ export default function DeckView({ onClose }: DeckViewProps) {
   );
 
   /**
-   * Handles the end of a drag event.
-   * Calculates the new position and updates the global state.
-   * * @param event - The payload provided by dnd-kit upon completing a drag
+   * Finalizes the reordering when a card is dropped.
+   * Calculates the new indices and updates the global deck store.
+   * 
+   * @param event - The dnd-kit drag end event payload.
    */
   const handleDragEnd = (event: DragEndEvent) => {
     const { active, over } = event;
 
-    // If dropped over a valid target that is not its original position
     if (over && active.id !== over.id) {
       const oldIndex = cards.findIndex((c) => c.id === active.id);
       const newIndex = cards.findIndex((c) => c.id === over.id);
 
-      // Reorder the array and push to global state
       setCards(arrayMove(cards, oldIndex, newIndex));
     }
   };
@@ -80,7 +80,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
         top: 0,
         left: 0,
         width: "100vw",
-        height: "100dvh", // dynamic viewport height ensures mobile safari compatibility
+        height: "100dvh",
         bgcolor: "grey.900",
         zIndex: 1200,
         display: "flex",
@@ -94,7 +94,6 @@ export default function DeckView({ onClose }: DeckViewProps) {
         onDragEnd={handleDragEnd}
         modifiers={[restrictToWindowEdges]}
       >
-        {/* Scrollable Grid Container */}
         <Box
           sx={{
             flexGrow: 1,
@@ -135,7 +134,6 @@ export default function DeckView({ onClose }: DeckViewProps) {
         </Box>
       </DndContext>
 
-      {/* Floating Close Button */}
       <Box
         sx={{
           position: "absolute",

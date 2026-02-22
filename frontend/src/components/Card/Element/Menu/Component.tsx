@@ -1,19 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import {
-  ArrowUpward,
   ArrowDownward,
+  ArrowUpward,
   Delete,
   Expand,
 } from "@mui/icons-material";
 import {
-  Fade,
-  ButtonGroup,
   Button,
-  type ButtonProps,
+  ButtonGroup,
+  Fade,
+  IconButton,
+  Paper,
   Popper,
   Portal,
-  Paper,
-  IconButton,
+  type ButtonProps,
 } from "@mui/material";
 import { omit } from "lodash";
 import { Tooltip } from "@src/components";
@@ -24,21 +24,22 @@ import usePopperRef from "../usePopperRef";
 import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
 
 export interface MenuProps {
-  /** Whether the menu is visible */
+  /** Whether the menu is currently visible */
   visible?: boolean;
   /** Whether the element is currently focused (editor-only) */
   focused?: boolean;
-  /** Additional buttons to display in the floating menu */
+  /** Additional custom buttons to display in the floating action menu */
   buttons?: (React.ReactElement | ButtonProps)[];
-  /** Settings buttons to display in the top toolbar portal */
+  /** Settings buttons to display in the top card toolbar portal */
   settings?: (React.ReactElement | (ButtonProps & { tooltip?: string }))[];
   /** Unique identifier of the associated element */
   id: string;
 }
 
 /**
- * Menu provides a floating action bar for an element (Move, Grow, Align, Delete)
- * and portals settings buttons to the top card toolbar.
+ * Menu provides a comprehensive management interface for a card element.
+ * It renders a floating "Action Menu" for structural changes (move, grow, delete) 
+ * and handles portaling element-specific "Settings" into the main card toolbar.
  */
 export default function Menu({
   visible = false,
@@ -67,6 +68,10 @@ export default function Menu({
   const anchorRef = useRef<HTMLDivElement>(null);
   const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
 
+  /**
+   * Capture the parent element for Popper anchoring to ensure the menu 
+   * follows the element during drag/sort animations.
+   */
   useEffect(() => {
     if (anchorRef.current) {
       setParentElement(anchorRef.current.parentElement);
@@ -75,10 +80,12 @@ export default function Menu({
 
   if (!element) return null;
 
+  /** Moves the current element one position up in the stack */
   const handleMoveUp = () => {
     if (index > 0) moveElement(index, index - 1);
   };
 
+  /** Moves the current element one position down in the stack */
   const handleMoveDown = () => {
     if (index < elements.length - 1) moveElement(index, index + 1);
   };

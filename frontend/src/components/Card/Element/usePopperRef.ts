@@ -2,11 +2,12 @@ import { useEffect, useRef } from "react";
 import type { PopperProps } from "@mui/material";
 
 /**
- * usePopperRef creates a ref for MUI Popper and starts an animation loop to
- * manually update the Popper position on every frame. This is useful for
- * ensuring the Popper stays attached to moving or transitioning elements.
+ * usePopperRef creates a specialized reference for MUI Poppers that updates 
+ * on every animation frame. This ensures that floating menus stay pixel-perfectly 
+ * aligned even when the anchor element is moving due to CSS transitions, 
+ * layout shifts, or drag-and-drop operations.
  *
- * @returns A ref object for use with the `popperRef` prop.
+ * @returns A mutable ref object suitable for the MUI Popper `popperRef` prop.
  */
 export default function usePopperRef() {
   const popperRef: PopperProps["popperRef"] = useRef(null);
@@ -15,6 +16,7 @@ export default function usePopperRef() {
     let handle: number;
 
     const loop = () => {
+      // Manually trigger a position update on the Popper instance
       popperRef.current?.update();
       handle = requestAnimationFrame(loop);
     };

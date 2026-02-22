@@ -26,25 +26,50 @@ interface ExportState {
   cards: Card[];
   /** Progress of PDF generation (0 to 1) */
   pdfProgress: number;
-  /** Adds a new card to the deck */
+  /**
+   * Adds a new card to the deck.
+   * 
+   * @param elements - The element configuration.
+   * @param imgUrl - The generated preview image URL.
+   * @param theme - The theme applied to the card.
+   */
   addCard(elements: Element[], imgUrl: string, theme: PreviewTheme): void;
-  /** Updates an existing card in the deck */
+  /**
+   * Updates an existing card in the deck.
+   * 
+   * @param id - The ID of the card to update.
+   * @param data - The partial data to update.
+   */
   updateCard(
     id: string,
     data: Partial<{ elements: Element[]; imgUrl: string; theme: PreviewTheme }>,
   ): void;
-  /** Removes a card from the deck by ID */
+  /**
+   * Removes a card from the deck.
+   * 
+   * @param id - The ID of the card to remove.
+   */
   removeCard(id: string): void;
-  /** Loads a deck from raw data (e.g., from a JSON file) */
+  /**
+   * Validates and loads a deck from a JSON data source.
+   * 
+   * @param data - The raw data to parse.
+   */
   loadFile(data: unknown): void;
   /** Sets the entire cards array */
   setCards(cards: Card[]): void;
-  /** Generates a PDF of specified cards (or the entire deck) and returns a blob URL */
+  /**
+   * Generates a PDF from the specified cards.
+   * 
+   * @param cardIds - Optional array of card IDs to export. If omitted, exports the whole deck.
+   * @returns A promise resolving to a blob URL of the generated PDF.
+   */
   generatePdf(cardIds?: string[]): Promise<string | undefined>;
 }
 
 /**
- * useExportCards is a Zustand store that manages the deck of cards and provides export utilities.
+ * useExportCards is a Zustand store that manages the saved deck of cards and 
+ * provides sophisticated export utilities, including PDF generation.
  */
 const useExportCards = create<ExportState>((set, get) => ({
   cards: [],
@@ -110,6 +135,7 @@ const useExportCards = create<ExportState>((set, get) => ({
       if (card.imgUrl) {
         if (index > 0 && index % CARDS_PER_PAGE === 0) {
           doc.addPage();
+          // Yield execution to allow progress updates in the UI
           await new Promise((resolve) => setTimeout(resolve, 0));
         }
 
@@ -129,6 +155,7 @@ const useExportCards = create<ExportState>((set, get) => ({
     const pdfBlob = doc.output("blob");
     const pdfUrl = URL.createObjectURL(pdfBlob);
 
+    // Keep progress at 100% for a brief moment before resetting
     setTimeout(() => set({ pdfProgress: 0 }), 1000);
 
     return pdfUrl;

@@ -10,18 +10,19 @@ import SettingsTooltip from "../SettingsTooltip";
 type VerticalAlignment = "start" | "center" | "end";
 
 interface VerticalAlignmentTooltipProps {
-  /** Current vertical alignment */
+  /** Current vertical alignment of the element */
   alignment: VerticalAlignment;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the alignment is updated */
+  /** Callback triggered when a new alignment is selected */
   onUpdate: (val: VerticalAlignment) => void;
 }
 
 /**
- * VerticalAlignmentTooltip provides options to set an element's vertical alignment (Top, Center, Bottom).
+ * VerticalAlignmentTooltip provides an interactive menu for choosing an 
+ * element's vertical position (Top, Center, Bottom) within its container.
  */
 export default function VerticalAlignmentTooltip({
   alignment,

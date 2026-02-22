@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { Add, Height, Remove } from "@mui/icons-material";
 import { Button, TextField } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
@@ -6,16 +6,18 @@ import SettingsTooltip from "../SettingsTooltip";
 interface LineHeightTooltipProps {
   /** Current line height percentage */
   lineHeight: number | undefined;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the line height is updated */
+  /** Callback triggered when the line height is updated */
   onUpdate: (val: number | undefined) => void;
 }
 
 /**
- * LineHeightTooltip provides controls for adjusting text line height (spacing) via input or buttons.
+ * LineHeightTooltip provides an interactive interface for adjusting text 
+ * line spacing (leading). It supports manual percentage input and 
+ * incremental adjustments.
  */
 export default function LineHeightTooltip({
   lineHeight,
@@ -24,7 +26,19 @@ export default function LineHeightTooltip({
   onUpdate,
 }: LineHeightTooltipProps) {
   const [value, setValue] = useState(lineHeight?.toString() ?? "120");
+  const [prevLineHeight, setPrevLineHeight] = useState(lineHeight);
 
+  /**
+   * Synchronize local input state if the lineHeight prop changes externally.
+   */
+  if (lineHeight !== prevLineHeight) {
+    setPrevLineHeight(lineHeight);
+    setValue(lineHeight?.toString() ?? "120");
+  }
+
+  /**
+   * Processes manual input, ensuring only numeric values are accepted.
+   */
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const val = e.target.value;
 
@@ -39,12 +53,6 @@ export default function LineHeightTooltip({
       onUpdate(parsedLineHeight);
     }
   };
-
-  useEffect(() => {
-    if (lineHeight !== undefined) {
-      setValue(lineHeight.toString());
-    }
-  }, [lineHeight]);
 
   return (
     <SettingsTooltip

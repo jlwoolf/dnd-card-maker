@@ -46,35 +46,57 @@ type ElementRegistry = {
   elements: Element[];
   /** Optional ID of the card being edited */
   cardId?: string;
-  /** ID of the element whose settings are currently active */
+  /** ID of the element whose settings are currently active in the toolbar */
   activeSettingsId?: string;
 
   /** Sets the active settings element ID */
   setActiveSettingsId: (id?: string) => void;
-  /** Registers a new element of the specified type */
+  /** 
+   * Registers a new element of the specified type at the end of the stack.
+   * 
+   * @param type - The type of element to create.
+   * @param initialValue - Optional partial initial values.
+   */
   registerElement<T extends Element["type"]>(
     type: T,
     initialValue?: Partial<ElementValue<T>>,
   ): void;
-  /** Unregisters an element by its ID */
+  /** Unregisters an element by its unique ID */
   unregisterElement(id: string): void;
-  /** Moves an element from one index to another */
+  /** Moves an element from one index to another (used for reordering) */
   moveElement(fromIndex: number, toIndex: number): void;
-  /** Updates the value of a specific element */
+  /** 
+   * Updates the type-specific value of an element.
+   * 
+   * @param id - Target element ID.
+   * @param value - Partial update for the element's value object.
+   */
   updateElement<T extends Element["type"]>(
     id: string,
     value: Partial<ElementValue<T>>,
   ): void;
-  /** Updates the layout style of a specific element */
+  /** 
+   * Updates the generic layout style of an element.
+   * 
+   * @param id - Target element ID.
+   * @param value - Partial update for the style object.
+   */
   updateStyle(id: string, value: Partial<Element["style"]>): void;
-  /** Retrieves an element by its ID */
+  /** Retrieves a single element by its ID */
   getElement(id: string): Element | undefined;
-  /** Loads a card into the registry, optionally associating it with an ID */
+  /** Loads an entire card (elements + ID) into the registry */
   loadCard(elements: Element[], cardId?: string): void;
-  /** Resets the registry to a blank state or the default card */
+  /** 
+   * Resets the registry.
+   * 
+   * @param withDefault - If true, populates the registry with a sample card.
+   */
   reset(withDefault?: boolean): void;
 };
 
+/**
+ * Default sample card content shown when the application first loads.
+ */
 const DEFAULT_CARD: Element[] = [
   {
     id: uuid(),
@@ -169,7 +191,9 @@ const DEFAULT_CARD: Element[] = [
 ];
 
 /**
- * useElementRegistry is a Zustand store that manages the state of elements on the current card.
+ * useElementRegistry is the core Zustand store managing the state of 
+ * the card currently being edited. It handles element creation, deletion, 
+ * reordering, and fine-grained property updates.
  */
 export const useElementRegistry = create<ElementRegistry>((set, get) => ({
   elements: DEFAULT_CARD,

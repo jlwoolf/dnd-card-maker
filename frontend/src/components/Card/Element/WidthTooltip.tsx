@@ -3,18 +3,19 @@ import { Box, Slider, Typography, type SliderOwnProps } from "@mui/material";
 import SettingsTooltip from "./SettingsTooltip";
 
 interface WidthTooltipProps {
-  /** Current width percentage */
+  /** Current width percentage (50-100) */
   width: number;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the width is updated */
+  /** Callback triggered when the width value is committed */
   onUpdate: (val: number) => void;
 }
 
 /**
- * WidthTooltip provides a slider to adjust the width of a card element (Image or Text).
+ * WidthTooltip provides a slider interface for adjusting the horizontal 
+ * span of an element (Text or Image) within the card container.
  */
 const WidthTooltip = ({
   width,
@@ -22,6 +23,10 @@ const WidthTooltip = ({
   onClose,
   onUpdate,
 }: WidthTooltipProps) => {
+  /**
+   * Handles the slider change event only when the user releases the handle
+   * to maintain smooth performance in the editor.
+   */
   const handleSliderChange: SliderOwnProps<number>["onChangeCommitted"] = (
     _,
     newValue,

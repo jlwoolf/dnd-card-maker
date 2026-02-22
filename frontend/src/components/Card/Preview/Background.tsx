@@ -1,5 +1,5 @@
 import React, { forwardRef } from "react";
-import { Paper, Box, styled } from "@mui/material";
+import { Box, Paper, styled } from "@mui/material";
 import { usePreviewTheme } from "./usePreviewTheme";
 
 const SvgBackground = styled("svg")({
@@ -28,8 +28,9 @@ interface BackgroundProps {
 }
 
 /**
- * Background renders the main SVG-based container for the preview card.
- * It uses the preview theme for fill and stroke colors.
+ * Background renders the high-fidelity SVG container for the preview card.
+ * It uses the active preview theme to render a stylized card frame with 
+ * customizable fill and stroke.
  */
 const Background = forwardRef<HTMLDivElement, BackgroundProps>(
   ({ children }: BackgroundProps, ref) => {
@@ -37,6 +38,7 @@ const Background = forwardRef<HTMLDivElement, BackgroundProps>(
 
     return (
       <StyledPaper ref={ref}>
+        {/* Render the card frame using SVG for crisp vector scaling */}
         <SvgBackground viewBox={`0 0 500 700`} preserveAspectRatio="none">
           <g>
             <rect

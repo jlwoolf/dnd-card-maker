@@ -12,8 +12,9 @@ interface ElementProps extends BoxProps {
 }
 
 /**
- * Element is a wrapper component for card items (Text/Image) that provides
- * hover states and a floating action menu.
+ * Element is a polymorphic wrapper for card items (Text/Image).
+ * It manages hover states, intersection-based visibility for menus, 
+ * and renders the floating Action Menu for each element.
  */
 export default function Element({
   menuProps: { visible, ...menuProps },

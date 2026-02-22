@@ -8,8 +8,9 @@ import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
 
 /**
- * EditCard provides the interactive editing interface for a card.
- * It renders the list of elements within a BaseCard and manages the settings toolbar anchor.
+ * EditCard provides the primary interactive interface for modifying a card's content.
+ * It renders a dynamic list of elements within a BaseCard and manages the 
+ * layout for the top and bottom toolbars.
  */
 export default function EditCard() {
   const { elements } = useElementRegistry();
@@ -27,8 +28,10 @@ export default function EditCard() {
       minWidth={400}
     >
       <CardMenu>
+        {/* Portal target for element-specific configuration toolbars */}
         <Box ref={setSettingsAnchor} className="settings-menu" />
       </CardMenu>
+      
       <BaseCard>
         {elements.map((element) => (
           <Box
@@ -45,6 +48,7 @@ export default function EditCard() {
           </Box>
         ))}
       </BaseCard>
+
       <BottomCardMenu anchorEl={containerEl} />
     </Box>
   );

@@ -1,25 +1,27 @@
-import { Edit, Delete, Download, ContentCopy } from "@mui/icons-material";
+import { ContentCopy, Delete, Download, Edit } from "@mui/icons-material";
 import { useElementRegistry } from "../Card/Element/useElementRegistry";
 import { usePreviewTheme } from "../Card/Preview";
-import { useSnackbar } from "../useSnackbar";
 import useExportCards, { type Card } from "../useExportCards";
+import { useSnackbar } from "../useSnackbar";
 import ActionButton from "./ActionButton";
 
 interface CardButtonsProps {
-  /** The card data associated with these buttons */
+  /** The full card data object */
   card: Card;
-  /** Optional callback when the card is deleted */
+  /** Callback triggered after the card is deleted from the deck */
   onDelete?: (card: Card) => void;
-  /** Optional callback when the card is edited */
+  /** Callback triggered after the card is loaded into the editor */
   onEdit?: (card: Card) => void;
-  /** Optional callback when the card is downloaded as an image */
+  /** Callback triggered after the card image is downloaded */
   onDownload?: (card: Card) => void;
-  /** Optional callback when the card is copied */
+  /** Callback triggered after the card is duplicated to the editor */
   onCopy?: (card: Card) => void;
 }
 
 /**
- * CardButtons provides the action icons overlay for a card in the deck stack.
+ * CardButtons provides a row of quick-action buttons for a card within 
+ * the deck view or stack. It handles editing, duplication, deletion, 
+ * and direct image downloads.
  */
 export default function CardButtons({
   card,

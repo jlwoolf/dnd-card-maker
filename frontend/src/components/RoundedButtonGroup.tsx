@@ -7,8 +7,11 @@ import {
 import { mergeSx } from "../utils/mergeSx";
 
 /**
- * RoundedButtonGroup provides a styled button group with responsive orientation
- * and rounded corners.
+ * RoundedButtonGroup provides a specialized MUI ButtonGroup with distinct 
+ * visual styling, including fully rounded corners and responsive orientation.
+ * It automatically switches to vertical mode on mobile devices.
+ * 
+ * @param props - Standard MUI ButtonGroupProps.
  */
 export default function RoundedButtonGroup({
   sx,
@@ -19,6 +22,10 @@ export default function RoundedButtonGroup({
   const isMobile = useMediaQuery(theme.breakpoints.down("md"));
   const size = isMobile ? "40px" : "80px";
 
+  /**
+   * Complex responsive styling to ensure the group maintains its "pill" shape 
+   * in both horizontal and vertical orientations.
+   */
   const responsiveSx = {
     borderRadius: "50px",
     "& .MuiButtonBase-root": {

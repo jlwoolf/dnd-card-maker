@@ -4,8 +4,9 @@ import classNames from "classnames";
 import { mergeSx } from "@src/utils/mergeSx";
 
 /**
- * CardMenu is a specialized Paper container used for card toolbars and menus.
- * It includes logic to handle border rounding when placed adjacent to a BaseCard.
+ * CardMenu is a specialized Paper container designed for card-related toolbars.
+ * It features responsive border-radius logic that automatically flattens corners 
+ * when placed immediately above or below a BaseCard, creating a seamless unified visual.
  */
 const CardMenu = React.forwardRef<HTMLDivElement, Omit<PaperProps, "ref">>(
   ({ children, sx, className, ...props }, ref) => {

@@ -1,4 +1,4 @@
-import { type ReactNode, useState, useCallback } from "react";
+import { type ReactNode, useCallback, useState } from "react";
 import { ElementRefContext } from "./Context";
 
 interface ElementRefProviderProps {
@@ -6,7 +6,9 @@ interface ElementRefProviderProps {
 }
 
 /**
- * ElementRefProvider manages the state of shared DOM references for card components.
+ * ElementRefProvider manages the state of shared DOM references across the 
+ * card component tree. It provides access to the preview container (for image 
+ * capture) and the toolbar anchor (for portal-based menu positioning).
  */
 export const ElementRefProvider = ({ children }: ElementRefProviderProps) => {
   const [element, setElementState] = useState<HTMLElement | null>(null);
@@ -14,10 +16,16 @@ export const ElementRefProvider = ({ children }: ElementRefProviderProps) => {
     null,
   );
 
+  /**
+   * Updates the preview container reference.
+   */
   const setElement = useCallback((node: HTMLElement | null) => {
     setElementState(node);
   }, []);
 
+  /**
+   * Updates the settings toolbar anchor reference.
+   */
   const setSettingsAnchor = useCallback((node: HTMLElement | null) => {
     setSettingsAnchorState(node);
   }, []);

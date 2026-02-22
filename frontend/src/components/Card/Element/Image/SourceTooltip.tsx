@@ -1,31 +1,33 @@
-import { useRef, type ChangeEvent } from "react";
+import { type ChangeEvent, useRef } from "react";
 import {
-  Link as LinkIcon,
   Folder as FolderIcon,
   Image as ImageIcon,
+  Link as LinkIcon,
 } from "@mui/icons-material";
 import {
   Box,
-  TextField,
-  InputAdornment,
-  IconButton,
   Divider,
+  IconButton,
+  InputAdornment,
+  TextField,
 } from "@mui/material";
 import SettingsTooltip from "../SettingsTooltip";
 
 interface SourceTooltipProps {
   /** Current image source URL or data URL */
   src: string;
-  /** Whether the tooltip is open */
+  /** Whether the tooltip is currently open */
   isOpen: boolean;
   /** Callback to close the tooltip */
   onClose: () => void;
-  /** Callback when the source value is updated */
+  /** Callback triggered when the source value is updated */
   onUpdate: (val: string) => void;
 }
 
 /**
- * SourceTooltip allows users to provide an image source via URL or by uploading a local file.
+ * SourceTooltip provides a dual-input interface for updating an image source.
+ * It supports both manual URL entry and local file uploads via the browser's 
+ * file picker.
  */
 const SourceTooltip = ({
   src,
@@ -36,14 +38,17 @@ const SourceTooltip = ({
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   /**
-   * Triggers the hidden file input.
+   * Triggers the click event on the hidden file input element.
    */
   const handleFolderClick = () => {
     fileInputRef.current?.click();
   };
 
   /**
-   * Handles local file selection and generates a blob URL.
+   * Processes the selected local file and converts it into a transient 
+   * object URL for immediate preview.
+   * 
+   * @param event - The input change event.
    */
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
