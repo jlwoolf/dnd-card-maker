@@ -62,7 +62,7 @@ export default function ColorSettingsModal({
           },
         },
         root: {
-          sx: { pointerEvents: "none" },
+          sx: { pointerEvents: "none", zIndex: 1000 },
         },
       }}
     >

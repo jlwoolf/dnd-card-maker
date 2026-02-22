@@ -82,7 +82,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
         width: "100vw",
         height: "100dvh", // dynamic viewport height ensures mobile safari compatibility
         bgcolor: "grey.900",
-        zIndex: 1000,
+        zIndex: 1200,
         display: "flex",
         flexDirection: "column",
         overflow: "hidden",
