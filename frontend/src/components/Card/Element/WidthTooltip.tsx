@@ -1,6 +1,6 @@
 import { WidthFull } from "@mui/icons-material";
-import { Box, Slider, Typography, type SliderOwnProps } from "@mui/material";
 import SettingsTooltip from "./SettingsTooltip";
+import SliderToolbarInput from "./SliderToolbarInput";
 
 interface WidthTooltipProps {
   /** Current width percentage (50-100) */
@@ -23,43 +23,21 @@ const WidthTooltip = ({
   onClose,
   onUpdate,
 }: WidthTooltipProps) => {
-  /**
-   * Handles the slider change event only when the user releases the handle
-   * to maintain smooth performance in the editor.
-   */
-  const handleSliderChange: SliderOwnProps<number>["onChangeCommitted"] = (
-    _,
-    newValue,
-  ) => {
-    if (typeof newValue === "number") {
-      onUpdate(newValue);
-    }
-  };
-
   return (
     <SettingsTooltip
       open={isOpen}
       onClose={onClose}
       title={
-        <Box
-          p={1}
-          sx={{ minWidth: 150 }}
-          onMouseDown={(e) => e.preventDefault()}
-        >
-          <Typography variant="caption" sx={{ display: "block" }}>
-            Width: {width}%
-          </Typography>
-          <Slider
-            size="small"
-            defaultValue={width}
-            min={50}
-            max={100}
-            step={5}
-            marks
-            onChange={handleSliderChange}
-            valueLabelDisplay="auto"
-          />
-        </Box>
+        <SliderToolbarInput
+          label="Width"
+          value={width}
+          onUpdate={onUpdate}
+          min={50}
+          max={100}
+          step={5}
+          suffix="%"
+          marks
+        />
       }
     >
       <WidthFull />

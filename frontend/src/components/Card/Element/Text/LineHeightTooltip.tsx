@@ -1,6 +1,5 @@
-import React, { useState } from "react";
-import { Add, Height, Remove } from "@mui/icons-material";
-import { Button, TextField } from "@mui/material";
+import { Height } from "@mui/icons-material";
+import NumericToolbarInput from "../NumericToolbarInput";
 import SettingsTooltip from "../SettingsTooltip";
 
 interface LineHeightTooltipProps {
@@ -16,8 +15,8 @@ interface LineHeightTooltipProps {
 
 /**
  * LineHeightTooltip provides an interactive interface for adjusting text 
- * line spacing (leading). It supports manual percentage input and 
- * incremental adjustments.
+ * line spacing (leading). It leverages NumericToolbarInput for consistent 
+ * behavioral logic and styling.
  */
 export default function LineHeightTooltip({
   lineHeight,
@@ -25,35 +24,6 @@ export default function LineHeightTooltip({
   onClose,
   onUpdate,
 }: LineHeightTooltipProps) {
-  const [value, setValue] = useState(lineHeight?.toString() ?? "120");
-  const [prevLineHeight, setPrevLineHeight] = useState(lineHeight);
-
-  /**
-   * Synchronize local input state if the lineHeight prop changes externally.
-   */
-  if (lineHeight !== prevLineHeight) {
-    setPrevLineHeight(lineHeight);
-    setValue(lineHeight?.toString() ?? "120");
-  }
-
-  /**
-   * Processes manual input, ensuring only numeric values are accepted.
-   */
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const val = e.target.value;
-
-    if (val === "") {
-      setValue("");
-      onUpdate(undefined);
-    }
-
-    if (/^[0-9\b]+$/.test(val)) {
-      const parsedLineHeight = parseInt(val);
-      setValue(parsedLineHeight.toString());
-      onUpdate(parsedLineHeight);
-    }
-  };
-
   return (
     <SettingsTooltip
       open={isOpen}
@@ -64,70 +34,12 @@ export default function LineHeightTooltip({
       }}
       onClose={onClose}
       title={
-        <div style={{ display: "flex", alignItems: "center" }}>
-          <Button
-            size="small"
-            variant="contained"
-            sx={(theme) => ({
-              minWidth: 0,
-              minHeight: 0,
-              padding: theme.spacing(1),
-            })}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              if (lineHeight === undefined || lineHeight <= 10) return;
-              const newValue = lineHeight - 10;
-              setValue(newValue.toString());
-              onUpdate(newValue);
-            }}
-          >
-            <Remove sx={{ width: "12px" }} />
-          </Button>
-          <TextField
-            value={value}
-            onChange={handleChange}
-            onKeyDown={(e) => {
-              if (["e", "E", "+", "-"].includes(e.key)) {
-                e.preventDefault();
-              }
-            }}
-            slotProps={{
-              input: {
-                sx: {
-                  borderRadius: 0,
-                  backgroundColor: "rgba(255,255,255,0.7)",
-                },
-              },
-              htmlInput: {
-                sx: (theme) => ({
-                  width: `${lineHeight?.toString().length || 1}ch`,
-                  fontSize: "14px",
-                  textAlign: "center",
-                  padding: theme.spacing(1),
-                  color: "text.primary",
-                }),
-              },
-            }}
-          />
-          <Button
-            size="small"
-            variant="contained"
-            sx={(theme) => ({
-              minWidth: 0,
-              minHeight: 0,
-              padding: theme.spacing(1),
-            })}
-            onMouseDown={(e) => {
-              e.preventDefault();
-              if (lineHeight === undefined) return;
-              const newValue = lineHeight + 10;
-              setValue(newValue.toString());
-              onUpdate(newValue);
-            }}
-          >
-            <Add sx={{ width: "12px" }} />
-          </Button>
-        </div>
+        <NumericToolbarInput 
+          value={lineHeight} 
+          onUpdate={onUpdate} 
+          min={10} 
+          step={10} 
+        />
       }
     >
       <Height />
