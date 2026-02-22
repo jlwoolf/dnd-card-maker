@@ -3,14 +3,13 @@ import { Box } from "@mui/material";
 import BaseCard from "./BaseCard";
 import BottomCardMenu from "./BottomCardMenu";
 import CardMenu from "./CardMenu";
-import { ImageElement, TextElement } from "./Element";
-import { useElementRegistry } from "./Element/useElementRegistry";
+import { ELEMENT_REGISTRY, useElementRegistry } from "./Element";
 import { useSharedElement } from "./ElementRefContext";
 
 /**
  * EditCard provides the primary interactive interface for modifying a card's content.
- * It renders a dynamic list of elements within a BaseCard and manages the 
- * layout for the top and bottom toolbars.
+ * It renders a dynamic list of elements within a BaseCard, using the ELEMENT_REGISTRY 
+ * to determine the correct editor for each element type.
  */
 export default function EditCard() {
   const { elements } = useElementRegistry();
@@ -33,20 +32,19 @@ export default function EditCard() {
       </CardMenu>
       
       <BaseCard>
-        {elements.map((element) => (
-          <Box
-            key={element.id}
-            width="100%"
-            flexGrow={element.style.grow ? 1 : 0}
-            alignContent={element.style.align}
-          >
-            {element.type === "text" ? (
-              <TextElement id={element.id} />
-            ) : (
-              <ImageElement id={element.id} />
-            )}
-          </Box>
-        ))}
+        {elements.map((element) => {
+          const { editor: Editor } = ELEMENT_REGISTRY[element.type];
+          return (
+            <Box
+              key={element.id}
+              width="100%"
+              flexGrow={element.style.grow ? 1 : 0}
+              alignContent={element.style.align}
+            >
+              <Editor id={element.id} />
+            </Box>
+          );
+        })}
       </BaseCard>
 
       <BottomCardMenu anchorEl={containerEl} />

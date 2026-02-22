@@ -5,3 +5,4 @@ export {
   ElementSchema,
   useElementRegistry,
 } from "./useElementRegistry";
+export { ELEMENT_REGISTRY } from "./registry";
