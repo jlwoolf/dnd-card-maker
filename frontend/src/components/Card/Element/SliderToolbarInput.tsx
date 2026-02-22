@@ -1,8 +1,8 @@
 import React from "react";
-import { Box, Slider, Typography, type SliderOwnProps } from "@mui/material";
+import { Box, Slider, Typography } from "@mui/material";
 
 interface SliderToolbarInputProps {
-  /** The current numeric value */
+  /** The current numeric value from the parent state */
   value: number;
   /** Callback triggered when the value is committed (mouse up) */
   onUpdate: (val: number) => void;
@@ -22,8 +22,8 @@ interface SliderToolbarInputProps {
 
 /**
  * SliderToolbarInput provides a standardized slider interface for use 
- * in toolbars. It handles the 'onChangeCommitted' logic to ensure 
- * performant updates only when the user finishes dragging.
+ * in toolbars. It provides real-time dynamic updates by triggering 
+ * onUpdate on every slider movement.
  */
 export default function SliderToolbarInput({
   value,
@@ -35,10 +35,7 @@ export default function SliderToolbarInput({
   suffix = "",
   marks = false,
 }: SliderToolbarInputProps) {
-  const handleSliderChange: SliderOwnProps<number>["onChangeCommitted"] = (
-    _,
-    newValue,
-  ) => {
+  const handleSliderChange = (_: Event, newValue: number | number[]) => {
     if (typeof newValue === "number") {
       onUpdate(newValue);
     }
@@ -58,7 +55,7 @@ export default function SliderToolbarInput({
       </Typography>
       <Slider
         size="small"
-        defaultValue={value}
+        value={value}
         min={min}
         max={max}
         step={step}
