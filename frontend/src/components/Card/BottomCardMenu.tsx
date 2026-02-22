@@ -10,8 +10,8 @@ import { IconButton } from "@mui/material";
 import ColorSettingsModal from "../ColorSettingsModal";
 import Tooltip from "../Tooltip";
 import { useSnackbar } from "../useSnackbar";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import CardMenu from "./CardMenu";
-import { useElementRegistry } from "./Element/useElementRegistry";
 
 interface BottomCardMenuProps {
   /** The element used to anchor the color settings modal popover */
@@ -24,7 +24,7 @@ interface BottomCardMenuProps {
  * card theme colors, and perform reset or clear operations.
  */
 export default function BottomCardMenu({ anchorEl }: BottomCardMenuProps) {
-  const { registerElement, reset } = useElementRegistry();
+  const { registerElement, reset } = useActiveCardStore();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
   const [colorModalOpen, setColorModalOpen] = useState(false);
 

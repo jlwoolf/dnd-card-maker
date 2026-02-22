@@ -1,6 +1,7 @@
 import { useCallback } from "react";
 import { create } from "zustand";
-import { useElementRegistry, type Element } from "./Card/Element";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
+import { type Element } from "@src/schemas";
 import generatePalette from "./generatePalette";
 
 type PaletteMap = Record<string, Record<string, string[]>>;
@@ -95,7 +96,7 @@ export const usePaletteStore = create<PaletteState>((set, get) => ({
  * @param paletteSize - The number of colors to extract per image. Defaults to 5.
  */
 export function useCardPalettes(paletteSize: number = 5) {
-  const elements = useElementRegistry((state) => state.elements);
+  const elements = useActiveCardStore((state) => state.elements);
   const { palettes, isGenerating, generateAllPalettes: storeGenerate } =
     usePaletteStore();
 

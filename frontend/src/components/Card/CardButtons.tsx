@@ -2,13 +2,12 @@ import { useCallback } from "react";
 import { Add, Save } from "@mui/icons-material";
 import { Button } from "@mui/material";
 import { ImageProcessor } from "@src/services/ImageProcessor";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
-import { useElementRegistry } from "./Element/useElementRegistry";
 import { useSharedElement } from "./ElementRefContext";
-import { usePreviewTheme } from "./Preview";
 
 /**
  * CardButtons provides the floating action buttons for the editor.
@@ -17,8 +16,8 @@ import { usePreviewTheme } from "./Preview";
  */
 export default function CardButtons() {
   const { element } = useSharedElement();
-  const { elements, cardId } = useElementRegistry();
-  const previewTheme = usePreviewTheme();
+  const { elements, cardId, theme: previewTheme } = useActiveCardStore();
+  
   const validCard = useExportCards(
     (state) => !!state.cards.find((card) => card.id === cardId),
   );

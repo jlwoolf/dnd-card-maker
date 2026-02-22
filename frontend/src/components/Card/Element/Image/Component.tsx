@@ -1,7 +1,7 @@
 import { useState } from "react";
 import { Box } from "@mui/material";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import Element from "../Element";
-import { useElementRegistry } from "../useElementRegistry";
 import WidthTooltip from "../WidthTooltip";
 import RadiusTooltip from "./RadiusTooltip";
 import SourceTooltip from "./SourceTooltip";
@@ -17,12 +17,12 @@ interface ImageElementProps {
  * display width, and border radius through interactive tooltips.
  */
 export default function ImageElement({ id }: ImageElementProps) {
-  const element = useElementRegistry((state) => state.getElement(id));
-  const updateElement = useElementRegistry((state) => state.updateElement);
-  const activeSettingsId = useElementRegistry(
+  const element = useActiveCardStore((state) => state.getElement(id));
+  const updateElement = useActiveCardStore((state) => state.updateElement);
+  const activeSettingsId = useActiveCardStore(
     (state) => state.activeSettingsId,
   );
-  const setActiveSettingsId = useElementRegistry(
+  const setActiveSettingsId = useActiveCardStore(
     (state) => state.setActiveSettingsId,
   );
 

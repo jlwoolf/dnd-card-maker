@@ -1,6 +1,6 @@
 import React, { forwardRef } from "react";
 import { Box, Paper, styled } from "@mui/material";
-import { usePreviewTheme } from "./usePreviewTheme";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 
 const SvgBackground = styled("svg")({
   position: "absolute",
@@ -34,7 +34,7 @@ interface BackgroundProps {
  */
 const Background = forwardRef<HTMLDivElement, BackgroundProps>(
   ({ children }: BackgroundProps, ref) => {
-    const theme = usePreviewTheme();
+    const theme = useActiveCardStore((state) => state.theme);
 
     return (
       <StyledPaper

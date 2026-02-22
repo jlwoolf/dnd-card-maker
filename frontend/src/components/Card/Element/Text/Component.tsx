@@ -4,8 +4,8 @@ import { Box } from "@mui/material";
 import classNames from "classnames";
 import { type Descendant } from "slate";
 import { Editable, Slate } from "slate-react";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import Element from "../Element";
-import { useElementRegistry } from "../useElementRegistry";
 import WidthTooltip from "../WidthTooltip";
 import AlignmentTooltip from "./AlignmentTooltip";
 import FontSizeTooltip from "./FontSizeTooltip";
@@ -25,12 +25,12 @@ interface TextElementProps {
  * state management and editing logic.
  */
 export default function TextElement({ id }: TextElementProps) {
-  const element = useElementRegistry((state) => state.getElement(id));
-  const updateElement = useElementRegistry((state) => state.updateElement);
-  const activeSettingsId = useElementRegistry(
+  const element = useActiveCardStore((state) => state.getElement(id));
+  const updateElement = useActiveCardStore((state) => state.updateElement);
+  const activeSettingsId = useActiveCardStore(
     (state) => state.activeSettingsId,
   );
-  const setActiveSettingsId = useElementRegistry(
+  const setActiveSettingsId = useActiveCardStore(
     (state) => state.setActiveSettingsId,
   );
 

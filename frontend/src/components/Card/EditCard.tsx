@@ -3,7 +3,8 @@ import { Box } from "@mui/material";
 import BaseCard from "./BaseCard";
 import BottomCardMenu from "./BottomCardMenu";
 import CardMenu from "./CardMenu";
-import { ELEMENT_REGISTRY, useElementRegistry } from "./Element";
+import { ELEMENT_REGISTRY } from "./Element";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { useSharedElement } from "./ElementRefContext";
 
 /**
@@ -12,7 +13,7 @@ import { useSharedElement } from "./ElementRefContext";
  * to determine the correct editor for each element type.
  */
 export default function EditCard() {
-  const { elements } = useElementRegistry();
+  const { elements } = useActiveCardStore();
   const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
   const { setSettingsAnchor } = useSharedElement();
 

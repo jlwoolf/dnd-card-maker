@@ -1,6 +1,5 @@
 import { ContentCopy, Delete, Download, Edit } from "@mui/icons-material";
-import { useElementRegistry } from "../Card/Element/useElementRegistry";
-import { usePreviewTheme } from "../Card/Preview";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import useExportCards, { type Card } from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import ActionButton from "./ActionButton";
@@ -30,9 +29,8 @@ export default function CardButtons({
   onEdit,
   onCopy,
 }: CardButtonsProps) {
-  const setTheme = usePreviewTheme((state) => state.setTheme);
+  const { loadCard } = useActiveCardStore();
   const removeCard = useExportCards((state) => state.removeCard);
-  const loadCard = useElementRegistry((state) => state.loadCard);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   return (
@@ -42,8 +40,7 @@ export default function CardButtons({
         icon={<Edit style={{ fontSize: 14 }} />}
         color="#3b82f6"
         onClick={() => {
-          loadCard(card.elements, card.id);
-          setTheme(card.theme);
+          loadCard(card);
           onEdit?.(card);
           showSnackbar("Card loaded into editor", "info");
         }}
@@ -53,8 +50,7 @@ export default function CardButtons({
         icon={<ContentCopy style={{ fontSize: 14 }} />}
         color="#8b5cf6"
         onClick={() => {
-          loadCard(card.elements);
-          setTheme(card.theme);
+          loadCard({ ...card, id: undefined });
           onCopy?.(card);
           showSnackbar("Card data copied to editor", "info");
         }}

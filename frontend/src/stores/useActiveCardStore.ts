@@ -1,17 +1,22 @@
 import { v4 as uuid } from "uuid";
 import { create } from "zustand";
 import {
+  DEFAULT_THEME,
   ElementSchema,
   ImageElementSchema,
   TextElementSchema,
+  type Card,
   type Element,
   type ElementValue,
+  type PreviewTheme,
 } from "@src/schemas";
 
-type ElementRegistry = {
+interface ActiveCardState {
   /** List of elements currently on the card */
   elements: Element[];
-  /** Optional ID of the card being edited */
+  /** Visual theme configuration for the current card */
+  theme: PreviewTheme;
+  /** Optional ID if editing an existing card from the deck */
   cardId?: string;
   /** ID of the element whose settings are currently active in the toolbar */
   activeSettingsId?: string;
@@ -24,47 +29,49 @@ type ElementRegistry = {
    * @param type - The type of element to create.
    * @param initialValue - Optional partial initial values.
    */
-  registerElement<T extends Element["type"]>(
+  registerElement: <T extends Element["type"]>(
     type: T,
     initialValue?: Partial<ElementValue<T>>,
-  ): void;
+  ) => void;
   /** Unregisters an element by its unique ID */
-  unregisterElement(id: string): void;
+  unregisterElement: (id: string) => void;
   /** Moves an element from one index to another (used for reordering) */
-  moveElement(fromIndex: number, toIndex: number): void;
+  moveElement: (fromIndex: number, toIndex: number) => void;
   /** 
    * Updates the type-specific value of an element.
    * 
    * @param id - Target element ID.
    * @param value - Partial update for the element's value object.
    */
-  updateElement<T extends Element["type"]>(
+  updateElement: <T extends Element["type"]>(
     id: string,
     value: Partial<ElementValue<T>>,
-  ): void;
+  ) => void;
   /** 
    * Updates the generic layout style of an element.
    * 
    * @param id - Target element ID.
    * @param value - Partial update for the style object.
    */
-  updateStyle(id: string, value: Partial<Element["style"]>): void;
+  updateStyle: (id: string, value: Partial<Element["style"]>) => void;
   /** Retrieves a single element by its ID */
-  getElement(id: string): Element | undefined;
-  /** Loads an entire card (elements + ID) into the registry */
-  loadCard(elements: Element[], cardId?: string): void;
+  getElement: (id: string) => Element | undefined;
+  /** Updates the current theme with partial data */
+  setTheme: (theme: Partial<PreviewTheme>) => void;
+  /** Loads an entire card into the active draft state */
+  loadCard: (card: Pick<Card, "elements" | "theme" | "id">) => void;
   /** 
-   * Resets the registry.
+   * Resets the active card state.
    * 
-   * @param withDefault - If true, populates the registry with a sample card.
+   * @param withDefault - If true, populates the store with a sample card and default theme.
    */
-  reset(withDefault?: boolean): void;
-};
+  reset: (withDefault?: boolean) => void;
+}
 
 /**
  * Default sample card content shown when the application first loads.
  */
-const DEFAULT_CARD: Element[] = [
+const DEFAULT_CARD_ELEMENTS: Element[] = [
   {
     id: uuid(),
     type: "text",
@@ -158,12 +165,13 @@ const DEFAULT_CARD: Element[] = [
 ];
 
 /**
- * useElementRegistry is the core Zustand store managing the state of 
- * the card currently being edited. It handles element creation, deletion, 
- * reordering, and fine-grained property updates.
+ * useActiveCardStore is the unified Zustand store managing the entire active 
+ * card draft, including elements, visual theme, and editor state.
  */
-export const useElementRegistry = create<ElementRegistry>((set, get) => ({
-  elements: DEFAULT_CARD,
+export const useActiveCardStore = create<ActiveCardState>((set, get) => ({
+  elements: DEFAULT_CARD_ELEMENTS,
+  theme: DEFAULT_THEME,
+  cardId: undefined,
   activeSettingsId: undefined,
 
   setActiveSettingsId: (id) => set({ activeSettingsId: id }),
@@ -264,12 +272,20 @@ export const useElementRegistry = create<ElementRegistry>((set, get) => ({
     return get().elements.find((element) => element.id === id);
   },
 
-  loadCard: (elements, cardId) => set(() => ({ elements, cardId })),
+  setTheme: (theme) => set((state) => ({ ...state, theme: { ...state.theme, ...theme } })),
+
+  loadCard: (card) => set(() => ({ 
+    elements: card.elements, 
+    theme: card.theme, 
+    cardId: card.id 
+  })),
 
   reset(withDefault = false) {
     set(() => ({
-      elements: withDefault ? DEFAULT_CARD : [],
+      elements: withDefault ? DEFAULT_CARD_ELEMENTS : [],
+      theme: DEFAULT_THEME,
       cardId: undefined,
+      activeSettingsId: undefined,
     }));
   },
 }));

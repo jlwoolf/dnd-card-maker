@@ -17,11 +17,11 @@ import {
 } from "@mui/material";
 import { omit } from "lodash";
 import { Tooltip } from "@src/components";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { mergeSx } from "@src/utils/mergeSx";
-import { useSharedElement } from "../../ElementRefContext";
-import { useElementRegistry } from "../useElementRegistry";
 import usePopperRef from "../usePopperRef";
 import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
+import { useSharedElement } from "../../ElementRefContext";
 
 export interface MenuProps {
   /** Whether the menu is currently visible */
@@ -56,10 +56,10 @@ export default function Menu({
     moveElement,
     updateStyle,
     activeSettingsId,
-  } = useElementRegistry();
+  } = useActiveCardStore();
 
   const index = elements.findIndex((element) => element.id === id);
-  const element = useElementRegistry((state) => state.getElement(id));
+  const element = useActiveCardStore((state) => state.getElement(id));
   const settingsOpen = activeSettingsId === id;
 
   const [vaAnchorEl, setVaAnchorEl] = useState<HTMLElement | null>(null);

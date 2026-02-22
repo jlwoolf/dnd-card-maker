@@ -1,5 +1,6 @@
 import { Box } from "@mui/material";
-import { ELEMENT_REGISTRY, useElementRegistry, type Element } from "../Element";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
+import { ELEMENT_REGISTRY, type Element } from "../Element";
 import { useSharedElement } from "../ElementRefContext";
 import Background from "./Background";
 
@@ -26,7 +27,7 @@ const ElementPreview = ({ element }: { element: Element }) => {
  * correct preview component for each element type.
  */
 export default function PreviewCard() {
-  const { elements } = useElementRegistry();
+  const { elements } = useActiveCardStore();
   const { setElement } = useSharedElement();
 
   return (

@@ -7,7 +7,7 @@ import {
   Stack,
   Typography,
 } from "@mui/material";
-import { usePreviewTheme } from "./Card/Preview";
+import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { ColorPicker } from "./ColorPicker";
 import { DEFAULT_THEME } from "@src/schemas";
 
@@ -30,8 +30,8 @@ export default function ColorSettingsModal({
   onClose,
   anchorEl,
 }: ColorSettingsModalProps) {
-  const { fill, stroke, bannerFill, boxFill, boxText, bannerText, setTheme } =
-    usePreviewTheme();
+  const { theme, setTheme } = useActiveCardStore();
+  const { fill, stroke, bannerFill, boxFill, boxText, bannerText } = theme;
 
   /**
    * Resets all theme colors to their default values.
