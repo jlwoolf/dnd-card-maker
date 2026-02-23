@@ -14,6 +14,10 @@ export default function Card() {
   return (
     <ElementRefProvider>
       <Box
+        component="main"
+        role="main"
+        aria-label="Card Editor"
+        data-testid="card-editor-container"
         width="100%"
         display="flex"
         justifyContent="center"

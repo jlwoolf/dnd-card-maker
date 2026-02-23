@@ -48,6 +48,7 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
       style={style}
       {...attributes}
       {...listeners}
+      data-testid={`sortable-card-${card.id}`}
       sx={{
         position: "relative",
         aspectRatio: "5/7",

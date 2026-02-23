@@ -30,6 +30,7 @@ export default function GlobalSnackbar() {
       open={open}
       autoHideDuration={4000}
       onClose={handleClose}
+      data-testid="global-snackbar"
       anchorOrigin={{
         vertical: isMobile ? "top" : "bottom",
         horizontal: isMobile ? "center" : "left",
@@ -40,6 +41,7 @@ export default function GlobalSnackbar() {
         severity={severity}
         variant="filled"
         sx={{ width: "100%" }}
+        data-testid="global-snackbar-alert"
       >
         {message}
       </Alert>

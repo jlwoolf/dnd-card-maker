@@ -52,6 +52,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
 
   return (
     <Box
+      component="section"
+      aria-label="Card Deck"
+      data-testid="deck-container"
       sx={{
         position: "fixed",
         bottom: 60,
@@ -74,6 +77,8 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
         return (
           <motion.div
             key={card.id}
+            data-testid={`deck-card-${card.id}`}
+            aria-current={isActive ? "true" : undefined}
             onClick={() => isActive && setIsHoveringActive(!isHoveringActive)}
             onMouseEnter={() => isActive && setIsHoveringActive(true)}
             onMouseLeave={() => isActive && setIsHoveringActive(false)}
@@ -116,6 +121,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: 10 }}
+                  data-testid="active-card-actions"
                   style={{
                     position: "absolute",
                     top: 8,
@@ -146,6 +152,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
       })}
 
       <Box
+        role="group"
+        aria-label="Deck controls"
+        data-testid="deck-controls"
         sx={{
           position: { xs: "fixed", md: "absolute" },
           bottom: { xs: 20, md: -40 },
@@ -172,8 +181,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
           >
             <ControlButton
               onClick={() => setIsCollapsed(!isCollapsed)}
-              label={isCollapsed ? "Expand" : "Collapse"}
+              label={isCollapsed ? "Expand deck controls" : "Collapse deck controls"}
               icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+              data-testid="collapse-deck-btn-mobile"
             />
           </Box>
         )}
@@ -215,12 +225,13 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
               <Tooltip title="View Grid">
                 <ControlButton
                   onClick={onOpenDeckView}
-                  label="View Grid"
+                  label="View card grid"
                   icon={<GridView />}
+                  data-testid="view-grid-btn"
                 />
               </Tooltip>
 
-              <DownloadButton />
+              <DownloadButton data-testid="download-deck-btn" />
 
               <Tooltip title="Upload File">
                 <UploadButton
@@ -229,24 +240,28 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                     showSnackbar("Deck loaded successfully", "success");
                   }}
                   icon={<Upload />}
+                  data-testid="upload-deck-btn"
+                  aria-label="Upload deck JSON file"
                 />
               </Tooltip>
 
-              <PdfButton />
+              <PdfButton data-testid="export-pdf-btn" />
 
               <Tooltip title="Previous Card">
                 <ControlButton
                   onClick={prevCard}
-                  label="Prev"
+                  label="Previous card in stack"
                   icon={<ChevronLeft />}
+                  data-testid="prev-card-btn"
                 />
               </Tooltip>
 
               <Tooltip title="Next Card">
                 <ControlButton
                   onClick={nextCard}
-                  label="Next"
+                  label="Next card in stack"
                   icon={<ChevronRight />}
+                  data-testid="next-card-btn"
                 />
               </Tooltip>
             </motion.div>
@@ -256,8 +271,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
         {isDesktop && (
           <ControlButton
             onClick={() => setIsCollapsed(!isCollapsed)}
-            label={isCollapsed ? "Expand" : "Collapse"}
+            label={isCollapsed ? "Expand deck controls" : "Collapse deck controls"}
             icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+            data-testid="collapse-deck-btn-desktop"
           />
         )}
       </Box>

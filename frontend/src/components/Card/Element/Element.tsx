@@ -30,6 +30,8 @@ export default function Element({
       ref={elementRef}
       position="relative"
       display="inline-block"
+      data-testid={`card-element-${id}`}
+      aria-label={`Card element ${id}`}
       sx={{
         width: "100%",
         display: "flex",

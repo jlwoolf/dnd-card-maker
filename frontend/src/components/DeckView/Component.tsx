@@ -87,6 +87,9 @@ export default function DeckView({ onClose }: DeckViewProps) {
         flexDirection: "column",
         overflow: "hidden",
       }}
+      data-testid="deck-view-overlay"
+      aria-label="Full deck view"
+      role="dialog"
     >
       <DndContext
         sensors={sensors}
@@ -95,6 +98,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
         modifiers={[restrictToWindowEdges]}
       >
         <Box
+          data-testid="deck-grid-container"
           sx={{
             flexGrow: 1,
             minHeight: 0,
@@ -147,6 +151,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
           color="primary"
           onClick={onClose}
           aria-label="close deck view"
+          data-testid="close-deck-view-btn"
           sx={{
             boxShadow: 4,
             "&:hover": {

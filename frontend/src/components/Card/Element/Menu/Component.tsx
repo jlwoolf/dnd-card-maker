@@ -127,6 +127,9 @@ export default function Menu({
         {({ TransitionProps }) => (
           <Fade {...TransitionProps} timeout={300}>
             <ButtonGroup
+              data-testid={`element-menu-${id}`}
+              role="group"
+              aria-label="Element actions"
               sx={(theme) => ({
                 position: "absolute",
                 right: 0,
@@ -153,6 +156,8 @@ export default function Menu({
                   color="primary"
                   variant="contained"
                   onClick={handleMoveUp}
+                  data-testid="move-up-btn"
+                  aria-label="Move element up"
                 >
                   <ArrowUpward />
                 </Button>
@@ -164,6 +169,8 @@ export default function Menu({
                   color="primary"
                   variant="contained"
                   onClick={handleMoveDown}
+                  data-testid="move-down-btn"
+                  aria-label="Move element down"
                 >
                   <ArrowDownward />
                 </Button>
@@ -175,6 +182,8 @@ export default function Menu({
                   color="primary"
                   variant="contained"
                   onClick={() => updateStyle(id, { grow: !element.style.grow })}
+                  data-testid="toggle-grow-btn"
+                  aria-label={element.style.grow ? "Shrink element" : "Grow element"}
                 >
                   <Expand />
                 </Button>
@@ -186,6 +195,8 @@ export default function Menu({
                   color="primary"
                   variant="contained"
                   onClick={(event) => setVaAnchorEl(event.currentTarget)}
+                  data-testid="vertical-align-btn"
+                  aria-label="Change vertical alignment"
                 >
                   <VerticalAlignmentTooltip
                     alignment={element.style.align}
@@ -210,6 +221,7 @@ export default function Menu({
                       color="primary"
                       variant="contained"
                       sx={mergeSx(sx)}
+                      data-testid={`custom-btn-${i}`}
                       {...omit(props, ["sx", "title"])}
                     />
                   </Tooltip>
@@ -222,6 +234,8 @@ export default function Menu({
                   color="primary"
                   variant="contained"
                   onClick={() => unregisterElement(id)}
+                  data-testid="delete-element-btn"
+                  aria-label="Delete element"
                 >
                   <Delete />
                 </Button>

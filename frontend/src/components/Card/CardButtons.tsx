@@ -66,6 +66,7 @@ export default function CardButtons() {
 
   return (
     <RoundedButtonGroup
+      data-testid="card-persistence-actions"
       sx={{
         position: "fixed",
         bottom: "20px",
@@ -76,13 +77,23 @@ export default function CardButtons() {
     >
       {validCard && (
         <Tooltip title="Save card">
-          <Button onClick={handleSave} sx={{ padding: "8px !important" }}>
+          <Button 
+            onClick={handleSave} 
+            sx={{ padding: "8px !important" }}
+            data-testid="save-card-btn"
+            aria-label="Save changes to current card"
+          >
             <Save />
           </Button>
         </Tooltip>
       )}
       <Tooltip title="Add card to deck">
-        <Button onClick={handleAdd} sx={{ padding: "8px !important" }}>
+        <Button 
+          onClick={handleAdd} 
+          sx={{ padding: "8px !important" }}
+          data-testid="add-to-deck-btn"
+          aria-label="Add current card to deck as new entry"
+        >
           <Add />
         </Button>
       </Tooltip>

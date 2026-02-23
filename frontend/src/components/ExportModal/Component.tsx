@@ -99,9 +99,13 @@ export default function ExportModal() {
         flexDirection: "column",
         overflow: "hidden",
       }}
+      data-testid="export-modal-overlay"
+      aria-label="Export deck to PDF"
+      role="dialog"
     >
       {/* Header with selection summaries and global toggles */}
       <Box
+        data-testid="export-modal-header"
         sx={{
           p: 2,
           display: "flex",
@@ -126,6 +130,7 @@ export default function ExportModal() {
             variant="outlined"
             onClick={selectAll}
             sx={{ color: "grey.300", borderColor: "grey.700" }}
+            data-testid="select-all-export-btn"
           >
             Select All
           </Button>
@@ -134,6 +139,7 @@ export default function ExportModal() {
             variant="outlined"
             onClick={deselectAll}
             sx={{ color: "grey.300", borderColor: "grey.700" }}
+            data-testid="deselect-all-export-btn"
           >
             Deselect All
           </Button>
@@ -142,6 +148,7 @@ export default function ExportModal() {
 
       {/* Grid of selectable card previews */}
       <Box
+        data-testid="export-card-grid"
         sx={{
           flexGrow: 1,
           minHeight: 0,
@@ -164,6 +171,9 @@ export default function ExportModal() {
             <Box
               key={card.id}
               onClick={() => toggleSelection(card.id)}
+              data-testid={`export-card-item-${card.id}`}
+              aria-checked={isSelected}
+              role="checkbox"
               sx={{
                 position: "relative",
                 aspectRatio: "5/7",
@@ -238,11 +248,12 @@ export default function ExportModal() {
           zIndex: 1300,
         }}
       >
-        <RoundedButtonGroup>
+        <RoundedButtonGroup data-testid="export-modal-footer">
           <Button
             onClick={handleExport}
             disabled={isGenerating || selectedIds.length === 0}
             startIcon={<PictureAsPdf />}
+            data-testid="confirm-export-btn"
             sx={{
               "&.Mui-disabled": {
                 bgcolor: "grey.800",
@@ -252,7 +263,11 @@ export default function ExportModal() {
           >
             Export
           </Button>
-          <Button onClick={() => setIsModalOpen(false)} startIcon={<Close />}>
+          <Button 
+            onClick={() => setIsModalOpen(false)} 
+            startIcon={<Close />}
+            data-testid="cancel-export-btn"
+          >
             Cancel
           </Button>
         </RoundedButtonGroup>

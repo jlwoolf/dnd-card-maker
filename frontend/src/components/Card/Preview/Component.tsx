@@ -31,7 +31,13 @@ export default function PreviewCard() {
   const { setElement } = useSharedElement();
 
   return (
-    <Box width="20%" position="relative" minWidth="400px">
+    <Box 
+      width="20%" 
+      position="relative" 
+      minWidth="400px"
+      data-testid="preview-card-pane"
+      aria-label="Card visual preview"
+    >
       <Background ref={setElement}>
         {elements.map((element) => (
           <Box

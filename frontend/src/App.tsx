@@ -14,6 +14,7 @@ function App() {
   return (
     <ExportContextProvider initialValue={false}>
       <Box
+        data-testid="app-root"
         display="flex"
         width="100vw"
         sx={{

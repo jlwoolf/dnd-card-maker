@@ -22,7 +22,7 @@ interface ColorSettingsModalProps {
 
 /**
  * ColorSettingsModal provides a comprehensive panel to adjust the thematic colors of the card.
- * Users can customize background fills, stroke/border colors, and specific styles for 
+ * Users can customize background fills, stroke/border colors, and specific styles for
  * banner and box text elements.
  */
 export default function ColorSettingsModal({
@@ -45,6 +45,7 @@ export default function ColorSettingsModal({
       open={open}
       onClose={onClose}
       anchorEl={anchorEl}
+      data-testid="color-settings-popover"
       anchorOrigin={{
         vertical: "bottom",
         horizontal: "center",
@@ -66,6 +67,9 @@ export default function ColorSettingsModal({
             flexDirection: "column",
             pointerEvents: "auto",
           },
+          "data-testid": "color-settings-paper",
+          role: "dialog",
+          "aria-label": "Card color settings",
         },
         root: {
           sx: { pointerEvents: "none", zIndex: 1000 },
@@ -78,32 +82,44 @@ export default function ColorSettingsModal({
         justifyContent="space-between"
         paddingY={1}
         paddingX={2}
+        data-testid="color-settings-header"
       >
         <Typography variant="h6">Card Colors</Typography>
-        <IconButton onClick={onClose} size="small">
+        <IconButton
+          onClick={onClose}
+          size="small"
+          data-testid="close-colors-btn"
+          aria-label="Close color settings"
+        >
           <Close />
         </IconButton>
       </Box>
-      <Stack spacing={2} sx={{ overflowY: "auto", flexGrow: 1, padding: 2 }}>
-        <Box>
+      <Stack
+        spacing={2}
+        sx={{ overflowY: "auto", flexGrow: 1, padding: 2 }}
+        data-testid="color-settings-content"
+      >
+        <Box data-testid="setting-bg-fill">
           <Typography variant="h5" gutterBottom>
             Background Fill
           </Typography>
           <ColorPicker
             value={fill}
             onChange={(color) => setTheme({ fill: color })}
+            data-testid="bg-fill-picker"
           />
         </Box>
-        <Box>
+        <Box data-testid="setting-stroke">
           <Typography variant="h5" gutterBottom>
             Stroke / Border
           </Typography>
           <ColorPicker
             value={stroke}
             onChange={(color) => setTheme({ stroke: color })}
+            data-testid="stroke-picker"
           />
         </Box>
-        <Box>
+        <Box data-testid="setting-banner">
           <Typography variant="h5" gutterBottom>
             Banner
           </Typography>
@@ -113,6 +129,7 @@ export default function ColorSettingsModal({
           <ColorPicker
             value={bannerFill}
             onChange={(color) => setTheme({ bannerFill: color })}
+            data-testid="banner-fill-picker"
           />
           <Typography variant="caption" gutterBottom>
             Text
@@ -120,9 +137,10 @@ export default function ColorSettingsModal({
           <ColorPicker
             value={bannerText}
             onChange={(color) => setTheme({ bannerText: color })}
+            data-testid="banner-text-picker"
           />
         </Box>
-        <Box>
+        <Box data-testid="setting-box">
           <Typography variant="h5" gutterBottom>
             Box
           </Typography>
@@ -132,6 +150,7 @@ export default function ColorSettingsModal({
           <ColorPicker
             value={boxFill}
             onChange={(color) => setTheme({ boxFill: color })}
+            data-testid="box-fill-picker"
           />
           <Typography variant="caption" gutterBottom>
             Text
@@ -139,6 +158,7 @@ export default function ColorSettingsModal({
           <ColorPicker
             value={boxText}
             onChange={(color) => setTheme({ boxText: color })}
+            data-testid="box-text-picker"
           />
         </Box>
 
@@ -148,10 +168,17 @@ export default function ColorSettingsModal({
           onClick={handleReset}
           fullWidth
           sx={{ mt: "auto", pt: 1 }}
+          data-testid="reset-colors-btn"
         >
           Reset Defaults
         </Button>
       </Stack>
     </Popover>
   );
+}
+
+declare module "@mui/material" {
+  export interface PopoverPaperSlotPropsOverrides {
+    "data-testid": string;
+  }
 }

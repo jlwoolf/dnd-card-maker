@@ -26,10 +26,17 @@ export default function EditCard() {
       width="20%"
       marginTop="-40px"
       minWidth={400}
+      data-testid="edit-card-pane"
+      aria-label="Edit card contents"
     >
       <CardMenu>
-        {/* Portal target for element-specific configuration toolbars */}
-        <Box ref={setSettingsAnchor} className="settings-menu" />
+        <Box 
+          ref={setSettingsAnchor} 
+          className="settings-menu" 
+          data-testid="element-settings-toolbar"
+          role="toolbar"
+          aria-label="Element settings"
+        />
       </CardMenu>
       
       <BaseCard>
