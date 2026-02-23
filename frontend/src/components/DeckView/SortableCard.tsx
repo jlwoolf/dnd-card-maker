@@ -1,8 +1,8 @@
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box } from "@mui/material";
+import type { Card } from "@src/schemas";
 import CardButtons from "../Deck/CardButtons";
-import type { Card } from "../useExportCards";
 
 /**
  * Props for the SortableCard component.
@@ -16,8 +16,8 @@ export interface SortableCardProps {
 
 /**
  * SortableCard is a draggable grid item designed for the DeckView.
- * It utilizes @dnd-kit/sortable for smooth drag interactions and features 
- * an overlay with quick action buttons (edit, delete, etc.) that appears 
+ * It utilizes @dnd-kit/sortable for smooth drag interactions and features
+ * an overlay with quick action buttons (edit, delete, etc.) that appears
  * on hover.
  */
 export default function SortableCard({ card, onClose }: SortableCardProps) {
@@ -32,7 +32,7 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
 
   /**
    * Applies the transformation provided by dnd-kit.
-   * Using CSS.Translate instead of CSS.Transform ensures the card maintains 
+   * Using CSS.Translate instead of CSS.Transform ensures the card maintains
    * its aspect ratio without distortion during drag operations.
    */
   const style = {

@@ -1,6 +1,7 @@
 import { Box } from "@mui/material";
+import type { Element } from "@src/schemas";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
-import { ELEMENT_REGISTRY, type Element } from "../Element";
+import { ELEMENT_REGISTRY } from "../Element";
 import { useSharedElement } from "../ElementRefContext";
 import Background from "./Background";
 
@@ -12,7 +13,7 @@ const ElementPreview = ({ element }: { element: Element }) => {
     const Preview = ELEMENT_REGISTRY.text.preview;
     return <Preview {...element.value} id={element.id} />;
   }
-  
+
   if (element.type === "image") {
     const Preview = ELEMENT_REGISTRY.image.preview;
     return <Preview {...element.value} id={element.id} />;
@@ -22,8 +23,8 @@ const ElementPreview = ({ element }: { element: Element }) => {
 };
 
 /**
- * PreviewCard renders a high-fidelity visual representation of the card 
- * being edited. It uses the ELEMENT_REGISTRY to dynamically render the 
+ * PreviewCard renders a high-fidelity visual representation of the card
+ * being edited. It uses the ELEMENT_REGISTRY to dynamically render the
  * correct preview component for each element type.
  */
 export default function PreviewCard() {
@@ -31,9 +32,9 @@ export default function PreviewCard() {
   const { setElement } = useSharedElement();
 
   return (
-    <Box 
-      width="20%" 
-      position="relative" 
+    <Box
+      width="20%"
+      position="relative"
       minWidth="400px"
       data-testid="preview-card-pane"
       aria-label="Card visual preview"

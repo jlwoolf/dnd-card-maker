@@ -1,4 +1,4 @@
-import { type BaseEditor, type Descendant } from "slate";
+import { type Descendant } from "slate";
 import { type ReactEditor } from "slate-react";
 import z from "zod";
 

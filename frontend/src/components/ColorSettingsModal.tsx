@@ -179,6 +179,6 @@ export default function ColorSettingsModal({
 
 declare module "@mui/material" {
   export interface PopoverPaperSlotPropsOverrides {
-    "data-testid": string;
+    "data-testid"?: string;
   }
 }
