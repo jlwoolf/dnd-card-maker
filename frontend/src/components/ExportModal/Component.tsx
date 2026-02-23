@@ -164,7 +164,7 @@ export default function ExportModal() {
           minHeight: 0,
           overflowY: "auto",
           p: 3,
-          pb: 12,
+          pb: 16,
           display: "grid",
           gridTemplateColumns: {
             xs: "repeat(auto-fill, minmax(140px, 1fr))",

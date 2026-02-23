@@ -29,9 +29,9 @@ export interface DeckViewProps {
 }
 
 /**
- * DeckView provides a full-screen, immersive management interface for the 
- * current deck. It features a responsive grid layout where cards can be 
- * reordered via drag-and-drop, using @dnd-kit for high-performance 
+ * DeckView provides a full-screen, immersive management interface for the
+ * current deck. It features a responsive grid layout where cards can be
+ * reordered via drag-and-drop, using @dnd-kit for high-performance
  * interactions and accessible sorting.
  */
 export default function DeckView({ onClose }: DeckViewProps) {
@@ -41,8 +41,8 @@ export default function DeckView({ onClose }: DeckViewProps) {
   const cardIds = useMemo(() => cards.map((card) => card.id), [cards]);
 
   /**
-   * Configure sophisticated input sensors. 
-   * PointerSensor handles mouse/touch with an 8px distance constraint to 
+   * Configure sophisticated input sensors.
+   * PointerSensor handles mouse/touch with an 8px distance constraint to
    * distinguish drags from clicks on action buttons.
    */
   const sensors = useSensors(
@@ -59,7 +59,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
   /**
    * Finalizes the reordering when a card is dropped.
    * Calculates the new indices and updates the global deck store.
-   * 
+   *
    * @param event - The dnd-kit drag end event payload.
    */
   const handleDragEnd = (event: DragEndEvent) => {
@@ -104,6 +104,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
             minHeight: 0,
             overflowY: "auto",
             p: 3,
+            pb: { xs: 12, md: 16 },
             display: "grid",
             gridTemplateColumns: {
               xs: "repeat(auto-fill, minmax(140px, 1fr))",

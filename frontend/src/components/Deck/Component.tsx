@@ -70,7 +70,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
         const isActive = index === activeIndex;
         let offsetFromActive = index - activeIndex;
         if (offsetFromActive < 0) offsetFromActive += cards.length;
-        if (offsetFromActive > 16) return null;
+
+        if (isDesktop && offsetFromActive > 16) return null;
+        if (!isDesktop && offsetFromActive > 8) return null;
 
         const zIndex = isActive ? 100 : cards.length - offsetFromActive;
 
