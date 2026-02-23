@@ -1,7 +1,7 @@
 import React, { forwardRef } from "react";
 import { type HTMLMotionProps, motion } from "framer-motion";
 
-interface ControlButtonProps extends HTMLMotionProps<"button"> {
+export interface ControlButtonProps extends HTMLMotionProps<"button"> {
   /** Callback triggered when the button is clicked */
   onClick?: React.MouseEventHandler<HTMLButtonElement>;
   /** Accessibility label for screen readers */

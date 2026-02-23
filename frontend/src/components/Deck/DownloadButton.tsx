@@ -3,20 +3,20 @@ import { ImageProcessor } from "@src/services/ImageProcessor";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
-import ControlButton from "./ControlButton";
+import ControlButton, { type ControlButtonProps } from "./ControlButton";
 
 /**
  * DownloadButton handles the full-deck JSON export.
- * It iterates through all saved cards, compresses transient blob URLs into 
- * persistent JPEG data URLs using the ImageProcessor service, and triggers 
+ * It iterates through all saved cards, compresses transient blob URLs into
+ * persistent JPEG data URLs using the ImageProcessor service, and triggers
  * a browser download of the combined JSON data.
  */
-export default function DownloadButton() {
+export default function DownloadButton(props: Partial<ControlButtonProps>) {
   const cards = useExportCards((state) => state.cards);
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   /**
-   * Orchestrates the export process: image processing, JSON serialization, 
+   * Orchestrates the export process: image processing, JSON serialization,
    * and file download triggering.
    */
   const handleDownload = async () => {
@@ -32,7 +32,9 @@ export default function DownloadButton() {
             element.type === "image" &&
             element.value.src.startsWith("blob:")
           ) {
-            element.value.src = await ImageProcessor.compressToJpeg(element.value.src);
+            element.value.src = await ImageProcessor.compressToJpeg(
+              element.value.src,
+            );
           }
         }
       }
@@ -64,7 +66,7 @@ export default function DownloadButton() {
 
   return (
     <Tooltip title="Download JSON">
-      <ControlButton icon={<Download />} onClick={handleDownload} />
+      <ControlButton icon={<Download />} onClick={handleDownload} {...props} />
     </Tooltip>
   );
 }

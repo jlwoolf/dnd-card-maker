@@ -31,7 +31,7 @@ export interface MenuProps {
   /** Additional custom buttons to display in the floating action menu */
   buttons?: (React.ReactElement | ButtonProps)[];
   /** Settings buttons to display in the top card toolbar portal */
-  settings?: (React.ReactElement | (ButtonProps & { tooltip?: string }))[];
+  settings?: (React.ReactElement | (ButtonProps & { tooltip?: string; }))[];
   /** Unique identifier of the associated element */
   id: string;
 }

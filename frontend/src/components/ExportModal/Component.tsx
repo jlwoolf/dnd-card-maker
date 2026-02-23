@@ -15,8 +15,8 @@ import { useExportModal } from "./ExportContext";
 
 /**
  * ExportModal provides a specialized selection interface for PDF export.
- * It allows users to pick exactly which cards they want to include in the 
- * final document, with "Select All" and "Deselect All" helpers. 
+ * It allows users to pick exactly which cards they want to include in the
+ * final document, with "Select All" and "Deselect All" helpers.
  * It features a persistent progress overlay during document generation.
  */
 export default function ExportModal() {
@@ -28,22 +28,32 @@ export default function ExportModal() {
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [prevIsModalOpen, setPrevIsModalOpen] = useState(isModalOpen);
+  const [prevCards, setPrevCards] = useState(cards);
+
+  let needsSelectionSync = false;
 
   /**
    * Synchronize selection state when the modal opens or cards list changes.
    */
-  if (isModalOpen && !prevIsModalOpen) {
-    setPrevIsModalOpen(true);
+  if (isModalOpen !== prevIsModalOpen) {
+    setPrevIsModalOpen(isModalOpen);
+    if (isModalOpen) needsSelectionSync = true;
+  }
+
+  if (cards !== prevCards) {
+    setPrevCards(cards);
+    if (isModalOpen) needsSelectionSync = true;
+  }
+
+  if (needsSelectionSync) {
     setSelectedIds(cards.map((c) => c.id));
-  } else if (!isModalOpen && prevIsModalOpen) {
-    setPrevIsModalOpen(false);
   }
 
   const isGenerating = pdfProgress > 0 && pdfProgress < 1;
 
   /**
    * Toggles the selection state of a single card.
-   * 
+   *
    * @param id - The unique card ID.
    */
   const toggleSelection = (id: string) => {
@@ -263,8 +273,8 @@ export default function ExportModal() {
           >
             Export
           </Button>
-          <Button 
-            onClick={() => setIsModalOpen(false)} 
+          <Button
+            onClick={() => setIsModalOpen(false)}
             startIcon={<Close />}
             data-testid="cancel-export-btn"
           >

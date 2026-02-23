@@ -3,15 +3,15 @@ import { Box, CircularProgress } from "@mui/material";
 import { useExportModal } from "../ExportModal";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
-import ControlButton from "./ControlButton";
+import ControlButton, { type ControlButtonProps } from "./ControlButton";
 
 /**
  * PdfButton triggers the PDF export workflow.
- * It opens the selection modal where users can choose which cards to include 
- * in the final document. It also displays a circular progress indicator during 
+ * It opens the selection modal where users can choose which cards to include
+ * in the final document. It also displays a circular progress indicator during
  * the generation phase.
  */
-export default function PdfButton() {
+export default function PdfButton(props: Partial<ControlButtonProps>) {
   const [, setIsModalOpen] = useExportModal();
   const pdfProgress = useExportCards((state) => state.pdfProgress);
 
@@ -37,6 +37,7 @@ export default function PdfButton() {
             <PictureAsPdf />
           )
         }
+        {...props}
       />
     </Tooltip>
   );

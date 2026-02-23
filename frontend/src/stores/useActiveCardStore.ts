@@ -23,9 +23,9 @@ interface ActiveCardState {
 
   /** Sets the active settings element ID */
   setActiveSettingsId: (id?: string) => void;
-  /** 
+  /**
    * Registers a new element of the specified type at the end of the stack.
-   * 
+   *
    * @param type - The type of element to create.
    * @param initialValue - Optional partial initial values.
    */
@@ -37,9 +37,9 @@ interface ActiveCardState {
   unregisterElement: (id: string) => void;
   /** Moves an element from one index to another (used for reordering) */
   moveElement: (fromIndex: number, toIndex: number) => void;
-  /** 
+  /**
    * Updates the type-specific value of an element.
-   * 
+   *
    * @param id - Target element ID.
    * @param value - Partial update for the element's value object.
    */
@@ -47,9 +47,9 @@ interface ActiveCardState {
     id: string,
     value: Partial<ElementValue<T>>,
   ) => void;
-  /** 
+  /**
    * Updates the generic layout style of an element.
-   * 
+   *
    * @param id - Target element ID.
    * @param value - Partial update for the style object.
    */
@@ -59,10 +59,10 @@ interface ActiveCardState {
   /** Updates the current theme with partial data */
   setTheme: (theme: Partial<PreviewTheme>) => void;
   /** Loads an entire card into the active draft state */
-  loadCard: (card: Pick<Card, "elements" | "theme" | "id">) => void;
-  /** 
+  loadCard: (card: Pick<Card, "elements" | "theme"> & { id?: string }) => void;
+  /**
    * Resets the active card state.
-   * 
+   *
    * @param withDefault - If true, populates the store with a sample card and default theme.
    */
   reset: (withDefault?: boolean) => void;
@@ -165,7 +165,7 @@ const DEFAULT_CARD_ELEMENTS: Element[] = [
 ];
 
 /**
- * useActiveCardStore is the unified Zustand store managing the entire active 
+ * useActiveCardStore is the unified Zustand store managing the entire active
  * card draft, including elements, visual theme, and editor state.
  */
 export const useActiveCardStore = create<ActiveCardState>((set, get) => ({
@@ -272,13 +272,15 @@ export const useActiveCardStore = create<ActiveCardState>((set, get) => ({
     return get().elements.find((element) => element.id === id);
   },
 
-  setTheme: (theme) => set((state) => ({ ...state, theme: { ...state.theme, ...theme } })),
+  setTheme: (theme) =>
+    set((state) => ({ ...state, theme: { ...state.theme, ...theme } })),
 
-  loadCard: (card) => set(() => ({ 
-    elements: card.elements, 
-    theme: card.theme, 
-    cardId: card.id 
-  })),
+  loadCard: (card) =>
+    set(() => ({
+      elements: card.elements,
+      theme: card.theme,
+      cardId: card.id,
+    })),
 
   reset(withDefault = false) {
     set(() => ({

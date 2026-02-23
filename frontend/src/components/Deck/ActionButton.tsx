@@ -1,8 +1,8 @@
 import React from "react";
-import { motion } from "framer-motion";
+import { motion, type HTMLMotionProps } from "framer-motion";
 import Tooltip from "../Tooltip";
 
-interface ActionButtonProps {
+interface ActionButtonProps extends HTMLMotionProps<"button"> {
   /** Icon component or SVG node to display */
   icon: React.ReactNode;
   /** Background color of the button (Hex or CSS color) */
@@ -25,6 +25,7 @@ const ActionButton = ({
   onClick,
   disabled,
   tooltip,
+  ...rest
 }: ActionButtonProps) => (
   <Tooltip title={tooltip}>
     <motion.button
@@ -48,6 +49,7 @@ const ActionButton = ({
         cursor: "pointer",
         boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
       }}
+      {...rest}
     >
       {icon}
     </motion.button>

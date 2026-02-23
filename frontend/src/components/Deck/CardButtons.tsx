@@ -1,8 +1,9 @@
 import { ContentCopy, Delete, Download, Edit } from "@mui/icons-material";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
-import useExportCards, { type Card } from "../useExportCards";
+import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
 import ActionButton from "./ActionButton";
+import type { Card } from "@src/schemas";
 
 interface CardButtonsProps {
   /** The full card data object */
@@ -44,6 +45,7 @@ export default function CardButtons({
           onEdit?.(card);
           showSnackbar("Card loaded into editor", "info");
         }}
+        data-testid="deck-action-button-edit"
       />
       <ActionButton
         tooltip="Copy to Editor"
@@ -54,6 +56,7 @@ export default function CardButtons({
           onCopy?.(card);
           showSnackbar("Card data copied to editor", "info");
         }}
+        data-testid="deck-action-button-copy"
       />
       <ActionButton
         tooltip="Delete Card"
@@ -64,6 +67,7 @@ export default function CardButtons({
           onDelete?.(card);
           showSnackbar("Card removed from deck", "warning");
         }}
+        data-testid="deck-action-button-delete"
       />
       <ActionButton
         tooltip="Download Card"
@@ -77,6 +81,7 @@ export default function CardButtons({
           onDownload?.(card);
           showSnackbar("Image downloaded", "success");
         }}
+        data-testid="deck-action-button-download"
       />
     </>
   );

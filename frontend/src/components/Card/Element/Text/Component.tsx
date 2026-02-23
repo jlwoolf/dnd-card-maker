@@ -20,8 +20,8 @@ interface TextElementProps {
 
 /**
  * TextElement is a rich-text editor component built on Slate.js.
- * It provides a comprehensive floating toolbar for character-level and 
- * block-level formatting, leveraging the useSlateControls hook for 
+ * It provides a comprehensive floating toolbar for character-level and
+ * block-level formatting, leveraging the useSlateControls hook for
  * state management and editing logic.
  */
 export default function TextElement({ id }: TextElementProps) {
@@ -114,6 +114,7 @@ export default function TextElement({ id }: TextElementProps) {
                 setAlignmentOpen(true);
               },
               tooltip: "Alignment",
+              "data-testid": "text-toolbar-alignment",
             },
             {
               children: (
@@ -136,6 +137,7 @@ export default function TextElement({ id }: TextElementProps) {
                 setFontSizeOpen(true);
               },
               tooltip: "Font Size",
+              "data-testid": "text-toolbar-font-size",
             },
             {
               children: (
@@ -158,6 +160,7 @@ export default function TextElement({ id }: TextElementProps) {
                 setLineHeightOpen(true);
               },
               tooltip: "Line Height",
+              "data-testid": "text-toolbar-line-height",
             },
             {
               children: (
@@ -173,6 +176,7 @@ export default function TextElement({ id }: TextElementProps) {
                 setVariantOpen(true);
               },
               tooltip: "Variant",
+              "data-testid": "text-toolbar-variant",
             },
             {
               children: (
@@ -188,6 +192,7 @@ export default function TextElement({ id }: TextElementProps) {
                 setWidthOpen(true);
               },
               tooltip: "Width",
+              "data-testid": "text-toolbar-width",
             },
             {
               children: <FormatBold />,
@@ -197,6 +202,7 @@ export default function TextElement({ id }: TextElementProps) {
                 toggleMark("bold");
               },
               tooltip: "Bold",
+              "data-testid": "text-toolbar-bold",
             },
             {
               children: <FormatItalic />,
@@ -206,6 +212,7 @@ export default function TextElement({ id }: TextElementProps) {
                 toggleMark("italic");
               },
               tooltip: "Italic",
+              "data-testid": "text-toolbar-italic",
             },
             {
               children: <OpenInFull />,
@@ -216,6 +223,7 @@ export default function TextElement({ id }: TextElementProps) {
               },
               disabled: !grow,
               tooltip: "Expand",
+              "data-testid": "text-toolbar-expand",
             },
           ],
         }}
@@ -264,4 +272,10 @@ export default function TextElement({ id }: TextElementProps) {
       </Element>
     </Slate>
   );
+}
+
+declare module "@mui/material" {
+  export interface ButtonOwnProps {
+    "data-testid"?: string;
+  }
 }
