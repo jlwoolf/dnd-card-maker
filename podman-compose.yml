@@ -5,7 +5,7 @@ services:
       dockerfile: Dockerfile
     container_name: dnd-card-maker
     ports:
-      - "8080:80"
+      - "8001:80"
     restart: always
     # Environment variables can be passed here if your build script supports them
     environment:
