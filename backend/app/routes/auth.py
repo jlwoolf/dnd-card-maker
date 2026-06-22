@@ -43,12 +43,29 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
-    """Register a new user account and send a verification email."""
+    """Register a new user account and send a verification email.
+
+    If the email is already registered but not yet verified, update the
+    password, generate a fresh verification token, and resend the email.
+    """
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
-        raise HTTPException(
-            status_code=status.HTTP_409_CONFLICT,
-            detail="Email already registered",
+        if existing.is_verified:
+            raise HTTPException(
+                status_code=status.HTTP_409_CONFLICT,
+                detail="Email already registered",
+            )
+        existing.password_hash = hash_password(body.password)
+        existing.verify_token = str(uuid4())
+        db.commit()
+        try:
+            send_verification_email(existing.email, existing.verify_token)
+        except Exception:
+            logging.getLogger(__name__).exception(
+                "Failed to send verification email to %s", existing.email
+            )
+        return MessageResponse(
+            message="A verification email has been resent. Check your email to verify your account."
         )
 
     user = User(
@@ -162,9 +179,9 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
 
 @router.post("/forgot-password", response_model=MessageResponse)
 def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    """Send a password-reset email if the given email belongs to a verified user."""
+    """Send a password-reset email if the given email is registered."""
     user = db.query(User).filter(User.email == body.email).first()
-    if user and user.is_verified:
+    if user:
         user.reset_token = str(uuid4())
         user.reset_expires = datetime.now(UTC) + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
         db.commit()
@@ -182,6 +199,8 @@ def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends
     """Reset the user's password using a valid reset token.
 
     Increments ``token_version`` to invalidate all existing sessions.
+    If the account was unverified, it becomes verified (proving ownership
+    of the email via the reset link is equivalent to verification).
     """
     user = (
         db.query(User)
@@ -202,6 +221,9 @@ def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends
     user.reset_token = None
     user.reset_expires = None
     user.token_version += 1
+    if not user.is_verified:
+        user.is_verified = True
+        user.verify_token = None
     db.commit()
 
     return MessageResponse(message="Password reset successfully")

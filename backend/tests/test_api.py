@@ -41,6 +41,35 @@ class TestAuth:
                 "password": "another123",
             },
         )
+        assert response.status_code == 201
+        assert "verification email has been resent" in response.json()["message"]
+
+    def test_register_duplicate_verified_email(self, client):
+        client.post(
+            "/api/auth/register",
+            json={
+                "email": "dupv@example.com",
+                "password": "securepass123",
+            },
+        )
+        db = TestSessionLocal()
+        try:
+            from app.models.user import User
+
+            user = db.query(User).filter(User.email == "dupv@example.com").first()
+            user.is_verified = True
+            user.verify_token = None
+            db.commit()
+        finally:
+            db.close()
+
+        response = client.post(
+            "/api/auth/register",
+            json={
+                "email": "dupv@example.com",
+                "password": "another123",
+            },
+        )
         assert response.status_code == 409
         assert "already registered" in response.json()["detail"]
 
