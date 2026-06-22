@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect, fn } from "storybook/test";
-import React from "react";
 import ControlButton from "./ControlButton";
 
 const meta = { component: ControlButton } satisfies Meta<typeof ControlButton>;

@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
-import React from "react";
 import Tooltip from "./Tooltip";
 
 const meta = { component: Tooltip } satisfies Meta<typeof Tooltip>;

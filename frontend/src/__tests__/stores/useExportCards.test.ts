@@ -20,6 +20,8 @@ describe("useExportCards", () => {
           type: "text",
           value: {
             variant: "banner",
+            expand: false,
+            width: 100,
             value: [{ type: "paragraph", children: [{ text: "Test" }] }],
           },
           style: { grow: false, align: "center" },
@@ -162,6 +164,8 @@ describe("useExportCards", () => {
             type: "text",
             value: {
               variant: "banner",
+              expand: false,
+              width: 100,
               value: [{ type: "paragraph", children: [{ text: "Hi" }] }],
             },
             style: { grow: false, align: "center" },

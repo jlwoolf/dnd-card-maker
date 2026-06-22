@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
-import React from "react";
 import PreviewImage from "./Image";
 
 const meta = { component: PreviewImage } satisfies Meta<typeof PreviewImage>;

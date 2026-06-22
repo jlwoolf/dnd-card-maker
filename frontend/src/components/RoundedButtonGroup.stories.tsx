@@ -1,6 +1,5 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import { expect } from "storybook/test";
-import React from "react";
 import RoundedButtonGroup from "./RoundedButtonGroup";
 
 const meta = { component: RoundedButtonGroup } satisfies Meta<typeof RoundedButtonGroup>;

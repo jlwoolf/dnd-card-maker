@@ -132,6 +132,8 @@ describe("useActiveCardStore", () => {
           type: "text" as const,
           value: {
             variant: "banner" as const,
+            expand: false,
+            width: 100,
             value: [{ type: "paragraph" as const, children: [{ text: "Imported" }] }],
           },
           style: { grow: false, align: "center" as const },
