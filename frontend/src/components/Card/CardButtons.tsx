@@ -5,6 +5,7 @@ import { cardApi } from "@src/services/api";
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { useAuthStore } from "@src/stores/useAuthStore";
+import { themeToSnake } from "@src/utils/themeHelpers";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
@@ -60,34 +61,21 @@ export default function CardButtons() {
   const handleSaveCloud = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (!dataUrl) return;
+    const snakeTheme = themeToSnake(previewTheme);
     try {
       if (cloudCardId) {
         await cardApi.update(cloudCardId, {
-          elements: elements as unknown[],
+          elements,
           img_url: dataUrl,
-          theme: {
-            fill: previewTheme.fill,
-            banner_fill: previewTheme.bannerFill,
-            box_fill: previewTheme.boxFill,
-            stroke: previewTheme.stroke,
-            banner_text: previewTheme.bannerText,
-            box_text: previewTheme.boxText,
-          },
+          theme: snakeTheme,
         });
         await cardApi.toggleSave(cloudCardId, "save");
         showSnackbar("Updated in cloud!", "success");
       } else {
         const response = await cardApi.create({
-          elements: elements as unknown[],
+          elements,
           img_url: dataUrl,
-          theme: {
-            fill: previewTheme.fill,
-            banner_fill: previewTheme.bannerFill,
-            box_fill: previewTheme.boxFill,
-            stroke: previewTheme.stroke,
-            banner_text: previewTheme.bannerText,
-            box_text: previewTheme.boxText,
-          },
+          theme: snakeTheme,
         });
         setCloudCardId(response.data.id);
         if (cardId) {

@@ -76,7 +76,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
       setCards([]);
       for (const card of res.data.cards) {
         addCard(
-          card.elements as never,
+          card.elements,
           card.img_url,
           themeFromSnake(card.theme),
         );
@@ -93,7 +93,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
       const res = await deckApi.get(deckId);
       for (const card of res.data.cards) {
         addCard(
-          card.elements as never,
+          card.elements,
           card.img_url,
           themeFromSnake(card.theme),
         );

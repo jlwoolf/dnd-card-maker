@@ -1,7 +1,9 @@
 from datetime import UTC, datetime, timedelta
 
 import bcrypt
-from jose import jwt
+from jose import JWTError, jwt
+
+from app.constants import JWT_ALGORITHM, TOKEN_TYPE_ACCESS, TOKEN_TYPE_REFRESH
 
 
 def hash_password(password: str) -> str:
@@ -27,18 +29,36 @@ def create_access_token(data: dict, secret: str, expires_delta: timedelta) -> st
     """Create a short-lived JWT access token for API authentication."""
     to_encode = data.copy()
     expire = datetime.now(UTC) + expires_delta
-    to_encode.update({"exp": expire, "type": "access"})
-    return jwt.encode(to_encode, secret, algorithm="HS256")
+    to_encode.update({"exp": expire, "type": TOKEN_TYPE_ACCESS})
+    return jwt.encode(to_encode, secret, algorithm=JWT_ALGORITHM)
 
 
 def create_refresh_token(data: dict, secret: str, expires_delta: timedelta) -> str:
     """Create a long-lived JWT refresh token for obtaining new access tokens."""
     to_encode = data.copy()
     expire = datetime.now(UTC) + expires_delta
-    to_encode.update({"exp": expire, "type": "refresh"})
-    return jwt.encode(to_encode, secret, algorithm="HS256")
+    to_encode.update({"exp": expire, "type": TOKEN_TYPE_REFRESH})
+    return jwt.encode(to_encode, secret, algorithm=JWT_ALGORITHM)
 
 
 def decode_token(token: str, secret: str) -> dict:
     """Decode and validate a JWT token, returning its payload."""
-    return jwt.decode(token, secret, algorithms=["HS256"])
+    return jwt.decode(token, secret, algorithms=[JWT_ALGORITHM])
+
+
+def get_user_id_from_token(token: str, expected_type: str, secret: str) -> str:
+    """Decode a JWT token and validate its type, returning the ``sub`` claim.
+
+    This single helper replaces the token-decode-and-validate pattern that was
+    duplicated across ``dependencies.py`` and ``routes/auth.py``.
+
+    Raises ``JWTError`` for invalid/expired tokens and ``ValueError`` when the
+    token type does not match ``expected_type`` or the ``sub`` claim is missing.
+    """
+    payload = decode_token(token, secret)
+    if payload.get("type") != expected_type:
+        raise ValueError(f"Expected token type '{expected_type}', got '{payload.get('type')}'")
+    user_id: str | None = payload.get("sub")
+    if user_id is None:
+        raise ValueError("Token missing 'sub' claim")
+    return user_id

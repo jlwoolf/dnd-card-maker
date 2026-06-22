@@ -1,8 +1,11 @@
+"""Public shared-card endpoint."""
+
 import json
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.constants import SHARE_MODE_VIEW_AND_COPY
 from app.database import get_db
 from app.models.card import Card
 from app.schemas import CardThemeSchema, SharedCardResponse
@@ -32,5 +35,5 @@ def get_shared_card(slug: str, db: Session = Depends(get_db)):
         img_url=card.img_url,
         theme=CardThemeSchema(**json.loads(card.theme)),
         mode=card.share_mode,
-        can_copy=card.share_mode == "view_and_copy",
+        can_copy=card.share_mode == SHARE_MODE_VIEW_AND_COPY,
     )

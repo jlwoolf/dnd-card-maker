@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
+from app.constants import DEV_MAIL_LIST_LIMIT
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.email import SentEmail
@@ -18,7 +19,7 @@ def list_mail(
 
     Requires authentication. Returns 200 with email summaries (to, subject, sent_at).
     """
-    emails = db.query(SentEmail).order_by(SentEmail.sent_at.desc()).limit(50).all()
+    emails = db.query(SentEmail).order_by(SentEmail.sent_at.desc()).limit(DEV_MAIL_LIST_LIMIT).all()
     return [
         {
             "id": e.id,

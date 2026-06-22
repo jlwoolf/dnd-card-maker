@@ -11,6 +11,8 @@ import { ImageProcessor } from "@src/services/ImageProcessor";
 import { sharedApi } from "@src/services/api";
 import useExportCards from "@src/components/useExportCards";
 import { useSnackbar } from "@src/components/useSnackbar";
+import { themeFromSnake } from "@src/utils/themeHelpers";
+import { CONTENT_MIN_HEIGHT } from "@src/theme/constants";
 import type { SharedCard } from "@src/services/api";
 
 export default function SharedCardPage() {
@@ -43,14 +45,7 @@ export default function SharedCardPage() {
         return;
       }
     }
-    addCard(card.elements as never, imgUrl, {
-      fill: card.theme.fill,
-      bannerFill: card.theme.banner_fill,
-      boxFill: card.theme.box_fill,
-      stroke: card.theme.stroke,
-      bannerText: card.theme.banner_text,
-      boxText: card.theme.box_text,
-    });
+    addCard(card.elements, imgUrl, themeFromSnake(card.theme));
     showSnackbar("Card copied to your deck!", "success");
   };
 
@@ -60,7 +55,7 @@ export default function SharedCardPage() {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="calc(100vh - 48px)"
+        minHeight={CONTENT_MIN_HEIGHT}
       >
         <CircularProgress />
       </Box>
@@ -73,7 +68,7 @@ export default function SharedCardPage() {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="calc(100vh - 48px)"
+        minHeight={CONTENT_MIN_HEIGHT}
       >
         <Box sx={{ width: 360, p: 3, textAlign: "center" }}>
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -94,7 +89,7 @@ export default function SharedCardPage() {
       display="flex"
       flexDirection="column"
       alignItems="center"
-      minHeight="calc(100vh - 48px)"
+      minHeight={CONTENT_MIN_HEIGHT}
       p={3}
     >
       {card.title && (

@@ -3,6 +3,7 @@ from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
+from app.constants import ADMIN_DEFAULT_LIMIT
 from app.database import get_db
 from app.dependencies import get_current_user
 from app.models.card import Card
@@ -43,7 +44,7 @@ def list_tables(
 def get_table_rows(
     table_name: str,
     offset: int = Query(0, ge=0),
-    limit: int = Query(100, ge=1, le=1000),
+    limit: int = Query(ADMIN_DEFAULT_LIMIT, ge=1, le=1000),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):

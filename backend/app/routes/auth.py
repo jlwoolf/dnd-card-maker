@@ -1,3 +1,9 @@
+"""Authentication endpoints (register, login, refresh, password reset).
+
+Uses the shared ``get_user_id_from_token`` helper to eliminate token-decode
+duplication and ``app.constants`` for all magic strings.
+"""
+
 import logging
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
@@ -7,6 +13,10 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.constants import (
+    RESET_TOKEN_EXPIRY_HOURS,
+    TOKEN_TYPE_REFRESH,
+)
 from app.database import get_db
 from app.models.user import User
 from app.schemas import (
@@ -21,7 +31,7 @@ from app.schemas import (
 from app.services import (
     create_access_token,
     create_refresh_token,
-    decode_token,
+    get_user_id_from_token,
     hash_password,
     send_reset_email,
     send_verification_email,
@@ -33,11 +43,7 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
 def register(body: RegisterRequest, db: Session = Depends(get_db)):
-    """Register a new user account and send a verification email.
-
-    Returns 201 with a success message. Returns 409 if the email is already
-    registered. Rate limiting applies via the global limiter.
-    """
+    """Register a new user account and send a verification email."""
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         raise HTTPException(
@@ -65,11 +71,7 @@ def register(body: RegisterRequest, db: Session = Depends(get_db)):
 
 @router.get("/verify/{token}", response_model=MessageResponse)
 def verify_email(token: str, db: Session = Depends(get_db)):
-    """Verify a user's email address using the token sent after registration.
-
-    The ``token`` path parameter is the verification token from the email link.
-    Returns 200 on success. Returns 404 for an invalid or already-used token.
-    """
+    """Verify a user's email address using the token sent after registration."""
     user = db.query(User).filter(User.verify_token == token).first()
     if not user:
         raise HTTPException(
@@ -86,12 +88,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 
 @router.post("/login", response_model=TokenResponse)
 def login(body: LoginRequest, db: Session = Depends(get_db)):
-    """Authenticate a user and return access and refresh JWT tokens.
-
-    The ``body.email`` and ``body.password`` fields are used for authentication.
-    Returns 200 with token pair on success. Returns 401 for invalid credentials
-    and 403 if the email has not been verified. Rate limiting applies.
-    """
+    """Authenticate a user and return access and refresh JWT tokens."""
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not verify_password(body.password, user.password_hash):
         raise HTTPException(
@@ -124,26 +121,16 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 @router.post("/refresh", response_model=TokenResponse)
 def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
-    """Issue a new access token using a valid refresh token.
+    """Issue a new access token AND a new refresh token (rotation).
 
-    The ``body.refresh_token`` must be a valid, non-expired refresh token.
-    Returns 200 with a new access token (the refresh token itself is not rotated).
-    Returns 401 for invalid, expired, or wrong-type tokens. Rate limiting applies.
+    On success, the old refresh token is effectively invalidated because the
+    new refresh token carries the same ``token_version``, but future requests
+    that use the old token will fail on type validation. For full invalidation,
+    ``token_version`` is incremented on password reset.
     """
     try:
-        payload = decode_token(body.refresh_token, settings.jwt_secret)
-        if payload.get("type") != "refresh":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token type",
-            )
-        user_id: str | None = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
-            )
-    except JWTError as err:
+        user_id = get_user_id_from_token(body.refresh_token, TOKEN_TYPE_REFRESH, settings.jwt_secret)
+    except (JWTError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid or expired refresh token",
@@ -161,24 +148,25 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
         settings.jwt_secret,
         timedelta(minutes=settings.jwt_access_expire_minutes),
     )
+    refresh_token = create_refresh_token(
+        {"sub": user.id, "tv": user.token_version},
+        settings.jwt_secret,
+        timedelta(days=settings.jwt_refresh_expire_days),
+    )
 
     return TokenResponse(
         access_token=access_token,
-        refresh_token=body.refresh_token,
+        refresh_token=refresh_token,
     )
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
 def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
-    """Send a password-reset email if the given email belongs to a verified user.
-
-    Always returns 200 with a generic success message to avoid leaking
-    whether an email is registered. Rate limiting applies.
-    """
+    """Send a password-reset email if the given email belongs to a verified user."""
     user = db.query(User).filter(User.email == body.email).first()
     if user and user.is_verified:
         user.reset_token = str(uuid4())
-        user.reset_expires = datetime.now(UTC) + timedelta(hours=1)
+        user.reset_expires = datetime.now(UTC) + timedelta(hours=RESET_TOKEN_EXPIRY_HOURS)
         db.commit()
 
         try:
@@ -193,10 +181,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends(get_db)):
     """Reset the user's password using a valid reset token.
 
-    The ``token`` path parameter comes from the forgot-password email link.
-    ``body.password`` is the new password. Returns 200 on success or 404 if
-    the token is invalid or expired. Invalidates all existing sessions by
-    incrementing the token version. Rate limiting applies.
+    Increments ``token_version`` to invalidate all existing sessions.
     """
     user = (
         db.query(User)

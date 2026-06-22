@@ -4,12 +4,6 @@ from typing import Any, Literal
 from pydantic import BaseModel, ConfigDict, Field
 
 
-def _to_camel(snake: str) -> str:
-    """Convert snake_case to camelCase."""
-    head, *tail = snake.split("_")
-    return head + "".join(w.capitalize() for w in tail)
-
-
 class CardThemeSchema(BaseModel):
     """Visual theme configuration for a card.
 

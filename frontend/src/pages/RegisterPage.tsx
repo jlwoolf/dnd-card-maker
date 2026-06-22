@@ -2,13 +2,14 @@ import { useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
   Alert,
-  Box,
   Button,
   Link,
   TextField,
   Typography,
 } from "@mui/material";
+import AuthPageLayout from "@src/components/AuthPageLayout";
 import { useAuthStore } from "@src/stores/useAuthStore";
+import { extractApiError } from "@src/utils/apiErrors";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -36,10 +37,7 @@ export default function RegisterPage() {
       await register(email, password);
       setSuccess(true);
     } catch (err: unknown) {
-      const detail =
-        (err as { response?: { data?: { detail?: string } } })?.response?.data
-          ?.detail;
-      setError(typeof detail === "string" ? detail : "Registration failed");
+      setError(extractApiError(err, "Registration failed"));
     } finally {
       setLoading(false);
     }
@@ -47,94 +45,72 @@ export default function RegisterPage() {
 
   if (success) {
     return (
-      <Box
-        display="flex"
-        justifyContent="center"
-        alignItems="center"
-        minHeight="calc(100vh - 48px)"
-      >
-        <Box sx={{ width: 360, p: 3, textAlign: "center" }}>
-          <Alert severity="success" sx={{ mb: 2 }}>
-            Registration successful! Check your email to verify your account.
-          </Alert>
-          <Button
-            variant="contained"
-            onClick={() => navigate("/login")}
-          >
-            Go to Login
-          </Button>
-        </Box>
-      </Box>
+      <AuthPageLayout>
+        <Alert severity="success" sx={{ mb: 2 }}>
+          Registration successful! Check your email to verify your account.
+        </Alert>
+        <Button variant="contained" onClick={() => navigate("/login")}>
+          Go to Login
+        </Button>
+      </AuthPageLayout>
     );
   }
 
   return (
-    <Box
-      display="flex"
-      justifyContent="center"
-      alignItems="center"
-      minHeight="calc(100vh - 48px)"
-    >
-      <Box
-        component="form"
-        onSubmit={handleSubmit}
-        sx={{ width: 360, p: 3 }}
-        data-testid="register-form"
+    <AuthPageLayout onSubmit={handleSubmit} dataTestId="register-form">
+      <Typography variant="h5" gutterBottom>
+        Create Account
+      </Typography>
+
+      {error && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {error}
+        </Alert>
+      )}
+
+      <TextField
+        label="Email"
+        type="email"
+        fullWidth
+        margin="normal"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        autoFocus
+      />
+      <TextField
+        label="Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        value={password}
+        onChange={(e) => setPassword(e.target.value)}
+        required
+        helperText="At least 8 characters"
+      />
+      <TextField
+        label="Confirm Password"
+        type="password"
+        fullWidth
+        margin="normal"
+        value={confirmPassword}
+        onChange={(e) => setConfirmPassword(e.target.value)}
+        required
+      />
+
+      <Button
+        type="submit"
+        variant="contained"
+        fullWidth
+        disabled={loading}
+        sx={{ mt: 2, mb: 2 }}
       >
-        <Typography variant="h5" gutterBottom>
-          Create Account
-        </Typography>
+        {loading ? "Creating account..." : "Register"}
+      </Button>
 
-        {error && (
-          <Alert severity="error" sx={{ mb: 2 }}>
-            {error}
-          </Alert>
-        )}
-
-        <TextField
-          label="Email"
-          type="email"
-          fullWidth
-          margin="normal"
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          required
-          autoFocus
-        />
-        <TextField
-          label="Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          required
-          helperText="At least 8 characters"
-        />
-        <TextField
-          label="Confirm Password"
-          type="password"
-          fullWidth
-          margin="normal"
-          value={confirmPassword}
-          onChange={(e) => setConfirmPassword(e.target.value)}
-          required
-        />
-
-        <Button
-          type="submit"
-          variant="contained"
-          fullWidth
-          disabled={loading}
-          sx={{ mt: 2, mb: 2 }}
-        >
-          {loading ? "Creating account..." : "Register"}
-        </Button>
-
-        <Link component={RouterLink} to="/login" variant="body2">
-          Already have an account? Login
-        </Link>
-      </Box>
-    </Box>
+      <Link component={RouterLink} to="/login" variant="body2">
+        Already have an account? Login
+      </Link>
+    </AuthPageLayout>
   );
 }

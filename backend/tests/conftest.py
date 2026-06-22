@@ -1,3 +1,10 @@
+"""Pytest fixtures for backend integration tests.
+
+Creates a temporary SQLite database per test run, overrides the FastAPI
+dependency injection to use the test DB session, and disables rate limiting
+so tests run without throttling.
+"""
+
 import os
 import tempfile
 from collections.abc import Generator
@@ -22,6 +29,7 @@ TestSessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=test_eng
 
 
 def override_get_db() -> Generator[Session, None, None]:
+    """FastAPI dependency override that yields a test DB session."""
     db = TestSessionLocal()
     try:
         yield db
@@ -34,6 +42,7 @@ def override_get_db() -> Generator[Session, None, None]:
 
 @pytest.fixture(autouse=True)
 def setup_db(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    """Replace the production DB session with a test session and disable rate limits."""
     from slowapi import Limiter
 
     from app import database
@@ -61,11 +70,13 @@ def setup_db(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
 
 @pytest.fixture
 def client() -> TestClient:
+    """Return a FastAPI TestClient for the application."""
     return TestClient(app)
 
 
 @pytest.fixture
 def auth_headers(client: TestClient) -> dict[str, str]:
+    """Return Authorization headers for a pre-authenticated, verified test user."""
     client.post(
         "/api/auth/register",
         json={

@@ -279,8 +279,8 @@ export default function CloudDeckPreview({
 
   const handleEdit = (card: CloudCard) => {
     loadCard({
-      elements: card.elements as never,
-      theme: card.theme as never,
+      elements: card.elements,
+      theme: themeFromSnake(card.theme),
       id: card.id,
       cloudCardId: card.id,
     });
@@ -289,7 +289,7 @@ export default function CloudDeckPreview({
   };
 
   const handleCopy = (card: CloudCard) => {
-    addCard(card.elements as never, card.img_url, card.theme as never);
+    addCard(card.elements, card.img_url, themeFromSnake(card.theme));
     showSnackbar("Card copied to local deck", "success");
   };
 
@@ -306,7 +306,7 @@ export default function CloudDeckPreview({
 
   const handleLoadAll = () => {
     for (const card of cards) {
-      addCard(card.elements as never, card.img_url, card.theme as never);
+      addCard(card.elements, card.img_url, themeFromSnake(card.theme));
     }
     showSnackbar(`Loaded ${cards.length} card(s) to local deck`, "success");
   };

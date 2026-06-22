@@ -1,4 +1,5 @@
 import axios from "axios";
+import type { Element, PreviewTheme } from "@src/schemas";
 
 const API_BASE = "/api";
 
@@ -80,6 +81,16 @@ api.interceptors.response.use(
 
 export default api;
 
+/** Theme colours as received from the API (snake_case keys). */
+export interface SnakeTheme {
+  fill: string;
+  banner_fill: string;
+  box_fill: string;
+  stroke: string;
+  banner_text: string;
+  box_text: string;
+}
+
 export interface CloudCardSummary {
   id: string;
   title: string | null;
@@ -95,16 +106,9 @@ export interface CloudCard {
   id: string;
   user_id: string;
   title: string | null;
-  elements: unknown[];
+  elements: Element[];
   img_url: string;
-  theme: {
-    fill: string;
-    banner_fill: string;
-    box_fill: string;
-    stroke: string;
-    banner_text: string;
-    box_text: string;
-  };
+  theme: SnakeTheme;
   share_slug: string | null;
   share_mode: string | null;
   share_at: string | null;
@@ -115,16 +119,9 @@ export interface CloudCard {
 export interface SharedCard {
   id: string;
   title: string | null;
-  elements: unknown[];
+  elements: Element[];
   img_url: string;
-  theme: {
-    fill: string;
-    banner_fill: string;
-    box_fill: string;
-    stroke: string;
-    banner_text: string;
-    box_text: string;
-  };
+  theme: SnakeTheme;
   mode: string | null;
   can_copy: boolean;
 }
@@ -134,17 +131,17 @@ export const cardApi = {
   get: (id: string) => api.get<CloudCard>(`/cards/${id}`),
   create: (data: {
     title?: string | null;
-    elements: unknown[];
+    elements: Element[];
     img_url: string;
-    theme: Record<string, string>;
+    theme: SnakeTheme;
   }) => api.post<CloudCard>("/cards", data),
   update: (
     id: string,
     data: Partial<{
       title: string | null;
-      elements: unknown[];
+      elements: Element[];
       img_url: string;
-      theme: Record<string, string>;
+      theme: SnakeTheme;
     }>,
   ) => api.put<CloudCard>(`/cards/${id}`, data),
   delete: (id: string) => api.delete(`/cards/${id}`),
@@ -175,20 +172,22 @@ export interface DeckSummary {
   updated_at: string;
 }
 
+export interface DeckCardEntry {
+  id: string;
+  title: string | null;
+  img_url: string;
+  saved: boolean;
+  elements: Element[];
+  theme: SnakeTheme;
+  share_slug: string | null;
+  share_mode: string | null;
+}
+
 export interface DeckResponse {
   id: string;
   title: string;
   is_default: boolean;
-  cards: Array<{
-    id: string;
-    title: string | null;
-    img_url: string;
-    saved: boolean;
-    elements: unknown[];
-    theme: Record<string, string>;
-    share_slug: string | null;
-    share_mode: string | null;
-  }>;
+  cards: DeckCardEntry[];
   share_slug: string | null;
   share_mode: string | null;
 }
@@ -200,7 +199,7 @@ export const deckApi = {
     api.post<DeckResponse>("/decks", data),
   save: (data: {
     title: string;
-    cards: Array<{ elements: unknown[]; img_url: string; theme: Record<string, string> }>;
+    cards: Array<{ elements: Element[]; img_url: string; theme: SnakeTheme }>;
   }) => api.post<DeckResponse>("/decks/save", data),
   update: (id: string, data: { title?: string; card_ids?: string[] }) =>
     api.put<DeckResponse>(`/decks/${id}`, data),

@@ -4,9 +4,10 @@ from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import settings
+from app.constants import TOKEN_TYPE_ACCESS
 from app.database import get_db
 from app.models.user import User
-from app.services.auth import decode_token
+from app.services.auth import decode_token, get_user_id_from_token
 
 security_scheme = HTTPBearer()
 
@@ -24,19 +25,9 @@ def get_current_user(
     """
     token = credentials.credentials
     try:
+        user_id = get_user_id_from_token(token, TOKEN_TYPE_ACCESS, settings.jwt_secret)
         payload = decode_token(token, settings.jwt_secret)
-        if payload.get("type") != "access":
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token type",
-            )
-        user_id: str | None = payload.get("sub")
-        if user_id is None:
-            raise HTTPException(
-                status_code=status.HTTP_401_UNAUTHORIZED,
-                detail="Invalid token",
-            )
-    except JWTError as err:
+    except (JWTError, ValueError) as err:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid token",

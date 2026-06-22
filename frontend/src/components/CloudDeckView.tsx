@@ -25,6 +25,7 @@ import {
 } from "@mui/material";
 import { cardApi, type CloudCardSummary } from "@src/services/api";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
+import { themeFromSnake } from "@src/utils/themeHelpers";
 import useExportCards from "./useExportCards";
 import { useSnackbar } from "./useSnackbar";
 import CardHoverActions from "./CardHoverActions";
@@ -72,15 +73,8 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
     try {
       const res = await cardApi.get(id);
       loadCard({
-        elements: res.data.elements as never,
-        theme: {
-          fill: res.data.theme.fill,
-          bannerFill: res.data.theme.banner_fill,
-          boxFill: res.data.theme.box_fill,
-          stroke: res.data.theme.stroke,
-          bannerText: res.data.theme.banner_text,
-          boxText: res.data.theme.box_text,
-        },
+        elements: res.data.elements,
+        theme: themeFromSnake(res.data.theme),
         id: res.data.id,
         cloudCardId: res.data.id,
       });
@@ -94,14 +88,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
   const handleCopyToDeck = async (id: string) => {
     try {
       const res = await cardApi.get(id);
-      addCard(res.data.elements as never, res.data.img_url, {
-        fill: res.data.theme.fill,
-        bannerFill: res.data.theme.banner_fill,
-        boxFill: res.data.theme.box_fill,
-        stroke: res.data.theme.stroke,
-        bannerText: res.data.theme.banner_text,
-        boxText: res.data.theme.box_text,
-      });
+      addCard(res.data.elements, res.data.img_url, themeFromSnake(res.data.theme));
       showSnackbar("Card copied to deck", "success");
     } catch {
       showSnackbar("Failed to copy card", "error");

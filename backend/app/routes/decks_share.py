@@ -1,12 +1,16 @@
-import json
+"""Public shared-deck endpoint.
+
+Uses the shared ``get_deck_cards_for_share`` helper from the deck service
+instead of duplicating card-assembly logic.
+"""
 
 from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.models.card import Card
 from app.models.deck import Deck
 from app.schemas import SharedDeckResponse
+from app.services.deck_service import get_deck_cards_for_share, get_shared_deck_by_slug
 
 router = APIRouter(prefix="/api/shared/decks", tags=["shared_decks"])
 
@@ -19,33 +23,14 @@ def get_shared_deck(slug: str, db: Session = Depends(get_db)):
     cards and a ``can_copy`` flag based on the share mode. Returns 404 if no
     shared deck matches the slug.
     """
-    deck = db.query(Deck).filter(Deck.share_slug == slug).first()
+    deck: Deck | None = get_shared_deck_by_slug(slug, db)
     if not deck:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Shared deck not found",
         )
 
-    card_ids = [dc.card_id for dc in deck.deck_cards]
-    cards = db.query(Card).filter(Card.id.in_(card_ids)).all() if card_ids else []
-    card_map = {c.id: c for c in cards}
-
-    cards_data = []
-    for dc in deck.deck_cards:
-        c = card_map.get(dc.card_id)
-        if c:
-            cards_data.append(
-                {
-                    "id": c.id,
-                    "title": c.title,
-                    "img_url": c.img_url,
-                    "elements": json.loads(c.elements),
-                    "theme": json.loads(c.theme),
-                    "share_slug": c.share_slug,
-                    "share_mode": c.share_mode,
-                }
-            )
-
+    cards_data = get_deck_cards_for_share(deck, db)
     return SharedDeckResponse(
         id=deck.id,
         title=deck.title,

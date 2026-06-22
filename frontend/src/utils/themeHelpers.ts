@@ -1,6 +1,8 @@
 import type { PreviewTheme } from "@src/schemas";
+import type { SnakeTheme } from "@src/services/api";
 
-export function themeFromSnake(theme: Record<string, string>): PreviewTheme {
+/** Convert a theme object with snake_case keys (API format) to camelCase (Preview format). */
+export function themeFromSnake(theme: SnakeTheme): PreviewTheme {
   return {
     fill: theme.fill,
     bannerFill: theme.banner_fill,
@@ -11,7 +13,8 @@ export function themeFromSnake(theme: Record<string, string>): PreviewTheme {
   };
 }
 
-export function themeToSnake(theme: PreviewTheme): Record<string, string> {
+/** Convert a PreviewTheme (camelCase) to snake_case for API requests. */
+export function themeToSnake(theme: PreviewTheme): SnakeTheme {
   return {
     fill: theme.fill,
     banner_fill: theme.bannerFill,
