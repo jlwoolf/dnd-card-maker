@@ -1,5 +1,5 @@
 import axios from "axios";
-import type { Element, PreviewTheme } from "@src/schemas";
+import type { Element } from "@src/schemas";
 
 const API_BASE = "/api";
 

@@ -11,8 +11,8 @@ import {
   CssBaseline,
 } from "@mui/material";
 import { Card, Deck, DeckView, GlobalSnackbar } from "./components";
-import CloudDeckView from "./components/CloudDeckView";
-import CloudDeckListView from "./components/CloudDeckListView";
+import CloudDeckView from "./components/Cloud/CloudDeckView";
+import CloudDeckListView from "./components/Cloud/CloudDeckListView";
 import ErrorBoundary from "./components/ErrorBoundary";
 import NavBar from "./components/NavBar";
 import SaveDeckDialog from "./components/SaveDeckDialog";

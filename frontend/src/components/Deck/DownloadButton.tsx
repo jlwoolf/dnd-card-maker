@@ -1,8 +1,8 @@
 import { Download } from "@mui/icons-material";
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import Tooltip from "../Tooltip";
-import useExportCards from "../useExportCards";
-import { useSnackbar } from "../useSnackbar";
+import useExportCards from "@src/hooks/useExportCards";
+import { useSnackbar } from "@src/hooks/useSnackbar";
 import ControlButton, { type ControlButtonProps } from "./ControlButton";
 
 /**

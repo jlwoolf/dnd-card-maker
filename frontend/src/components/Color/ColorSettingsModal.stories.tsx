@@ -1,6 +1,6 @@
 import type { Meta, StoryObj } from "@storybook/react-vite";
 import ColorSettingsModal from "./ColorSettingsModal";
-import { useActiveCardStore } from "../stores/useActiveCardStore";
+import { useActiveCardStore } from "../../stores/useActiveCardStore";
 
 const meta = {
   component: ColorSettingsModal,

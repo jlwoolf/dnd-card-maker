@@ -9,8 +9,8 @@ import {
 } from "@mui/material";
 import RoundedButtonGroup from "@src/components/RoundedButtonGroup";
 import { deckApi } from "@src/services/api";
-import useExportCards from "@src/components/useExportCards";
-import { useSnackbar } from "@src/components/useSnackbar";
+import useExportCards from "@src/hooks/useExportCards";
+import { useSnackbar } from "@src/hooks/useSnackbar";
 import { themeToSnake } from "@src/utils/themeHelpers";
 
 interface SaveDeckDialogProps {

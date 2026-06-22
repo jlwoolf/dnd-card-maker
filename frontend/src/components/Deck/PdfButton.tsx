@@ -2,7 +2,7 @@ import { PictureAsPdf } from "@mui/icons-material";
 import { Box, CircularProgress } from "@mui/material";
 import { useExportModal } from "../ExportModal";
 import Tooltip from "../Tooltip";
-import useExportCards from "../useExportCards";
+import useExportCards from "@src/hooks/useExportCards";
 import ControlButton, { type ControlButtonProps } from "./ControlButton";
 
 /**

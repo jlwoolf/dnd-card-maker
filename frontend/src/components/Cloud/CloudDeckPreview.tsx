@@ -42,21 +42,23 @@ import {
 } from "@dnd-kit/sortable";
 import { deckApi, cardApi } from "@src/services/api";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
-import { themeFromSnake } from "@src/utils/themeHelpers";
-import useExportCards from "./useExportCards";
-import { useSnackbar } from "./useSnackbar";
-import CardHoverActions from "./CardHoverActions";
-import AddToDeckPopover from "./AddToDeckPopover";
-import { useSortable } from "@dnd-kit/sortable";
-import { CSS } from "@dnd-kit/utilities";
 
-interface CloudCard {
+interface PreviewCard {
   id: string;
   title: string | null;
   img_url: string;
-  elements: unknown[];
-  theme: Record<string, string>;
+  elements: Element[];
+  theme: PreviewTheme;
 }
+import type { Element, PreviewTheme } from "@src/schemas"
+import { themeFromSnake } from "@src/utils/themeHelpers";
+import useExportCards from "@src/hooks/useExportCards";
+import { useSnackbar } from "@src/hooks/useSnackbar";
+import CardHoverActions from "../CardHoverActions";
+import AddToDeckPopover from "../AddToDeckPopover";
+import { useSortable } from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
+
 
 interface CloudDeckPreviewProps {
   deckId: string;
@@ -74,7 +76,7 @@ function SortableCloudCard({
   onAddToDeck,
   onShare,
 }: {
-  card: CloudCard;
+  card: PreviewCard;
   saved: boolean;
   onEdit: () => void;
   onCopy: () => void;
@@ -207,7 +209,7 @@ export default function CloudDeckPreview({
   onClose,
   onCloseAll,
 }: CloudDeckPreviewProps) {
-  const [cards, setCards] = useState<CloudCard[]>([]);
+  const [cards, setCards] = useState<PreviewCard[]>([]);
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [deckTitle, setDeckTitle] = useState("");
   const [loading, setLoading] = useState(true);
@@ -277,10 +279,10 @@ export default function CloudDeckPreview({
     }
   };
 
-  const handleEdit = (card: CloudCard) => {
+  const handleEdit = (card: PreviewCard) => {
     loadCard({
       elements: card.elements,
-      theme: themeFromSnake(card.theme),
+      theme: card.theme,
       id: card.id,
       cloudCardId: card.id,
     });
@@ -288,8 +290,8 @@ export default function CloudDeckPreview({
     onCloseAll();
   };
 
-  const handleCopy = (card: CloudCard) => {
-    addCard(card.elements, card.img_url, themeFromSnake(card.theme));
+  const handleCopy = (card: PreviewCard) => {
+    addCard(card.elements, card.img_url, card.theme);
     showSnackbar("Card copied to local deck", "success");
   };
 
@@ -306,7 +308,7 @@ export default function CloudDeckPreview({
 
   const handleLoadAll = () => {
     for (const card of cards) {
-      addCard(card.elements, card.img_url, themeFromSnake(card.theme));
+      addCard(card.elements, card.img_url, card.theme);
     }
     showSnackbar(`Loaded ${cards.length} card(s) to local deck`, "success");
   };

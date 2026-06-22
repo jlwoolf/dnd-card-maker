@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import useExportCards from "../../components/useExportCards";
+import useExportCards from "../../hooks/useExportCards";
 
 describe("useExportCards", () => {
   beforeEach(() => {

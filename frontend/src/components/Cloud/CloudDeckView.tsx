@@ -26,10 +26,10 @@ import {
 import { cardApi, type CloudCardSummary } from "@src/services/api";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { themeFromSnake } from "@src/utils/themeHelpers";
-import useExportCards from "./useExportCards";
-import { useSnackbar } from "./useSnackbar";
-import CardHoverActions from "./CardHoverActions";
-import AddToDeckPopover from "./AddToDeckPopover";
+import useExportCards from "@src/hooks/useExportCards";
+import { useSnackbar } from "@src/hooks/useSnackbar";
+import CardHoverActions from "../CardHoverActions";
+import AddToDeckPopover from "../AddToDeckPopover";
 
 interface CloudDeckViewProps {
   onClose: () => void;

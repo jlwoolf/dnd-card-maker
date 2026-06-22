@@ -9,7 +9,7 @@ import {
   type PaperProps,
 } from "@mui/material";
 import { MuiColorInput, type MuiColorInputProps } from "mui-color-input";
-import { useCardPalettes } from "./useCardPalettes";
+import { useCardPalettes } from "@src/hooks/useCardPalettes";
 
 type PaletteGroups = Record<string, Record<string, string[]>>;
 

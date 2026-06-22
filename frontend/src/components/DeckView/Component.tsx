@@ -17,7 +17,7 @@ import {
 } from "@dnd-kit/sortable";
 import { Close } from "@mui/icons-material";
 import { Box, Fab, Typography } from "@mui/material";
-import useExportCards from "../useExportCards";
+import useExportCards from "@src/hooks/useExportCards";
 import SortableCard from "./SortableCard";
 
 /**

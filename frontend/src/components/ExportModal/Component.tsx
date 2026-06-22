@@ -9,8 +9,8 @@ import {
   Typography,
 } from "@mui/material";
 import RoundedButtonGroup from "../RoundedButtonGroup";
-import { useSnackbar } from "../useSnackbar";
-import useExportCards from "../useExportCards";
+import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/hooks/useExportCards";
 import { useExportModal } from "./ExportContext";
 
 /**

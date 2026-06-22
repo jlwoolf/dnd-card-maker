@@ -1,5 +1,5 @@
 import { Alert, Snackbar } from "@mui/material";
-import { useSnackbar } from "./useSnackbar";
+import { useSnackbar } from "@src/hooks/useSnackbar";
 
 /**
  * GlobalSnackbar provides a system-wide notification overlay using MUI Snackbar and Alert.

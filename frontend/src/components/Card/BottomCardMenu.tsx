@@ -7,9 +7,9 @@ import {
   TextFields,
 } from "@mui/icons-material";
 import { IconButton } from "@mui/material";
-import ColorSettingsModal from "../ColorSettingsModal";
+import ColorSettingsModal from "../Color/ColorSettingsModal";
 import Tooltip from "../Tooltip";
-import { useSnackbar } from "../useSnackbar";
+import { useSnackbar } from "@src/hooks/useSnackbar";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import CardMenu from "./CardMenu";
 

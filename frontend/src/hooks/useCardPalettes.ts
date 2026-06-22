@@ -2,7 +2,7 @@ import { useCallback } from "react";
 import { create } from "zustand";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { type Element } from "@src/schemas";
-import generatePalette from "./generatePalette";
+import generatePalette from "../components/Color/generatePalette";
 
 type PaletteMap = Record<string, Record<string, string[]>>;
 

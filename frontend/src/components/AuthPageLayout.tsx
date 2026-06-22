@@ -3,8 +3,6 @@ import { DESIGN_TOKENS } from "@src/theme/constants";
 import type { ReactNode } from "react";
 
 interface AuthPageLayoutProps {
-  /** Optional title displayed above the content area. */
-  title?: string;
   /** The form or status content to render inside the card. */
   children: ReactNode;
   /** Optional form submission handler (passes to the inner Box as `component="form"`). */
@@ -20,7 +18,6 @@ interface AuthPageLayoutProps {
   This component DRYs that up so only the content changes per page.
 */
 export default function AuthPageLayout({
-  title,
   children,
   onSubmit,
   dataTestId,
