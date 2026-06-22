@@ -9,6 +9,7 @@ from slowapi.util import get_remote_address
 from app.config import settings
 from app.database import init_db
 from app.routes import (
+    admin_router,
     auth_router,
     cards_router,
     decks_router,
@@ -51,6 +52,7 @@ app.include_router(decks_share_router)
 
 if settings.dev_mail_enabled:
     app.include_router(dev_router)
+    app.include_router(admin_router)
 
 
 @app.get("/api/health")

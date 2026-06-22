@@ -21,6 +21,7 @@ import SaveDeckDialog from "./components/SaveDeckDialog";
 import { ExportContextProvider } from "./components/ExportModal";
 import ExportModal from "./components/ExportModal/Component";
 import { useResponsiveZoom } from "./hooks/useResponsiveZoom";
+import AdminPage from "./pages/AdminPage";
 import DevMailPage from "./pages/DevMailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import LoginPage from "./pages/LoginPage";
@@ -158,6 +159,9 @@ function AppContent() {
         <Route path="/share/:shareSlug" element={<SharedCardPage />} />
         {!import.meta.env.PROD && (
           <Route path="/mail" element={<DevMailPage />} />
+        )}
+        {!import.meta.env.PROD && (
+          <Route path="/admin" element={<AdminPage />} />
         )}
       </Routes>
       {isCloudDeckOpen && (

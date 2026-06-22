@@ -234,3 +234,16 @@ export const devMailApi = {
   get: (id: string) => api.get<MailFull>(`/dev/mail/${id}`),
   clear: () => api.delete("/dev/mail"),
 };
+
+export interface AdminTableRows {
+  rows: Record<string, unknown>[];
+  total: number;
+  offset: number;
+  limit: number;
+}
+
+export const adminApi = {
+  getTables: () => api.get<{ tables: string[] }>("/admin/tables"),
+  getRows: (table: string, offset: number, limit: number) =>
+    api.get<AdminTableRows>("/admin/" + table, { params: { offset, limit } }),
+};
