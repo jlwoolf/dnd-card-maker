@@ -3,7 +3,6 @@ import CardButtons from "./CardButtons";
 import EditCard from "./EditCard";
 import { ElementRefProvider } from "./ElementRefContext";
 import { PreviewCard } from "./Preview";
-import CloudMenu from "../CloudMenu";
 
 /**
  * The main Card orchestrator component. 
@@ -33,7 +32,6 @@ export default function Card() {
         <EditCard />
         <PreviewCard />
       </Box>
-      <CloudMenu />
       <CardButtons />
     </ElementRefProvider>
   );

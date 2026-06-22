@@ -52,6 +52,7 @@ def list_cards(
         CardSummary(
             id=c.id,
             title=c.title,
+            img_url=c.img_url,
             created_at=c.created_at,
             updated_at=c.updated_at,
             share_slug=c.share_slug,

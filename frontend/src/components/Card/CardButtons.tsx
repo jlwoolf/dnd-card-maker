@@ -1,8 +1,10 @@
 import { useCallback } from "react";
-import { Add, Save } from "@mui/icons-material";
+import { Add, CloudUpload, Save } from "@mui/icons-material";
 import { Button } from "@mui/material";
+import { cardApi } from "@src/services/api";
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
+import { useAuthStore } from "@src/stores/useAuthStore";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
@@ -17,6 +19,7 @@ import { useSharedElement } from "./ElementRefContext";
 export default function CardButtons() {
   const { element } = useSharedElement();
   const { elements, cardId, theme: previewTheme } = useActiveCardStore();
+  const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   const validCard = useExportCards(
     (state) => !!state.cards.find((card) => card.id === cardId),
@@ -24,11 +27,6 @@ export default function CardButtons() {
   const { addCard, updateCard } = useExportCards();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
-  /**
-   * Captures the current preview DOM element as a PNG data URL.
-   * 
-   * @returns A promise resolving to the image data URL.
-   */
   const getImageUrl = useCallback(
     async () =>
       ImageProcessor.captureElement(element, {
@@ -39,10 +37,6 @@ export default function CardButtons() {
     [element, showSnackbar],
   );
 
-  /**
-   * Saves changes to an existing card in the deck. 
-   * Triggers image re-generation to ensure the deck preview is up-to-date.
-   */
   const handleSave = useCallback(async () => {
     if (cardId) {
       const dataUrl = await getImageUrl();
@@ -53,9 +47,6 @@ export default function CardButtons() {
     }
   }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
 
-  /**
-   * Adds the current editor state as a new unique card entry in the deck.
-   */
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (dataUrl) {
@@ -63,6 +54,28 @@ export default function CardButtons() {
       showSnackbar("Card added to deck!", "success");
     }
   }, [addCard, elements, getImageUrl, previewTheme, showSnackbar]);
+
+  const handleSaveCloud = useCallback(async () => {
+    const dataUrl = await getImageUrl();
+    if (!dataUrl) return;
+    try {
+      await cardApi.create({
+        elements: elements as unknown[],
+        img_url: dataUrl,
+        theme: {
+          fill: previewTheme.fill,
+          banner_fill: previewTheme.bannerFill,
+          box_fill: previewTheme.boxFill,
+          stroke: previewTheme.stroke,
+          banner_text: previewTheme.bannerText,
+          box_text: previewTheme.boxText,
+        },
+      });
+      showSnackbar("Saved to cloud!", "success");
+    } catch {
+      showSnackbar("Failed to save to cloud", "error");
+    }
+  }, [elements, getImageUrl, previewTheme, showSnackbar]);
 
   return (
     <RoundedButtonGroup
@@ -84,6 +97,18 @@ export default function CardButtons() {
             aria-label="Save changes to current card"
           >
             <Save />
+          </Button>
+        </Tooltip>
+      )}
+      {isAuthenticated && (
+        <Tooltip title="Save to cloud">
+          <Button
+            onClick={handleSaveCloud}
+            sx={{ padding: "8px !important" }}
+            data-testid="save-cloud-btn"
+            aria-label="Save current card to cloud"
+          >
+            <CloudUpload />
           </Button>
         </Tooltip>
       )}

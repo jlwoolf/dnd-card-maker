@@ -83,6 +83,7 @@ export default api;
 export interface CloudCardSummary {
   id: string;
   title: string | null;
+  img_url: string;
   created_at: string;
   updated_at: string;
   share_slug: string | null;

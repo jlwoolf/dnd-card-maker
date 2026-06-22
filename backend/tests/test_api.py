@@ -268,7 +268,6 @@ class TestCards:
         assert isinstance(cards, list)
         assert len(cards) >= 1
         assert cards[0]["title"] == "Card 1"
-        assert "img_url" not in cards[0]  # Summary doesn't include full data
 
     def test_list_cards_unauthorized(self, client):
         response = client.get("/api/cards")

@@ -30,6 +30,7 @@ class CardUpdate(BaseModel):
 class CardSummary(BaseModel):
     id: str
     title: str | None
+    img_url: str
     created_at: datetime
     updated_at: datetime
     share_slug: str | None

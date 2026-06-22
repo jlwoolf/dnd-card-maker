@@ -14,6 +14,7 @@ import {
   Typography,
 } from "@mui/material";
 import { Card, Deck, DeckView, GlobalSnackbar } from "./components";
+import CloudDeckView from "./components/CloudDeckView";
 import { ExportContextProvider } from "./components/ExportModal";
 import ExportModal from "./components/ExportModal/Component";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -49,7 +50,7 @@ function EditorPage() {
   );
 }
 
-function NavBar() {
+function NavBar({ onOpenCloudDeck }: { onOpenCloudDeck: () => void }) {
   const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
@@ -65,6 +66,14 @@ function NavBar() {
         </Typography>
         {isAuthenticated ? (
           <>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={onOpenCloudDeck}
+              sx={{ textTransform: "none", mr: 1 }}
+            >
+              My Cloud Cards
+            </Button>
             <Typography variant="caption" sx={{ mr: 1, opacity: 0.8 }}>
               {user?.email}
             </Typography>
@@ -97,6 +106,7 @@ function NavBar() {
 
 function AppContent() {
   const { checkAuth, isLoading } = useAuthStore();
+  const [isCloudDeckOpen, setIsCloudDeckOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -117,7 +127,7 @@ function AppContent() {
 
   return (
     <ExportContextProvider initialValue={false}>
-      <NavBar />
+      <NavBar onOpenCloudDeck={() => setIsCloudDeckOpen(true)} />
       <Routes>
         <Route path="/" element={<EditorPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -130,6 +140,9 @@ function AppContent() {
           <Route path="/mail" element={<DevMailPage />} />
         )}
       </Routes>
+      {isCloudDeckOpen && (
+        <CloudDeckView onClose={() => setIsCloudDeckOpen(false)} />
+      )}
       <GlobalSnackbar />
       <ExportModal />
     </ExportContextProvider>
