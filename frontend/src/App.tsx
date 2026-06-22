@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   BrowserRouter,
   Link as RouterLink,
+  Navigate,
   Route,
   Routes,
 } from "react-router-dom";
@@ -55,6 +56,12 @@ function EditorPage() {
       )}
     </Box>
   );
+}
+
+function GuestRoute({ children }: { children: React.ReactNode }) {
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
+  if (isAuthenticated) return <Navigate to="/" replace />;
+  return <>{children}</>;
 }
 
 function NavBar({ onOpenCloudDeck, onOpenDecks }: { onOpenCloudDeck: () => void; onOpenDecks: () => void }) {
@@ -151,11 +158,11 @@ function AppContent() {
       />
       <Routes>
         <Route path="/" element={<EditorPage />} />
-        <Route path="/login" element={<LoginPage />} />
-        <Route path="/register" element={<RegisterPage />} />
-        <Route path="/verify/:token" element={<VerifyPage />} />
-        <Route path="/forgot-password" element={<ForgotPasswordPage />} />
-        <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
+        <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
+        <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
+        <Route path="/verify/:token" element={<GuestRoute><VerifyPage /></GuestRoute>} />
+        <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
+        <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
         <Route path="/share/:shareSlug" element={<SharedCardPage />} />
         {!import.meta.env.PROD && (
           <Route path="/mail" element={<DevMailPage />} />
