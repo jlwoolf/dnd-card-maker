@@ -8,7 +8,25 @@ from app.config import settings
 logger = logging.getLogger(__name__)
 
 
-def _send_email(to_email: str, subject: str, html_body: str) -> None:
+def _store_email(to_email: str, subject: str, html_body: str) -> None:
+    from app.database import SessionLocal
+    from app.models.email import SentEmail
+
+    db = SessionLocal()
+    try:
+        email = SentEmail(to_email=to_email, subject=subject, html_body=html_body)
+        db.add(email)
+        db.commit()
+    except Exception as e:
+        logger.error("Failed to store email in DB: %s", e)
+    finally:
+        db.close()
+
+
+def _try_send_smtp(to_email: str, subject: str, html_body: str) -> None:
+    if not settings.smtp_host or settings.smtp_host == "localhost":
+        return
+
     msg = MIMEMultipart("alternative")
     msg["Subject"] = subject
     msg["From"] = settings.smtp_from
@@ -23,7 +41,11 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
             server.sendmail(settings.smtp_from, to_email, msg.as_string())
     except Exception as e:
         logger.error("Failed to send email to %s: %s", to_email, e)
-        raise
+
+
+def _send_email(to_email: str, subject: str, html_body: str) -> None:
+    _store_email(to_email, subject, html_body)
+    _try_send_smtp(to_email, subject, html_body)
 
 
 def send_verification_email(email: str, token: str) -> None:

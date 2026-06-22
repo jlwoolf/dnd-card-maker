@@ -22,6 +22,7 @@ def init_db() -> None:
     os.makedirs(os.path.dirname(settings.sqlite_path) or ".", exist_ok=True)
     from app.models.user import User  # noqa: F401
     from app.models.card import Card  # noqa: F401
+    from app.models.email import SentEmail  # noqa: F401
     Base.metadata.create_all(bind=engine)
 
 

@@ -16,6 +16,8 @@ class Settings(BaseSettings):
 
     frontend_url: str = "http://localhost:5173"
 
+    dev_mail_enabled: bool = True
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 

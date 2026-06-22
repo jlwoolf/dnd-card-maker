@@ -154,3 +154,20 @@ export const cardApi = {
 export const sharedApi = {
   get: (slug: string) => api.get<SharedCard>(`/shared/${slug}`),
 };
+
+export interface MailSummary {
+  id: string;
+  to_email: string;
+  subject: string;
+  sent_at: string;
+}
+
+export interface MailFull extends MailSummary {
+  html_body: string;
+}
+
+export const devMailApi = {
+  list: () => api.get<MailSummary[]>("/dev/mail"),
+  get: (id: string) => api.get<MailFull>(`/dev/mail/${id}`),
+  clear: () => api.delete("/dev/mail"),
+};

@@ -22,6 +22,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SharedCardPage from "./pages/SharedCardPage";
 import VerifyPage from "./pages/VerifyPage";
+import DevMailPage from "./pages/DevMailPage";
 import { useAuthStore } from "./stores/useAuthStore";
 
 function EditorPage() {
@@ -124,6 +125,9 @@ function AppContent() {
         <Route path="/forgot-password" element={<ForgotPasswordPage />} />
         <Route path="/reset-password/:token" element={<ResetPasswordPage />} />
         <Route path="/share/:shareSlug" element={<SharedCardPage />} />
+        {!import.meta.env.PROD && (
+          <Route path="/mail" element={<DevMailPage />} />
+        )}
       </Routes>
       <GlobalSnackbar />
       <ExportModal />
