@@ -1,0 +1,29 @@
+services:
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Containerfile
+    container_name: dnd-card-maker
+    ports:
+      - "8001:80"
+    restart: always
+    environment:
+      - NODE_ENV=production
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    container_name: dnd-card-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/app/data
+    env_file:
+      - ./backend/.env
+    restart: always
+
+volumes:
+  db_data:

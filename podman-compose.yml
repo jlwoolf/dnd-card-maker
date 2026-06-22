@@ -2,28 +2,33 @@ services:
   frontend:
     build:
       context: ./frontend
-      dockerfile: Containerfile
-    container_name: dnd-card-maker
+      dockerfile: Containerfile.dev
     ports:
-      - "8001:80"
-    restart: always
+      - "5173:5173"
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
     environment:
-      - NODE_ENV=production
+      - VITE_API_TARGET=http://backend:8000
     depends_on:
       - backend
+    restart: unless-stopped
 
   backend:
     build:
       context: ./backend
-      dockerfile: Containerfile
-    container_name: dnd-card-backend
+      dockerfile: Containerfile.dev
     ports:
       - "8000:8000"
     volumes:
+      - ./backend:/app
+      - /app/.venv
       - db_data:/app/data
     env_file:
       - ./backend/.env
-    restart: always
+    environment:
+      - FRONTEND_URL=http://localhost:5173
+    restart: unless-stopped
 
 volumes:
   db_data:
