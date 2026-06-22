@@ -10,6 +10,7 @@ import {
   Box,
   Button,
   CircularProgress,
+  CssBaseline,
   Toolbar,
   Typography,
 } from "@mui/material";
@@ -17,17 +18,19 @@ import { Card, Deck, DeckView, GlobalSnackbar } from "./components";
 import CloudDeckView from "./components/CloudDeckView";
 import { ExportContextProvider } from "./components/ExportModal";
 import ExportModal from "./components/ExportModal/Component";
+import { useResponsiveZoom } from "./hooks/useResponsiveZoom";
+import DevMailPage from "./pages/DevMailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SharedCardPage from "./pages/SharedCardPage";
 import VerifyPage from "./pages/VerifyPage";
-import DevMailPage from "./pages/DevMailPage";
 import { useAuthStore } from "./stores/useAuthStore";
 
 function EditorPage() {
   const [isDeckViewOpen, setIsDeckViewOpen] = useState(false);
+  const { isColumn } = useResponsiveZoom();
 
   return (
     <Box
@@ -35,11 +38,12 @@ function EditorPage() {
       display="flex"
       width="100vw"
       sx={{
-        height: { xs: undefined, md: "calc(100vh - 48px)" },
-        overflow: "hidden",
+        height: { xs: undefined, md: isColumn ? undefined : "calc(100vh - 48px)" },
+        overflow: { xs: "auto", md: isColumn ? "auto" : "hidden" },
+        py: { xs: 1, md: 2.5 },
       }}
       justifyContent="center"
-      alignItems="center"
+      alignItems={isColumn ? "flex-start" : "center"}
     >
       <Card />
       <Deck onOpenDeckView={() => setIsDeckViewOpen(true)} />
@@ -127,6 +131,7 @@ function AppContent() {
 
   return (
     <ExportContextProvider initialValue={false}>
+      <CssBaseline />
       <NavBar onOpenCloudDeck={() => setIsCloudDeckOpen(true)} />
       <Routes>
         <Route path="/" element={<EditorPage />} />

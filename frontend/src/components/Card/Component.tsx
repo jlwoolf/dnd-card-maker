@@ -1,4 +1,5 @@
 import { Box } from "@mui/material";
+import { useResponsiveZoom } from "@src/hooks/useResponsiveZoom";
 import CardButtons from "./CardButtons";
 import EditCard from "./EditCard";
 import { ElementRefProvider } from "./ElementRefContext";
@@ -11,6 +12,8 @@ import { PreviewCard } from "./Preview";
  * to share DOM references required for image capture and portal-based menu positioning.
  */
 export default function Card() {
+  const { zoom, isColumn } = useResponsiveZoom();
+
   return (
     <ElementRefProvider>
       <Box
@@ -22,11 +25,10 @@ export default function Card() {
         display="flex"
         justifyContent="center"
         sx={(theme) => ({
-          flexDirection: { xs: "column", md: "row" },
+          flexDirection: isColumn ? "column" : { xs: "column", md: "row" },
           gap: theme.spacing(1),
-          alignItems: { xs: "center", md: "flex-start" },
-          scale: { xs: 0.8, md: 1 },
-          transformOrigin: "center center",
+          alignItems: isColumn ? "center" : { xs: "center", md: "flex-start" },
+          zoom,
         })}
       >
         <EditCard />

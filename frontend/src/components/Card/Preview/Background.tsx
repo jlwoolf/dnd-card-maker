@@ -29,7 +29,7 @@ interface BackgroundProps {
 
 /**
  * Background renders the high-fidelity SVG container for the preview card.
- * It uses the active preview theme to render a stylized card frame with 
+ * It uses the active preview theme to render a stylized card frame with
  * customizable fill and stroke.
  */
 const Background = forwardRef<HTMLDivElement, BackgroundProps>(
@@ -78,8 +78,8 @@ const Background = forwardRef<HTMLDivElement, BackgroundProps>(
             flexDirection: "column",
             alignItems: "center",
             flexGrow: 1,
-            width: "calc(100% - 32px)",
-            height: "calc(100% - 32px)",
+            width: "100%",
+            height: "100%",
             padding: "16px",
             overflowY: "visible",
           }}

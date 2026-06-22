@@ -9,6 +9,7 @@ import {
 } from "@mui/icons-material";
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
+import { useResponsiveZoom } from "@src/hooks/useResponsiveZoom";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
@@ -48,7 +49,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
     setActiveIndex((prev) => (prev - 1 + cards.length) % cards.length);
 
   const theme = useTheme();
-  const isDesktop = useMediaQuery(theme.breakpoints.up("md"));
+  const { isColumn, zoom } = useResponsiveZoom();
+  const isDesktopLayout = useMediaQuery(theme.breakpoints.up("md"));
+  const isDesktop = isDesktopLayout && !isColumn;
 
   return (
     <Box
@@ -58,8 +61,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
       sx={{
         position: "fixed",
         bottom: 60,
-        left: { xs: 20, md: "unset" },
-        right: { xs: "unset", md: 40 },
+        left: 20,
         zIndex: 500,
         width: CARD_WIDTH,
         height: CARD_HEIGHT,
@@ -87,15 +89,15 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
             animate={isActive && !isCollapsed ? "active" : "stacked"}
             variants={{
               stacked: {
-                x: 0 + offsetFromActive * 2 * (isDesktop ? 1 : -1),
+                x: offsetFromActive * 2,
                 y: 0 - offsetFromActive * 2,
                 scale: 0.9,
                 zIndex: zIndex,
               },
               active: {
-                x: isDesktop ? -120 : 60,
-                y: isDesktop ? -250 : -200,
-                scale: 2.2,
+                x: isColumn ? 20 : 60 * zoom,
+                y: isColumn ? 0 : -202 * zoom,
+                scale: 2.2 * zoom,
                 rotate: 0,
                 zIndex: 100,
               },
@@ -160,19 +162,27 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
         sx={{
           position: { xs: "fixed", md: "absolute" },
           bottom: { xs: 20, md: -40 },
-          left: { xs: 0, md: "unset" },
-          right: { xs: "unset", md: -20 },
+          left: { xs: 0, md: 0 },
           width: { xs: "100%", md: "auto" },
           height: "40px",
           display: "flex",
-          justifyContent: { xs: "center", md: "flex-end" },
+          justifyContent: { xs: "center", md: "flex-start" },
           alignItems: "center",
           zIndex: 600,
           pointerEvents: "none",
           gap: { xs: "unset", md: "8px" },
         }}
       >
-        {!isDesktop && (
+        {isDesktopLayout && (
+          <ControlButton
+            onClick={() => setIsCollapsed(!isCollapsed)}
+            label={isCollapsed ? "Expand deck controls" : "Collapse deck controls"}
+            icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
+            data-testid="collapse-deck-btn-desktop"
+          />
+        )}
+
+        {!isDesktopLayout && (
           <Box
             sx={{
               position: "absolute",
@@ -196,59 +206,34 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
               initial={{
                 opacity: 0,
                 scale: 0.8,
-                x: isDesktop ? 0 : "-50%",
-                y: 10,
+                x: isDesktopLayout ? -20 : "-50%",
+                y: isDesktopLayout ? 0 : 10,
               }}
               animate={{
                 opacity: 1,
                 scale: 1,
-                x: isDesktop ? 0 : "-50%",
+                x: isDesktopLayout ? 0 : "-50%",
                 y: 0,
               }}
               exit={{
                 opacity: 0,
                 scale: 0.8,
-                x: isDesktop ? 0 : "-50%",
-                y: 10,
+                x: isDesktopLayout ? -20 : "-50%",
+                y: isDesktopLayout ? 0 : 10,
               }}
               style={{
                 display: "flex",
-                flexWrap: isDesktop ? "nowrap" : "wrap",
+                flexWrap: isDesktopLayout ? "nowrap" : "wrap",
                 justifyContent: "center",
-                maxWidth: isDesktop ? "none" : "190px",
-                gap: isDesktop ? "12px" : "8px",
+                maxWidth: isDesktopLayout ? "none" : "190px",
+                gap: isDesktopLayout ? "12px" : "8px",
                 alignItems: "center",
                 pointerEvents: "auto",
-                position: isDesktop ? "static" : "absolute",
+                position: isDesktopLayout ? "static" : "absolute",
                 bottom: 0,
-                left: isDesktop ? "auto" : "50%",
+                left: isDesktopLayout ? "auto" : "50%",
               }}
             >
-              <Tooltip title="View Grid">
-                <ControlButton
-                  onClick={onOpenDeckView}
-                  label="View card grid"
-                  icon={<GridView />}
-                  data-testid="view-grid-btn"
-                />
-              </Tooltip>
-
-              <DownloadButton data-testid="download-deck-btn" />
-
-              <Tooltip title="Upload File">
-                <UploadButton
-                  onUpload={(data) => {
-                    loadFile(data);
-                    showSnackbar("Deck loaded successfully", "success");
-                  }}
-                  icon={<Upload />}
-                  data-testid="upload-deck-btn"
-                  aria-label="Upload deck JSON file"
-                />
-              </Tooltip>
-
-              <PdfButton data-testid="export-pdf-btn" />
-
               <Tooltip title="Previous Card">
                 <ControlButton
                   onClick={prevCard}
@@ -266,18 +251,34 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                   data-testid="next-card-btn"
                 />
               </Tooltip>
+
+              <PdfButton data-testid="export-pdf-btn" />
+
+              <Tooltip title="Upload File">
+                <UploadButton
+                  onUpload={(data) => {
+                    loadFile(data);
+                    showSnackbar("Deck loaded successfully", "success");
+                  }}
+                  icon={<Upload />}
+                  data-testid="upload-deck-btn"
+                  aria-label="Upload deck JSON file"
+                />
+              </Tooltip>
+
+              <DownloadButton data-testid="download-deck-btn" />
+
+              <Tooltip title="View Grid">
+                <ControlButton
+                  onClick={onOpenDeckView}
+                  label="View card grid"
+                  icon={<GridView />}
+                  data-testid="view-grid-btn"
+                />
+              </Tooltip>
             </motion.div>
           )}
         </AnimatePresence>
-
-        {isDesktop && (
-          <ControlButton
-            onClick={() => setIsCollapsed(!isCollapsed)}
-            label={isCollapsed ? "Expand deck controls" : "Collapse deck controls"}
-            icon={isCollapsed ? <ExpandLess /> : <ExpandMore />}
-            data-testid="collapse-deck-btn-desktop"
-          />
-        )}
       </Box>
     </Box>
   );

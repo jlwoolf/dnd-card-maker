@@ -35,6 +35,7 @@ export default function PreviewCard() {
     <Box
       width="20%"
       position="relative"
+      marginTop="40px"
       minWidth="400px"
       data-testid="preview-card-pane"
       aria-label="Card visual preview"

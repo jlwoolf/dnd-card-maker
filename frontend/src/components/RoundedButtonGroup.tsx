@@ -6,20 +6,26 @@ import {
 } from "@mui/material";
 import { mergeSx } from "../utils/mergeSx";
 
+interface RoundedButtonGroupProps extends ButtonGroupProps {
+  vertical?: boolean;
+}
+
 /**
  * RoundedButtonGroup provides a specialized MUI ButtonGroup with distinct 
  * visual styling, including fully rounded corners and responsive orientation.
- * It automatically switches to vertical mode on mobile devices.
+ * When `vertical` is set, forces vertical orientation and mobile sizing.
  * 
- * @param props - Standard MUI ButtonGroupProps.
+ * @param props - Extended ButtonGroupProps with optional vertical flag.
  */
 export default function RoundedButtonGroup({
   sx,
   children,
+  vertical,
   ...props
-}: ButtonGroupProps) {
+}: RoundedButtonGroupProps) {
   const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const widthMobile = useMediaQuery(theme.breakpoints.down("md"));
+  const isMobile = vertical || widthMobile;
   const size = isMobile ? "40px" : "80px";
 
   /**

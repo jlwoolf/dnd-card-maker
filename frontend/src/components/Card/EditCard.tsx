@@ -24,7 +24,6 @@ export default function EditCard() {
       position="relative"
       flexDirection="column"
       width="20%"
-      marginTop="-40px"
       minWidth={400}
       data-testid="edit-card-pane"
       aria-label="Edit card contents"
