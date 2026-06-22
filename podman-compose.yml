@@ -7,6 +7,23 @@ services:
     ports:
       - "8001:80"
     restart: always
-    # Environment variables can be passed here if your build script supports them
     environment:
       - NODE_ENV=production
+    depends_on:
+      - backend
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Containerfile
+    container_name: dnd-card-backend
+    ports:
+      - "8000:8000"
+    volumes:
+      - db_data:/app/data
+    env_file:
+      - ./backend/.env
+    restart: always
+
+volumes:
+  db_data:
