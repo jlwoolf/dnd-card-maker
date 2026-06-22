@@ -3,22 +3,16 @@ from sqlalchemy.orm import Session
 
 from app.constants import DEV_MAIL_LIST_LIMIT
 from app.database import get_db
-from app.dependencies import get_current_user
 from app.models.email import SentEmail
-from app.models.user import User
 
 router = APIRouter(prefix="/api/dev", tags=["dev"])
 
 
 @router.get("/mail")
 def list_mail(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """List the 50 most recently sent emails (dev/testing endpoint).
-
-    Requires authentication. Returns 200 with email summaries (to, subject, sent_at).
-    """
+    """List the 50 most recently sent emails (dev/testing endpoint — no auth)."""
     emails = db.query(SentEmail).order_by(SentEmail.sent_at.desc()).limit(DEV_MAIL_LIST_LIMIT).all()
     return [
         {
@@ -34,14 +28,9 @@ def list_mail(
 @router.get("/mail/{email_id}")
 def get_mail(
     email_id: str,
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Retrieve a single sent email by ID, including its HTML body (dev/testing).
-
-    Requires authentication. Returns 200 on success or 404 if the email is
-    not found.
-    """
+    """Retrieve a single sent email by ID, including its HTML body (dev/testing — no auth)."""
     email = db.query(SentEmail).filter(SentEmail.id == email_id).first()
     if not email:
         raise HTTPException(
@@ -59,12 +48,8 @@ def get_mail(
 
 @router.delete("/mail", status_code=status.HTTP_204_NO_CONTENT)
 def clear_mail(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Delete all stored sent emails (dev/testing endpoint).
-
-    Requires authentication. Returns 204 on success.
-    """
+    """Delete all stored sent emails (dev/testing endpoint — no auth)."""
     db.query(SentEmail).delete()
     db.commit()

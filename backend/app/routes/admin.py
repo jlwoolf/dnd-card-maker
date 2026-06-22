@@ -5,7 +5,6 @@ from sqlalchemy.orm import Session
 
 from app.constants import ADMIN_DEFAULT_LIMIT
 from app.database import get_db
-from app.dependencies import get_current_user
 from app.models.card import Card
 from app.models.deck import Deck, DeckCard
 from app.models.email import SentEmail
@@ -34,7 +33,6 @@ def _serialize(model) -> dict[str, object]:
 
 @router.get("/tables")
 def list_tables(
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     return {"tables": list(TABLES.keys())}
@@ -45,7 +43,6 @@ def get_table_rows(
     table_name: str,
     offset: int = Query(0, ge=0),
     limit: int = Query(ADMIN_DEFAULT_LIMIT, ge=1, le=1000),
-    current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
     model = TABLES.get(table_name)
