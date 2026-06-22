@@ -199,7 +199,7 @@ export const deckApi = {
     api.post<DeckResponse>("/decks", data),
   save: (data: {
     title: string;
-    cards: Array<{ elements: Element[]; img_url: string; theme: SnakeTheme }>;
+    cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
   }) => api.post<DeckResponse>("/decks/save", data),
   update: (id: string, data: { title?: string; card_ids?: string[] }) =>
     api.put<DeckResponse>(`/decks/${id}`, data),
@@ -240,6 +240,23 @@ export interface AdminTableRows {
   offset: number;
   limit: number;
 }
+
+export const userApi = {
+  changePassword: (currentPassword: string, newPassword: string) =>
+    api.post<{ message: string }>("/users/me/change-password", {
+      current_password: currentPassword,
+      new_password: newPassword,
+    }),
+  updateEmail: (newEmail: string, password: string) =>
+    api.put<{ message: string }>("/users/me/email", {
+      new_email: newEmail,
+      password,
+    }),
+  deleteAccount: (password: string) =>
+    api.delete<{ message: string }>("/users/me", {
+      data: { password },
+    }),
+};
 
 export const adminApi = {
   getTables: () => api.get<{ tables: string[] }>("/admin/tables"),

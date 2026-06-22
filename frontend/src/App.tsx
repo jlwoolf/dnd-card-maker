@@ -25,6 +25,7 @@ import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
+import SettingsPage from "./pages/SettingsPage";
 import SharedCardPage from "./pages/SharedCardPage";
 import VerifyPage from "./pages/VerifyPage";
 import { useAuthStore } from "./stores/useAuthStore";
@@ -94,6 +95,7 @@ function AppContent() {
       />
       <Routes>
         <Route path="/" element={<EditorPage />} />
+        <Route path="/settings" element={<SettingsPage />} />
         <Route path="/login" element={<GuestRoute><LoginPage /></GuestRoute>} />
         <Route path="/register" element={<GuestRoute><RegisterPage /></GuestRoute>} />
         <Route path="/verify/:token" element={<GuestRoute><VerifyPage /></GuestRoute>} />

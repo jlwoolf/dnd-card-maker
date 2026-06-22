@@ -16,6 +16,7 @@ from app.routes import (
     decks_share_router,
     dev_router,
     share_router,
+    users_router,
 )
 
 
@@ -47,6 +48,7 @@ app.include_router(cards_router)
 app.include_router(share_router)
 app.include_router(decks_router)
 app.include_router(decks_share_router)
+app.include_router(users_router)
 
 if settings.dev_mail_enabled:
     app.include_router(dev_router)

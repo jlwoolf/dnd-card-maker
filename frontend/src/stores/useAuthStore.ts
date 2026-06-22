@@ -9,6 +9,7 @@ interface AuthState {
   register: (email: string, password: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
+  setUser: (user: { id: string; email: string }) => void;
 }
 
 function decodeTokenPayload(token: string): { sub: string; email: string; exp: number } | null {
@@ -85,5 +86,9 @@ export const useAuthStore = create<AuthState>((set) => ({
       localStorage.removeItem("refresh_token");
       set({ isLoading: false });
     }
+  },
+
+  setUser: (user: { id: string; email: string }) => {
+    set({ user });
   },
 }));

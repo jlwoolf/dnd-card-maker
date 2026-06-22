@@ -19,6 +19,20 @@ class ResetPasswordRequest(BaseModel):
     password: str = Field(min_length=8, max_length=128)
 
 
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str = Field(min_length=8, max_length=128)
+
+
+class UpdateEmailRequest(BaseModel):
+    new_email: EmailStr
+    password: str
+
+
+class DeleteAccountRequest(BaseModel):
+    password: str
+
+
 class UserResponse(BaseModel):
     id: str
     email: str

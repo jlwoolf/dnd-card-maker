@@ -26,9 +26,12 @@ from app.schemas.deck import (  # noqa: F401
     SharedDeckResponse,
 )
 from app.schemas.user import (  # noqa: F401
+    ChangePasswordRequest,
+    DeleteAccountRequest,
     ForgotPasswordRequest,
     LoginRequest,
     RegisterRequest,
     ResetPasswordRequest,
+    UpdateEmailRequest,
     UserResponse,
 )
