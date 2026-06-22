@@ -35,6 +35,7 @@ function EditorPage() {
       width="100vw"
       sx={{
         height: { xs: undefined, md: "calc(100vh - 48px)" },
+        overflow: "hidden",
       }}
       justifyContent="center"
       alignItems="center"
@@ -52,7 +53,7 @@ function NavBar() {
   const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
-    <AppBar position="static" elevation={0} sx={{ bgcolor: "#48534b", minHeight: 48 }}>
+    <AppBar position="sticky" elevation={0} sx={{ bgcolor: "#48534b", minHeight: 48, zIndex: 1100 }}>
       <Toolbar variant="dense" sx={{ minHeight: 48, px: 2 }}>
         <Typography
           variant="subtitle1"

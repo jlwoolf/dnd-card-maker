@@ -35,7 +35,7 @@ export default function VerifyPage() {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="calc(100vh - 64px)"
+      minHeight="calc(100vh - 48px)"
     >
       <Box sx={{ width: 360, p: 3, textAlign: "center" }}>
         {status === "loading" && <CircularProgress />}

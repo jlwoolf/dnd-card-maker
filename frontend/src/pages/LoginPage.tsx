@@ -42,7 +42,7 @@ export default function LoginPage() {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="calc(100vh - 64px)"
+      minHeight="calc(100vh - 48px)"
     >
       <Box
         component="form"

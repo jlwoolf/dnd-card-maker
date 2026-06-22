@@ -60,7 +60,7 @@ export default function SharedCardPage() {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="calc(100vh - 64px)"
+        minHeight="calc(100vh - 48px)"
       >
         <CircularProgress />
       </Box>
@@ -73,7 +73,7 @@ export default function SharedCardPage() {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="calc(100vh - 64px)"
+        minHeight="calc(100vh - 48px)"
       >
         <Box sx={{ width: 360, p: 3, textAlign: "center" }}>
           <Alert severity="error" sx={{ mb: 2 }}>
@@ -94,7 +94,7 @@ export default function SharedCardPage() {
       display="flex"
       flexDirection="column"
       alignItems="center"
-      minHeight="calc(100vh - 64px)"
+      minHeight="calc(100vh - 48px)"
       p={3}
     >
       {card.title && (

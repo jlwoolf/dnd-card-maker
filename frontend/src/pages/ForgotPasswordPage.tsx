@@ -39,7 +39,7 @@ export default function ForgotPasswordPage() {
         display="flex"
         justifyContent="center"
         alignItems="center"
-        minHeight="calc(100vh - 64px)"
+        minHeight="calc(100vh - 48px)"
       >
         <Box sx={{ width: 360, p: 3, textAlign: "center" }}>
           <Alert severity="success" sx={{ mb: 2 }}>
@@ -58,7 +58,7 @@ export default function ForgotPasswordPage() {
       display="flex"
       justifyContent="center"
       alignItems="center"
-      minHeight="calc(100vh - 64px)"
+      minHeight="calc(100vh - 48px)"
     >
       <Box
         component="form"
