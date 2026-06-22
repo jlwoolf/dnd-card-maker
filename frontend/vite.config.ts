@@ -1,6 +1,8 @@
 import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import path from "path";
+import { storybookTest } from "@storybook/addon-vitest/vitest-plugin";
+import { playwright } from "@vitest/browser-playwright";
 
 const BASE_PATH = process.env.VITE_BASE_PATH || "/dnd-card-maker/";
 
@@ -23,10 +25,39 @@ export default defineConfig({
     },
   },
   test: {
-    globals: true,
-    environment: "jsdom",
-    setupFiles: "./src/test-setup.ts",
-    css: false,
-    exclude: ["e2e/**", "node_modules/**"],
+    projects: [
+      // Unit tests (stores, schemas, API) — jsdom is sufficient
+      {
+        extends: true,
+        test: {
+          name: "unit",
+          globals: true,
+          environment: "jsdom",
+          setupFiles: "./src/test-setup.ts",
+          css: false,
+          exclude: ["e2e/**", "node_modules/**"],
+          include: ["src/**/*.{test,spec}.?(c|m)[jt]s?(x)"],
+        },
+      },
+      // Storybook component tests — real browser via Playwright
+      {
+        extends: true,
+        plugins: [
+          storybookTest({
+            configDir: path.join(__dirname, ".storybook"),
+          }),
+        ],
+        test: {
+          name: "storybook",
+          browser: {
+            enabled: true,
+            provider: playwright({}),
+            headless: true,
+            instances: [{ browser: "chromium" }],
+          },
+          setupFiles: ["./.storybook/vitest.setup.ts"],
+        },
+      },
+    ],
   },
 });

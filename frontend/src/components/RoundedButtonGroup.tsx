@@ -34,33 +34,29 @@ export default function RoundedButtonGroup({
    */
   const responsiveSx = {
     borderRadius: "50px",
-    "& .MuiButtonBase-root": {
+    overflow: "hidden",
+    "& > button, & > .MuiButtonBase-root": {
       minWidth: isMobile ? "unset" : size,
       minHeight: isMobile ? size : "unset",
       height: size,
-      borderRadius: "50px",
+      borderRadius: 0,
     },
-    "& .MuiButtonGroup-grouped": {
-      px: 3,
-      borderColor: "primary.light",
+    "& > * + *": {
+      borderLeft: "1px solid rgba(255, 255, 255, 0.3)",
     },
 
-    "& .MuiButtonGroup-firstButton": {
-      borderRadius: "unset",
+    "& > *:first-of-type": {
       borderTopLeftRadius: "50px",
       borderBottomLeftRadius: isMobile ? "0px" : "50px",
       borderTopRightRadius: isMobile ? "50px" : "0px",
+      borderBottomRightRadius: 0,
     },
 
-    "& .MuiButtonGroup-lastButton": {
-      borderRadius: "unset",
+    "& > *:last-of-type": {
       borderBottomRightRadius: "50px",
       borderTopRightRadius: isMobile ? "0px" : "50px",
       borderBottomLeftRadius: isMobile ? "50px" : "0px",
-    },
-
-    "& .MuiButtonGroup-middleButton": {
-      borderRadius: "0px",
+      borderTopLeftRadius: 0,
     },
   };
 

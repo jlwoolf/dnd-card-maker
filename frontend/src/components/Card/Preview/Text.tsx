@@ -34,13 +34,13 @@ const BoxVariant = ({ children }: TextProps) => {
         <rect
           width={500}
           height={500}
-          fill="var(--box-fill, var(--card-fill))"
-          stroke="var(--card-stroke)"
+          fill="var(--box-fill, var(--card-fill, #e6e5e3))"
+          stroke="var(--card-stroke, #3b3939)"
           strokeWidth={4}
           vectorEffect="non-scaling-stroke"
         />
       </SvgBackground>
-      <MuiBox style={{ position: "relative", color: "var(--box-text)" }}>
+      <MuiBox style={{ position: "relative", color: "var(--box-text, #000000)" }}>
         {children}
       </MuiBox>
     </>
@@ -70,15 +70,15 @@ const BannerVariant = ({ children }: TextProps) => {
         <g transform="translate(0, -0.5)">
           <path
             d="M 5.23,0.78 C 5.23,0.78 0.82,1.4 0.78,12.63 0.74,23.86 5.23,24.74 5.23,24.74 h 82.23 82.23 c 0,0 4.49,-0.87 4.45,-12.11 -0.04,-11.23 -4.45,-11.86 -4.45,-11.86 h -82.23 z"
-            fill="var(--banner-fill, var(--card-fill))"
-            stroke="var(--card-stroke)"
+            fill="var(--banner-fill, var(--card-fill, #c1b8b9))"
+            stroke="var(--card-stroke, #3b3939)"
             strokeWidth={4}
             vectorEffect="non-scaling-stroke"
           />
         </g>
       </svg>
       <MuiBox
-        sx={{ position: "relative", padding: "0px 8px", color: "var(--banner-text)" }}
+        sx={{ position: "relative", padding: "0px 8px", color: "var(--banner-text, #000000)" }}
       >
         {children}
       </MuiBox>

@@ -42,8 +42,8 @@ const Image = ({ children, radius = 0, width = 100 }: ImageProps) => {
           <rect
             rx={`${radius * 4}px`}
             style={{ width: "100%", height: "100%" }}
-            fill="var(--card-fill)"
-            stroke="var(--card-stroke)"
+            fill="var(--card-fill, #48534b)"
+            stroke="var(--card-stroke, #3b3939)"
             strokeWidth={4}
             vectorEffect="non-scaling-stroke"
           />

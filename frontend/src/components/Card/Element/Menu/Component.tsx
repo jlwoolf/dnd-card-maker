@@ -248,6 +248,7 @@ export default function Menu({
       {settingsOpen && settingsAnchor && (
         <Portal container={settingsAnchor}>
           <Paper
+            elevation={0}
             sx={{
               borderBottomLeftRadius: "0px",
               borderBottomRightRadius: "0px",
