@@ -39,7 +39,7 @@ function EditorPage() {
     <Box
       data-testid="app-root"
       display="flex"
-      width="100vw"
+      width="100%"
       sx={{
         height: { xs: undefined, md: isColumn ? undefined : "calc(100vh - 48px)" },
         overflow: { xs: "auto", md: isColumn ? "auto" : "hidden" },

@@ -346,7 +346,7 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
           <Button variant="contained" size="small" onClick={handleLoadAll}>
             Load All to Local
           </Button>
-          <Button variant="outlined" size="small" color="inherit" onClick={onClose}>
+          <Button variant="outlined" size="small" onClick={onClose} sx={{ color: "white", borderColor: "white" }}>
             Back
           </Button>
         </Box>

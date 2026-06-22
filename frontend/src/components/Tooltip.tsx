@@ -27,45 +27,43 @@ interface TooltipProps {
  */
 const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   const [isVisible, setIsVisible] = useState(false);
-  const [coords, setCoords] = useState({ top: 0, left: 0, alignCenter: true });
+  const [coords, setCoords] = useState({ top: 0, left: 0, align: "center" as "center" | "left" | "right" });
   const triggerRef = useRef<HTMLElement>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  /**
-   * Updates the tooltip position based on the trigger's bounding rectangle.
-   * Includes logic to prevent the tooltip from going off-screen by adjusting alignment.
-   */
   const updatePosition = useCallback(() => {
     if (triggerRef.current) {
       const rect = triggerRef.current.getBoundingClientRect();
-      const buffer = rect.width / 2;
+      const edgeThreshold = 120;
 
-      const isNearRight = window.innerWidth - rect.right <= buffer;
-      const isNearLeft = rect.left <= buffer;
+      const isNearRight = window.innerWidth - rect.right <= edgeThreshold;
+      const isNearLeft = rect.left <= edgeThreshold;
 
-      const newTop = rect.top + window.scrollY;
+      const newTop = rect.top;
 
       let newLeft;
-      let newAlignCenter = false;
+      let newAlign: "center" | "left" | "right" = "center";
 
       if (isNearRight) {
-        newLeft = rect.right + window.scrollX;
+        newLeft = rect.right;
+        newAlign = "right";
       } else if (isNearLeft) {
-        newLeft = rect.left + window.scrollX;
+        newLeft = rect.left;
+        newAlign = "left";
       } else {
-        newLeft = rect.left + rect.width / 2 + window.scrollX;
-        newAlignCenter = true;
+        newLeft = rect.left + rect.width / 2;
+        newAlign = "center";
       }
 
       setCoords((prev) => {
         if (
           prev.top === newTop &&
           prev.left === newLeft &&
-          prev.alignCenter === newAlignCenter
+          prev.align === newAlign
         ) {
           return prev;
         }
-        return { top: newTop, left: newLeft, alignCenter: newAlignCenter };
+        return { top: newTop, left: newLeft, align: newAlign };
       });
     }
   }, []);
@@ -73,11 +71,9 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
   useLayoutEffect(() => {
     if (isVisible) {
       updatePosition();
-      window.addEventListener("scroll", updatePosition);
       window.addEventListener("resize", updatePosition);
     }
     return () => {
-      window.removeEventListener("scroll", updatePosition);
       window.removeEventListener("resize", updatePosition);
     };
   }, [isVisible, updatePosition]);
@@ -146,24 +142,36 @@ const Tooltip: React.FC<TooltipProps> = ({ children, title, delay = 500 }) => {
             <motion.div
               initial={{
                 opacity: 0,
-                y: 5,
-                x: coords.alignCenter ? "-50%" : "-100%",
+                x:
+                  coords.align === "center"
+                    ? "-50%"
+                    : coords.align === "right"
+                      ? "-100%"
+                      : "0%",
                 scale: 0.9,
               }}
               animate={{
                 opacity: 1,
-                y: 0,
-                x: coords.alignCenter ? "-50%" : "-100%",
+                x:
+                  coords.align === "center"
+                    ? "-50%"
+                    : coords.align === "right"
+                      ? "-100%"
+                      : "0%",
                 scale: 1,
               }}
               exit={{
                 opacity: 0,
-                y: 5,
-                x: coords.alignCenter ? "-50%" : "-100%",
+                x:
+                  coords.align === "center"
+                    ? "-50%"
+                    : coords.align === "right"
+                      ? "-100%"
+                      : "0%",
                 scale: 0.9,
               }}
               style={{
-                position: "absolute",
+                position: "fixed",
                 top: coords.top - 35,
                 left: coords.left,
                 backgroundColor: "rgba(97, 97, 97, 0.95)",
