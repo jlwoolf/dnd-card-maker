@@ -83,8 +83,14 @@ function SortableCloudCard({
   onAddToDeck: () => void;
   onShare: () => void;
 }) {
-  const { attributes, listeners, setNodeRef, transform, transition, isDragging } =
-    useSortable({ id: card.id });
+  const {
+    attributes,
+    listeners,
+    setNodeRef,
+    transform,
+    transition,
+    isDragging,
+  } = useSortable({ id: card.id });
 
   const style = {
     transform: CSS.Translate.toString(transform),
@@ -119,7 +125,12 @@ function SortableCloudCard({
         src={card.img_url}
         alt={card.title || "Card"}
         draggable="false"
-        style={{ width: "100%", height: "100%", objectFit: "cover", pointerEvents: "none" }}
+        style={{
+          width: "100%",
+          height: "100%",
+          objectFit: "cover",
+          pointerEvents: "none",
+        }}
       />
       <Box
         className="deck-preview-actions"
@@ -145,7 +156,11 @@ function SortableCloudCard({
             slots={{
               save: {
                 tooltip: saved ? "Remove from My Cards" : "Save to My Cards",
-                icon: saved ? <Bookmark style={{ fontSize: 14 }} /> : <BookmarkBorder style={{ fontSize: 14 }} />,
+                icon: saved ? (
+                  <Bookmark style={{ fontSize: 14 }} />
+                ) : (
+                  <BookmarkBorder style={{ fontSize: 14 }} />
+                ),
                 color: "#e6b800",
                 onClick: onToggleSave,
               },
@@ -187,7 +202,11 @@ function SortableCloudCard({
   );
 }
 
-export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudDeckPreviewProps) {
+export default function CloudDeckPreview({
+  deckId,
+  onClose,
+  onCloseAll,
+}: CloudDeckPreviewProps) {
   const [cards, setCards] = useState<CloudCard[]>([]);
   const [savedCards, setSavedCards] = useState<Set<string>>(new Set());
   const [deckTitle, setDeckTitle] = useState("");
@@ -198,7 +217,9 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
   const [addDeckCardId, setAddDeckCardId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareCardId, setShareCardId] = useState<string | null>(null);
-  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">("view_and_copy");
+  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">(
+    "view_and_copy",
+  );
   const [shareUrl, setShareUrl] = useState("");
   const [copyFeedback, setCopyFeedback] = useState(false);
 
@@ -206,7 +227,9 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
 
   const sensors = useSensors(
     useSensor(PointerSensor, { activationConstraint: { distance: 8 } }),
-    useSensor(KeyboardSensor, { coordinateGetter: sortableKeyboardCoordinates }),
+    useSensor(KeyboardSensor, {
+      coordinateGetter: sortableKeyboardCoordinates,
+    }),
   );
 
   const fetchDeck = useCallback(async () => {
@@ -222,7 +245,9 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
           theme: themeFromSnake(c.theme),
         })),
       );
-      setSavedCards(new Set(res.data.cards.filter((c) => c.saved).map((c) => c.id)));
+      setSavedCards(
+        new Set(res.data.cards.filter((c) => c.saved).map((c) => c.id)),
+      );
     } catch {
       showSnackbar("Failed to load deck", "error");
     } finally {
@@ -253,7 +278,12 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
   };
 
   const handleEdit = (card: CloudCard) => {
-    loadCard({ elements: card.elements as never, theme: card.theme as never, id: card.id, cloudCardId: card.id });
+    loadCard({
+      elements: card.elements as never,
+      theme: card.theme as never,
+      id: card.id,
+      cloudCardId: card.id,
+    });
     showSnackbar("Card loaded into editor", "success");
     onCloseAll();
   };
@@ -294,7 +324,10 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
           return next;
         });
       }
-      showSnackbar(saved ? "Saved to My Cards" : "Removed from My Cards", "success");
+      showSnackbar(
+        saved ? "Saved to My Cards" : "Removed from My Cards",
+        "success",
+      );
     } catch {
       showSnackbar("Failed to update save status", "error");
     }
@@ -318,7 +351,13 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
       setShareUrl(
         `${window.location.origin}${import.meta.env.BASE_URL}share/${res.data.share_slug}`,
       );
-      fetchDeck();
+      setCards((prev) =>
+        prev.map((c) =>
+          c.id === shareCardId
+            ? { ...c, share_slug: res.data.share_slug, share_mode: shareMode }
+            : c,
+        ),
+      );
     } catch {
       showSnackbar("Failed to share card", "error");
     }
@@ -329,7 +368,13 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
     try {
       await cardApi.unshare(shareCardId);
       setShareUrl("");
-      fetchDeck();
+      setCards((prev) =>
+        prev.map((c) =>
+          c.id === shareCardId
+            ? { ...c, share_slug: null, share_mode: null }
+            : c,
+        ),
+      );
       showSnackbar("Share link removed", "success");
     } catch {
       showSnackbar("Failed to unshare", "error");
@@ -338,7 +383,13 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
 
   return (
     <>
-      <Box display="flex" alignItems="center" justifyContent="space-between" px={3} py={2}>
+      <Box
+        display="flex"
+        alignItems="center"
+        justifyContent="space-between"
+        px={3}
+        py={2}
+      >
         <Typography variant="h6" color="white">
           {deckTitle}
         </Typography>
@@ -346,7 +397,12 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
           <Button variant="contained" size="small" onClick={handleLoadAll}>
             Load All to Local
           </Button>
-          <Button variant="outlined" size="small" onClick={onClose} sx={{ color: "white", borderColor: "white" }}>
+          <Button
+            variant="outlined"
+            size="small"
+            onClick={onClose}
+            sx={{ color: "white", borderColor: "white" }}
+          >
             Back
           </Button>
         </Box>
@@ -435,31 +491,43 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
         cardId={addDeckCardId || ""}
         onClose={() => setAddDeckCardId(null)}
       />
-      <Dialog open={shareOpen} onClose={() => setShareOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>
-          {cards.find((c) => c.id === shareCardId) ? "Manage Share" : "Share Card"}
+          {cards.find((c) => c.id === shareCardId)
+            ? "Manage Share"
+            : "Share Card"}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           {shareUrl && (
             <Box sx={{ mb: 2, position: "relative" }}>
               <TextField
                 fullWidth
                 size="small"
                 value={shareUrl}
-                InputProps={{ readOnly: true }}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          navigator.clipboard.writeText(shareUrl);
+                          setCopyFeedback(true);
+                        }}
+                      >
+                        <LinkIcon fontSize="small" />
+                      </IconButton>
+                    ),
+                  },
+                }}
                 label="Share Link"
                 sx={{ mb: 1 }}
               />
-              <IconButton
-                size="small"
-                onClick={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  setCopyFeedback(true);
-                }}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-              >
-                <LinkIcon fontSize="small" />
-              </IconButton>
             </Box>
           )}
           <ToggleButtonGroup

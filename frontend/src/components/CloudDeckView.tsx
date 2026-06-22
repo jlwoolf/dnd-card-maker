@@ -44,7 +44,9 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
 
   const [shareOpen, setShareOpen] = useState(false);
   const [shareCardId, setShareCardId] = useState<string | null>(null);
-  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">("view_and_copy");
+  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">(
+    "view_and_copy",
+  );
   const [shareUrl, setShareUrl] = useState("");
   const [copyFeedback, setCopyFeedback] = useState(false);
   const [addDeckCardId, setAddDeckCardId] = useState<string | null>(null);
@@ -92,18 +94,14 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
   const handleCopyToDeck = async (id: string) => {
     try {
       const res = await cardApi.get(id);
-      addCard(
-        res.data.elements as never,
-        res.data.img_url,
-        {
-          fill: res.data.theme.fill,
-          bannerFill: res.data.theme.banner_fill,
-          boxFill: res.data.theme.box_fill,
-          stroke: res.data.theme.stroke,
-          bannerText: res.data.theme.banner_text,
-          boxText: res.data.theme.box_text,
-        },
-      );
+      addCard(res.data.elements as never, res.data.img_url, {
+        fill: res.data.theme.fill,
+        bannerFill: res.data.theme.banner_fill,
+        boxFill: res.data.theme.box_fill,
+        stroke: res.data.theme.stroke,
+        bannerText: res.data.theme.banner_text,
+        boxText: res.data.theme.box_text,
+      });
       showSnackbar("Card copied to deck", "success");
     } catch {
       showSnackbar("Failed to copy card", "error");
@@ -114,10 +112,11 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
     try {
       const res = await cardApi.toggleSave(id);
       const saved = res.data.saved;
-      setCards((prev) =>
-        prev.map((c) => (c.id === id ? { ...c, saved } : c)),
+      setCards((prev) => prev.map((c) => (c.id === id ? { ...c, saved } : c)));
+      showSnackbar(
+        saved ? "Saved to My Cards" : "Removed from My Cards",
+        "success",
       );
-      showSnackbar(saved ? "Saved to My Cards" : "Removed from My Cards", "success");
     } catch {
       showSnackbar("Failed to update save status", "error");
     }
@@ -141,7 +140,13 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
       const slug = res.data.share_slug;
       const url = `${window.location.origin}${import.meta.env.BASE_URL}share/${slug}`;
       setShareUrl(url);
-      await fetchCards();
+      setCards((prev) =>
+        prev.map((c) =>
+          c.id === shareCardId
+            ? { ...c, share_slug: slug, share_mode: shareMode }
+            : c,
+        ),
+      );
     } catch {
       showSnackbar("Failed to share card", "error");
     }
@@ -152,7 +157,13 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
     try {
       await cardApi.unshare(shareCardId);
       setShareUrl("");
-      await fetchCards();
+      setCards((prev) =>
+        prev.map((c) =>
+          c.id === shareCardId
+            ? { ...c, share_slug: null, share_mode: null }
+            : c,
+        ),
+      );
       showSnackbar("Share link removed", "success");
     } catch {
       showSnackbar("Failed to unshare card", "error");
@@ -306,14 +317,18 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
                 transition: "opacity 0.2s ease-in-out",
               }}
             >
-              <Box
-                onPointerDown={(e) => e.stopPropagation()}
-              >
+              <Box onPointerDown={(e) => e.stopPropagation()}>
                 <CardHoverActions
                   slots={{
                     save: {
-                      tooltip: card.saved ? "Remove from My Cards" : "Save to My Cards",
-                      icon: card.saved ? <Bookmark style={{ fontSize: 14 }} /> : <BookmarkBorder style={{ fontSize: 14 }} />,
+                      tooltip: card.saved
+                        ? "Remove from My Cards"
+                        : "Save to My Cards",
+                      icon: card.saved ? (
+                        <Bookmark style={{ fontSize: 14 }} />
+                      ) : (
+                        <BookmarkBorder style={{ fontSize: 14 }} />
+                      ),
                       color: "#e6b800",
                       onClick: () => handleToggleSave(card.id),
                       testId: `cloud-card-save-${card.id}`,
@@ -389,24 +404,26 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
         <DialogTitle>
           {selectedCard?.share_slug ? "Manage Share" : "Share Card"}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           {selectedCard?.share_slug && shareUrl && (
-            <Box sx={{ mb: 2, position: "relative" }}>
+            <Box sx={{ mt: 1, mb: 2, position: "relative" }}>
               <TextField
                 fullWidth
                 size="small"
                 value={shareUrl}
-                InputProps={{ readOnly: true }}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <IconButton size="small" onClick={handleCopyLink}>
+                        <LinkIcon fontSize="small" />
+                      </IconButton>
+                    ),
+                  },
+                }}
                 label="Share Link"
                 sx={{ mb: 1 }}
               />
-              <IconButton
-                size="small"
-                onClick={handleCopyLink}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-              >
-                <LinkIcon fontSize="small" />
-              </IconButton>
             </Box>
           )}
 
@@ -430,11 +447,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
               {selectedCard?.share_slug ? "Update Share" : "Create Share Link"}
             </Button>
             {selectedCard?.share_slug && (
-              <Button
-                variant="outlined"
-                color="error"
-                onClick={handleUnshare}
-              >
+              <Button variant="outlined" color="error" onClick={handleUnshare}>
                 Remove
               </Button>
             )}

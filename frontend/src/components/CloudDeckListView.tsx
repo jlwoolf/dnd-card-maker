@@ -46,7 +46,9 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
   const [previewDeckId, setPreviewDeckId] = useState<string | null>(null);
   const [shareOpen, setShareOpen] = useState(false);
   const [shareDeckId, setShareDeckId] = useState<string | null>(null);
-  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">("view_and_copy");
+  const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">(
+    "view_and_copy",
+  );
   const [shareUrl, setShareUrl] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteDeckId, setDeleteDeckId] = useState<string | null>(null);
@@ -124,7 +126,13 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
       setShareUrl(
         `${window.location.origin}${import.meta.env.BASE_URL}share/${res.data.share_slug}`,
       );
-      await fetchDecks();
+      setDecks((prev) =>
+        prev.map((d) =>
+          d.id === shareDeckId
+            ? { ...d, share_slug: res.data.share_slug, share_mode: shareMode }
+            : d,
+        ),
+      );
     } catch {
       showSnackbar("Failed to share deck", "error");
     }
@@ -135,7 +143,13 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
     try {
       await deckApi.unshare(shareDeckId);
       setShareUrl("");
-      await fetchDecks();
+      setDecks((prev) =>
+        prev.map((d) =>
+          d.id === shareDeckId
+            ? { ...d, share_slug: null, share_mode: null }
+            : d,
+        ),
+      );
       showSnackbar("Share link removed", "success");
     } catch {
       showSnackbar("Failed to unshare", "error");
@@ -211,7 +225,9 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
           {error && (
             <Box sx={{ gridColumn: "1 / -1", textAlign: "center", py: 4 }}>
               <Typography color="error">{error}</Typography>
-              <Button onClick={fetchDecks} sx={{ mt: 1 }}>Retry</Button>
+              <Button onClick={fetchDecks} sx={{ mt: 1 }}>
+                Retry
+              </Button>
             </Box>
           )}
 
@@ -269,15 +285,33 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
               <Typography
                 variant="subtitle2"
                 color="white"
-                sx={{ position: "relative", zIndex: 1, textAlign: "center", px: 1, pointerEvents: "none" }}
+                sx={{
+                  position: "relative",
+                  zIndex: 1,
+                  textAlign: "center",
+                  px: 1,
+                  pointerEvents: "none",
+                }}
               >
                 {deck.title}
               </Typography>
-              <Typography variant="caption" color="grey.400" sx={{ position: "relative", zIndex: 1, pointerEvents: "none" }}>
+              <Typography
+                variant="caption"
+                color="grey.400"
+                sx={{ position: "relative", zIndex: 1, pointerEvents: "none" }}
+              >
                 {deck.card_count} card{deck.card_count !== 1 ? "s" : ""}
               </Typography>
               {deck.is_default && (
-                <Typography variant="caption" color="primary.light" sx={{ position: "relative", zIndex: 1, pointerEvents: "none" }}>
+                <Typography
+                  variant="caption"
+                  color="primary.light"
+                  sx={{
+                    position: "relative",
+                    zIndex: 1,
+                    pointerEvents: "none",
+                  }}
+                >
                   Default
                 </Typography>
               )}
@@ -380,31 +414,43 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
       </Box>
 
       {/* Share dialog */}
-      <Dialog open={shareOpen} onClose={() => setShareOpen(false)} maxWidth="xs" fullWidth>
+      <Dialog
+        open={shareOpen}
+        onClose={() => setShareOpen(false)}
+        maxWidth="xs"
+        fullWidth
+      >
         <DialogTitle>
-          {decks.find((d) => d.id === shareDeckId)?.share_slug ? "Manage Share" : "Share Deck"}
+          {decks.find((d) => d.id === shareDeckId)?.share_slug
+            ? "Manage Share"
+            : "Share Deck"}
         </DialogTitle>
-        <DialogContent>
+        <DialogContent sx={{ pt: 1 }}>
           {shareUrl && (
-            <Box sx={{ mb: 2, position: "relative" }}>
+            <Box sx={{ mt: 1, mb: 2, position: "relative" }}>
               <TextField
                 fullWidth
                 size="small"
                 value={shareUrl}
-                InputProps={{ readOnly: true }}
+                slotProps={{
+                  input: {
+                    readOnly: true,
+                    endAdornment: (
+                      <IconButton
+                        size="small"
+                        onClick={() => {
+                          navigator.clipboard.writeText(shareUrl);
+                          setCopyFeedback(true);
+                        }}
+                      >
+                        <LinkIcon fontSize="small" />
+                      </IconButton>
+                    ),
+                  },
+                }}
                 label="Share Link"
                 sx={{ mb: 1 }}
               />
-              <IconButton
-                size="small"
-                onClick={() => {
-                  navigator.clipboard.writeText(shareUrl);
-                  setCopyFeedback(true);
-                }}
-                sx={{ position: "absolute", right: 8, top: 8 }}
-              >
-                <LinkIcon fontSize="small" />
-              </IconButton>
             </Box>
           )}
           <ToggleButtonGroup
@@ -420,7 +466,9 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
           </ToggleButtonGroup>
           <Box display="flex" gap={1}>
             <Button variant="contained" onClick={handleShare} fullWidth>
-              {decks.find((d) => d.id === shareDeckId)?.share_slug ? "Update" : "Create Link"}
+              {decks.find((d) => d.id === shareDeckId)?.share_slug
+                ? "Update"
+                : "Create Link"}
             </Button>
             {decks.find((d) => d.id === shareDeckId)?.share_slug && (
               <Button variant="outlined" color="error" onClick={handleUnshare}>
@@ -436,12 +484,15 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
         <DialogTitle>Delete Deck?</DialogTitle>
         <DialogContent>
           <DialogContentText>
-            This won't delete the individual cards from your cloud. They'll remain in your default deck.
+            This won't delete the individual cards from your cloud. They'll
+            remain in your default deck.
           </DialogContentText>
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setDeleteOpen(false)}>Cancel</Button>
-          <Button color="error" onClick={handleDelete}>Delete</Button>
+          <Button color="error" onClick={handleDelete}>
+            Delete
+          </Button>
         </DialogActions>
       </Dialog>
 
