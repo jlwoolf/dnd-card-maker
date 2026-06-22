@@ -31,6 +31,7 @@ class CardSummary(BaseModel):
     id: str
     title: str | None
     img_url: str
+    saved: bool = True
     created_at: datetime
     updated_at: datetime
     share_slug: str | None

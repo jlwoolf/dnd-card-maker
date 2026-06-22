@@ -16,6 +16,8 @@ import {
 } from "@mui/material";
 import { Card, Deck, DeckView, GlobalSnackbar } from "./components";
 import CloudDeckView from "./components/CloudDeckView";
+import CloudDeckListView from "./components/CloudDeckListView";
+import SaveDeckDialog from "./components/SaveDeckDialog";
 import { ExportContextProvider } from "./components/ExportModal";
 import ExportModal from "./components/ExportModal/Component";
 import { useResponsiveZoom } from "./hooks/useResponsiveZoom";
@@ -54,7 +56,7 @@ function EditorPage() {
   );
 }
 
-function NavBar({ onOpenCloudDeck }: { onOpenCloudDeck: () => void }) {
+function NavBar({ onOpenCloudDeck, onOpenDecks }: { onOpenCloudDeck: () => void; onOpenDecks: () => void }) {
   const { user, isAuthenticated, logout } = useAuthStore();
 
   return (
@@ -76,7 +78,15 @@ function NavBar({ onOpenCloudDeck }: { onOpenCloudDeck: () => void }) {
               onClick={onOpenCloudDeck}
               sx={{ textTransform: "none", mr: 1 }}
             >
-              My Cloud Cards
+              My Cards
+            </Button>
+            <Button
+              color="inherit"
+              size="small"
+              onClick={onOpenDecks}
+              sx={{ textTransform: "none", mr: 1 }}
+            >
+              Decks
             </Button>
             <Typography variant="caption" sx={{ mr: 1, opacity: 0.8 }}>
               {user?.email}
@@ -111,6 +121,8 @@ function NavBar({ onOpenCloudDeck }: { onOpenCloudDeck: () => void }) {
 function AppContent() {
   const { checkAuth, isLoading } = useAuthStore();
   const [isCloudDeckOpen, setIsCloudDeckOpen] = useState(false);
+  const [isDeckListOpen, setIsDeckListOpen] = useState(false);
+  const [isSaveDeckOpen, setIsSaveDeckOpen] = useState(false);
 
   useEffect(() => {
     checkAuth();
@@ -132,7 +144,10 @@ function AppContent() {
   return (
     <ExportContextProvider initialValue={false}>
       <CssBaseline />
-      <NavBar onOpenCloudDeck={() => setIsCloudDeckOpen(true)} />
+      <NavBar
+        onOpenCloudDeck={() => setIsCloudDeckOpen(true)}
+        onOpenDecks={() => setIsDeckListOpen(true)}
+      />
       <Routes>
         <Route path="/" element={<EditorPage />} />
         <Route path="/login" element={<LoginPage />} />
@@ -148,6 +163,13 @@ function AppContent() {
       {isCloudDeckOpen && (
         <CloudDeckView onClose={() => setIsCloudDeckOpen(false)} />
       )}
+      {isDeckListOpen && (
+        <CloudDeckListView onClose={() => setIsDeckListOpen(false)} />
+      )}
+      <SaveDeckDialog
+        open={isSaveDeckOpen}
+        onClose={() => setIsSaveDeckOpen(false)}
+      />
       <GlobalSnackbar />
       <ExportModal />
     </ExportContextProvider>

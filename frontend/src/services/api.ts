@@ -84,6 +84,7 @@ export interface CloudCardSummary {
   id: string;
   title: string | null;
   img_url: string;
+  saved: boolean;
   created_at: string;
   updated_at: string;
   share_slug: string | null;
@@ -150,6 +151,67 @@ export const cardApi = {
   share: (id: string, mode: "view_only" | "view_and_copy") =>
     api.post<CloudCard>(`/cards/${id}/share`, { mode }),
   unshare: (id: string) => api.delete(`/cards/${id}/share`),
+  toggleSave: (id: string, action?: "save" | "unsave") =>
+    api.post<{ message: string }>(`/cards/${id}/toggle-save`, undefined, {
+      params: action ? { action } : undefined,
+    }),
+  getDecks: (id: string) =>
+    api.get<Array<{ deck_id: string; title: string; is_default: boolean }>>(
+      `/cards/${id}/decks`,
+    ),
+  updateDecks: (id: string, deck_ids: string[]) =>
+    api.put(`/cards/${id}/decks`, { deck_ids }),
+};
+
+export interface DeckSummary {
+  id: string;
+  title: string;
+  is_default: boolean;
+  card_count: number;
+  first_card_img_url: string | null;
+  share_slug: string | null;
+  share_mode: string | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export interface DeckResponse {
+  id: string;
+  title: string;
+  is_default: boolean;
+  cards: Array<{
+    id: string;
+    title: string | null;
+    img_url: string;
+    saved: boolean;
+    elements: unknown[];
+    theme: Record<string, string>;
+    share_slug: string | null;
+    share_mode: string | null;
+  }>;
+  share_slug: string | null;
+  share_mode: string | null;
+}
+
+export const deckApi = {
+  list: () => api.get<DeckSummary[]>("/decks"),
+  get: (id: string) => api.get<DeckResponse>(`/decks/${id}`),
+  create: (data: { title: string; card_ids: string[] }) =>
+    api.post<DeckResponse>("/decks", data),
+  save: (data: {
+    title: string;
+    cards: Array<{ elements: unknown[]; img_url: string; theme: Record<string, string> }>;
+  }) => api.post<DeckResponse>("/decks/save", data),
+  update: (id: string, data: { title?: string; card_ids?: string[] }) =>
+    api.put<DeckResponse>(`/decks/${id}`, data),
+  delete: (id: string) => api.delete(`/decks/${id}`),
+  share: (id: string, mode: "view_only" | "view_and_copy") =>
+    api.post<DeckResponse>(`/decks/${id}/share`, { mode }),
+  unshare: (id: string) => api.delete(`/decks/${id}/share`),
+};
+
+export const sharedDeckApi = {
+  get: (slug: string) => api.get<DeckResponse>(`/shared/decks/${slug}`),
 };
 
 export const sharedApi = {

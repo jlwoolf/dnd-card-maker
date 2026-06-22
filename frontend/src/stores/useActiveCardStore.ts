@@ -18,6 +18,10 @@ interface ActiveCardState {
   theme: PreviewTheme;
   /** Optional ID if editing an existing card from the deck */
   cardId?: string;
+  /** Optional cloud card ID if editing a card loaded from the cloud */
+  cloudCardId?: string;
+  /** Sets the cloud card ID (for tracking newly created cloud cards) */
+  setCloudCardId: (id: string) => void;
   /** ID of the element whose settings are currently active in the toolbar */
   activeSettingsId?: string;
 
@@ -59,7 +63,7 @@ interface ActiveCardState {
   /** Updates the current theme with partial data */
   setTheme: (theme: Partial<PreviewTheme>) => void;
   /** Loads an entire card into the active draft state */
-  loadCard: (card: Pick<Card, "elements" | "theme"> & { id?: string }) => void;
+  loadCard: (card: Pick<Card, "elements" | "theme"> & { id?: string; cloudCardId?: string }) => void;
   /**
    * Resets the active card state.
    *
@@ -172,6 +176,7 @@ export const useActiveCardStore = create<ActiveCardState>((set, get) => ({
   elements: DEFAULT_CARD_ELEMENTS,
   theme: DEFAULT_THEME,
   cardId: undefined,
+  cloudCardId: undefined,
   activeSettingsId: undefined,
 
   setActiveSettingsId: (id) => set({ activeSettingsId: id }),
@@ -280,13 +285,17 @@ export const useActiveCardStore = create<ActiveCardState>((set, get) => ({
       elements: card.elements,
       theme: card.theme,
       cardId: card.id,
+      cloudCardId: card.cloudCardId,
     })),
+
+  setCloudCardId: (id) => set({ cloudCardId: id }),
 
   reset(withDefault = false) {
     set(() => ({
       elements: withDefault ? DEFAULT_CARD_ELEMENTS : [],
       theme: DEFAULT_THEME,
       cardId: undefined,
+      cloudCardId: undefined,
       activeSettingsId: undefined,
     }));
   },

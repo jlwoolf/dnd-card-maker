@@ -2,6 +2,7 @@ import { useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
+  CloudUpload,
   ExpandLess,
   ExpandMore,
   GridView,
@@ -10,6 +11,7 @@ import {
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { useResponsiveZoom } from "@src/hooks/useResponsiveZoom";
+import SaveDeckDialog from "../SaveDeckDialog";
 import Tooltip from "../Tooltip";
 import useExportCards from "../useExportCards";
 import { useSnackbar } from "../useSnackbar";
@@ -40,6 +42,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isHoveringActive, setIsHoveringActive] = useState(false);
   const [isCollapsed, setIsCollapsed] = useState(false);
+  const [saveDeckOpen, setSaveDeckOpen] = useState(false);
 
   /** Advances the stack to the next card */
   const nextCard = () => setActiveIndex((prev) => (prev + 1) % cards.length);
@@ -54,6 +57,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
   const isDesktop = isDesktopLayout && !isColumn;
 
   return (
+    <>
     <Box
       component="section"
       aria-label="Card Deck"
@@ -234,6 +238,15 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
                 left: isDesktopLayout ? "auto" : "50%",
               }}
             >
+              <Tooltip title="Save Deck to Cloud">
+                <ControlButton
+                  onClick={() => setSaveDeckOpen(true)}
+                  label="Save deck to cloud"
+                  icon={<CloudUpload />}
+                  data-testid="save-deck-btn"
+                />
+              </Tooltip>
+
               <Tooltip title="Previous Card">
                 <ControlButton
                   onClick={prevCard}
@@ -281,6 +294,11 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
         </AnimatePresence>
       </Box>
     </Box>
+    <SaveDeckDialog
+      open={saveDeckOpen}
+      onClose={() => setSaveDeckOpen(false)}
+    />
+    </>
   );
 };
 

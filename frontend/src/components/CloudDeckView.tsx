@@ -1,10 +1,12 @@
 import { useEffect, useState } from "react";
 import {
+  Bookmark,
+  BookmarkBorder,
   Close,
   ContentCopy,
-  Delete,
   Edit,
   Link as LinkIcon,
+  PlaylistAdd,
 } from "@mui/icons-material";
 import {
   Box,
@@ -25,7 +27,8 @@ import { cardApi, type CloudCardSummary } from "@src/services/api";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import useExportCards from "./useExportCards";
 import { useSnackbar } from "./useSnackbar";
-import ActionButton from "./Deck/ActionButton";
+import CardHoverActions from "./CardHoverActions";
+import AddToDeckPopover from "./AddToDeckPopover";
 
 interface CloudDeckViewProps {
   onClose: () => void;
@@ -44,6 +47,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
   const [shareMode, setShareMode] = useState<"view_only" | "view_and_copy">("view_and_copy");
   const [shareUrl, setShareUrl] = useState("");
   const [copyFeedback, setCopyFeedback] = useState(false);
+  const [addDeckCardId, setAddDeckCardId] = useState<string | null>(null);
 
   const fetchCards = async () => {
     setLoading(true);
@@ -76,6 +80,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
           boxText: res.data.theme.box_text,
         },
         id: res.data.id,
+        cloudCardId: res.data.id,
       });
       showSnackbar("Card loaded into editor", "success");
       onClose();
@@ -105,14 +110,21 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
     }
   };
 
-  const handleDelete = async (id: string) => {
+  const handleToggleSave = async (id: string) => {
     try {
-      await cardApi.delete(id);
-      setCards((prev) => prev.filter((c) => c.id !== id));
-      showSnackbar("Card deleted from cloud", "success");
+      const res = await cardApi.toggleSave(id);
+      const saved = res.data.message === "saved";
+      setCards((prev) =>
+        prev.map((c) => (c.id === id ? { ...c, saved } : c)),
+      );
+      showSnackbar(saved ? "Saved to My Cards" : "Removed from My Cards", "success");
     } catch {
-      showSnackbar("Failed to delete card", "error");
+      showSnackbar("Failed to update save status", "error");
     }
+  };
+
+  const handleAddToDeck = (id: string) => {
+    setAddDeckCardId(id);
   };
 
   const handleShareOpen = (id: string) => {
@@ -235,6 +247,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
         {cards.map((card) => (
           <Box
             key={card.id}
+            data-card-id={card.id}
             sx={{
               position: "relative",
               aspectRatio: "5/7",
@@ -242,7 +255,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
               overflow: "hidden",
               boxShadow: 3,
               border: "1px solid",
-              borderColor: "divider",
+              borderColor: card.saved ? "gold" : "divider",
               "&:hover": {
                 boxShadow: 6,
                 "& .cloud-card-actions": { opacity: 1 },
@@ -295,42 +308,45 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
             >
               <Box
                 onPointerDown={(e) => e.stopPropagation()}
-                sx={{
-                  display: "flex",
-                  gap: 1,
-                  p: 1,
-                  borderRadius: 1,
-                  bgcolor: "background.paper",
-                  boxShadow: 2,
-                }}
               >
-                <ActionButton
-                  tooltip="Load into Editor"
-                  icon={<Edit style={{ fontSize: 14 }} />}
-                  color="#3b82f6"
-                  onClick={() => handleLoadToEditor(card.id)}
-                  data-testid={`cloud-card-edit-${card.id}`}
-                />
-                <ActionButton
-                  tooltip="Copy to Deck"
-                  icon={<ContentCopy style={{ fontSize: 14 }} />}
-                  color="#8b5cf6"
-                  onClick={() => handleCopyToDeck(card.id)}
-                  data-testid={`cloud-card-copy-${card.id}`}
-                />
-                <ActionButton
-                  tooltip={card.share_slug ? "Manage Share" : "Share"}
-                  icon={<LinkIcon style={{ fontSize: 14 }} />}
-                  color="#f59e0b"
-                  onClick={() => handleShareOpen(card.id)}
-                  data-testid={`cloud-card-share-${card.id}`}
-                />
-                <ActionButton
-                  tooltip="Delete"
-                  icon={<Delete style={{ fontSize: 14 }} />}
-                  color="#ef4444"
-                  onClick={() => handleDelete(card.id)}
-                  data-testid={`cloud-card-delete-${card.id}`}
+                <CardHoverActions
+                  slots={{
+                    save: {
+                      tooltip: card.saved ? "Remove from My Cards" : "Save to My Cards",
+                      icon: card.saved ? <Bookmark style={{ fontSize: 14 }} /> : <BookmarkBorder style={{ fontSize: 14 }} />,
+                      color: "#e6b800",
+                      onClick: () => handleToggleSave(card.id),
+                      testId: `cloud-card-save-${card.id}`,
+                    },
+                    addToDeck: {
+                      tooltip: "Add to Deck",
+                      icon: <PlaylistAdd style={{ fontSize: 14 }} />,
+                      color: "#10b981",
+                      onClick: () => handleAddToDeck(card.id),
+                      testId: `cloud-card-add-deck-${card.id}`,
+                    },
+                    edit: {
+                      tooltip: "Load into Editor",
+                      icon: <Edit style={{ fontSize: 14 }} />,
+                      color: "#3b82f6",
+                      onClick: () => handleLoadToEditor(card.id),
+                      testId: `cloud-card-edit-${card.id}`,
+                    },
+                    copy: {
+                      tooltip: "Copy to Deck",
+                      icon: <ContentCopy style={{ fontSize: 14 }} />,
+                      color: "#8b5cf6",
+                      onClick: () => handleCopyToDeck(card.id),
+                      testId: `cloud-card-copy-${card.id}`,
+                    },
+                    share: {
+                      tooltip: card.share_slug ? "Manage Share" : "Share",
+                      icon: <LinkIcon style={{ fontSize: 14 }} />,
+                      color: "#f59e0b",
+                      onClick: () => handleShareOpen(card.id),
+                      testId: `cloud-card-share-${card.id}`,
+                    },
+                  }}
                 />
               </Box>
             </Box>
@@ -431,6 +447,14 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
         autoHideDuration={2000}
         onClose={() => setCopyFeedback(false)}
         message="Link copied to clipboard"
+      />
+      <AddToDeckPopover
+        open={Boolean(addDeckCardId)}
+        anchorEl={null}
+        cardId={addDeckCardId || ""}
+        onClose={() => {
+          setAddDeckCardId(null);
+        }}
       />
     </Box>
   );

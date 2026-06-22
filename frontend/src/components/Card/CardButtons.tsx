@@ -18,13 +18,13 @@ import { useSharedElement } from "./ElementRefContext";
  */
 export default function CardButtons() {
   const { element } = useSharedElement();
-  const { elements, cardId, theme: previewTheme } = useActiveCardStore();
+  const { elements, cardId, cloudCardId, theme: previewTheme, setCloudCardId } = useActiveCardStore();
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   const validCard = useExportCards(
-    (state) => !!state.cards.find((card) => card.id === cardId),
+    (state) => !!state.cards.find((card) => card.id === cardId) || !!cloudCardId,
   );
-  const { addCard, updateCard } = useExportCards();
+  const { addCard, updateCard, setCardCloudId } = useExportCards();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);
 
   const getImageUrl = useCallback(
@@ -40,10 +40,9 @@ export default function CardButtons() {
   const handleSave = useCallback(async () => {
     if (cardId) {
       const dataUrl = await getImageUrl();
-      if (dataUrl) {
-        updateCard(cardId, { elements, imgUrl: dataUrl, theme: previewTheme });
-        showSnackbar("Card saved successfully!", "success");
-      }
+      if (!dataUrl) return;
+      updateCard(cardId, { elements, imgUrl: dataUrl, theme: previewTheme });
+      showSnackbar("Card saved!", "success");
     }
   }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
 
@@ -59,23 +58,45 @@ export default function CardButtons() {
     const dataUrl = await getImageUrl();
     if (!dataUrl) return;
     try {
-      await cardApi.create({
-        elements: elements as unknown[],
-        img_url: dataUrl,
-        theme: {
-          fill: previewTheme.fill,
-          banner_fill: previewTheme.bannerFill,
-          box_fill: previewTheme.boxFill,
-          stroke: previewTheme.stroke,
-          banner_text: previewTheme.bannerText,
-          box_text: previewTheme.boxText,
-        },
-      });
-      showSnackbar("Saved to cloud!", "success");
+      if (cloudCardId) {
+        await cardApi.update(cloudCardId, {
+          elements: elements as unknown[],
+          img_url: dataUrl,
+          theme: {
+            fill: previewTheme.fill,
+            banner_fill: previewTheme.bannerFill,
+            box_fill: previewTheme.boxFill,
+            stroke: previewTheme.stroke,
+            banner_text: previewTheme.bannerText,
+            box_text: previewTheme.boxText,
+          },
+        });
+        await cardApi.toggleSave(cloudCardId, "save");
+        showSnackbar("Updated in cloud!", "success");
+      } else {
+        const response = await cardApi.create({
+          elements: elements as unknown[],
+          img_url: dataUrl,
+          theme: {
+            fill: previewTheme.fill,
+            banner_fill: previewTheme.bannerFill,
+            box_fill: previewTheme.boxFill,
+            stroke: previewTheme.stroke,
+            banner_text: previewTheme.bannerText,
+            box_text: previewTheme.boxText,
+          },
+        });
+        setCloudCardId(response.data.id);
+        if (cardId) {
+          setCardCloudId(cardId, response.data.id);
+        }
+        await cardApi.toggleSave(response.data.id, "save");
+        showSnackbar("Saved to cloud!", "success");
+      }
     } catch {
       showSnackbar("Failed to save to cloud", "error");
     }
-  }, [elements, getImageUrl, previewTheme, showSnackbar]);
+  }, [cardId, cloudCardId, elements, getImageUrl, previewTheme, setCardCloudId, setCloudCardId, showSnackbar]);
 
   return (
     <RoundedButtonGroup

@@ -21,7 +21,7 @@ interface ExportState {
    * @param imgUrl - The generated preview image URL.
    * @param theme - The theme applied to the card.
    */
-  addCard(elements: Element[], imgUrl: string, theme: PreviewTheme): void;
+  addCard(elements: Element[], imgUrl: string, theme: PreviewTheme, cloudCardId?: string): void;
   /**
    * Updates an existing card in the deck.
    * 
@@ -46,6 +46,8 @@ interface ExportState {
   loadFile(data: unknown): void;
   /** Sets the entire cards array */
   setCards(cards: Card[]): void;
+  /** Sets the cloud card ID on a local card */
+  setCardCloudId(localId: string, cloudCardId: string): void;
   /**
    * Generates a PDF from the specified cards.
    * 
@@ -63,9 +65,9 @@ const useExportCards = create<ExportState>((set, get) => ({
   cards: [],
   pdfProgress: 0,
 
-  addCard(elements, imgUrl, theme) {
+  addCard(elements, imgUrl, theme, cloudCardId) {
     set((state) => ({
-      cards: [...state.cards, { elements, imgUrl, id: uuid(), theme }],
+      cards: [...state.cards, { elements, imgUrl, id: uuid(), theme, cloudCardId }],
     }));
   },
 
@@ -87,6 +89,12 @@ const useExportCards = create<ExportState>((set, get) => ({
 
   setCards(cards) {
     set({ cards });
+  },
+
+  setCardCloudId(localId, cloudCardId) {
+    set((state) => ({
+      cards: state.cards.map((c) => c.id === localId ? { ...c, cloudCardId } : c),
+    }));
   },
 
   loadFile(unknownData) {

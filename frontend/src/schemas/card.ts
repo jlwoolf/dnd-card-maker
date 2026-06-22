@@ -22,6 +22,8 @@ export const CardSchema = z.object({
   id: z.string(),
   /** The color palette and visual styling configuration active for this card */
   theme: PreviewThemeSchema,
+  /** Optional cloud card ID for cards that have been synced to the server */
+  cloudCardId: z.string().optional(),
 });
 
 /**
