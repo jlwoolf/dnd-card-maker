@@ -172,14 +172,16 @@ def save_deck_with_cards(
     title: str,
     cards_input: list[dict],
     db: Session,
+    deck_id: str | None = None,
 ) -> Deck:
     """Save or update an entire deck with cards in a single operation.
 
     Each item in ``cards_input`` must have ``elements``, ``img_url``, ``theme``
     and optionally an ``id`` for updates.
 
-    If a deck with the given title already exists for the user, its cards are
-    replaced; otherwise a new deck is created. Orphaned cards are cleaned up.
+    If ``deck_id`` is provided, that specific deck is updated.  Otherwise the
+    deck is matched by title.  When no matching deck exists a new one is
+    created.  Orphaned cards are cleaned up.
     """
     card_ids: list[str] = []
     for card_input in cards_input:
@@ -205,15 +207,22 @@ def save_deck_with_cards(
         db.flush()
         card_ids.append(card.id)
 
-    existing = (
-        db.query(Deck)
-        .filter(
-            Deck.user_id == user_id,
-            Deck.title == title,
-            not Deck.is_default,
+    if deck_id:
+        existing = (
+            db.query(Deck)
+            .filter(Deck.id == deck_id, Deck.user_id == user_id)
+            .first()
         )
-        .first()
-    )
+    else:
+        existing = (
+            db.query(Deck)
+            .filter(
+                Deck.user_id == user_id,
+                Deck.title == title,
+                not Deck.is_default,
+            )
+            .first()
+        )
 
     if existing:
         deck = existing

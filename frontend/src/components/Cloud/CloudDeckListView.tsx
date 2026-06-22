@@ -41,6 +41,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
   const [error, setError] = useState("");
   const addCard = useExportCards((s) => s.addCard);
   const setCards = useExportCards((s) => s.setCards);
+  const setEditingCloudDeck = useExportCards((s) => s.setEditingCloudDeck);
   const showSnackbar = useSnackbar((s) => s.showSnackbar);
 
   const [previewDeckId, setPreviewDeckId] = useState<string | null>(null);
@@ -74,11 +75,13 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
     try {
       const res = await deckApi.get(deckId);
       setCards([]);
+      setEditingCloudDeck(deckId, res.data.title);
       for (const card of res.data.cards) {
         addCard(
           card.elements,
           card.img_url,
           themeFromSnake(card.theme),
+          card.id,
         );
       }
       showSnackbar("Deck loaded into editor!", "success");
@@ -96,6 +99,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
           card.elements,
           card.img_url,
           themeFromSnake(card.theme),
+          card.id,
         );
       }
       showSnackbar("Deck copied to local deck!", "success");

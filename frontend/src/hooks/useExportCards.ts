@@ -14,6 +14,10 @@ interface ExportState {
   cards: Card[];
   /** Progress of PDF generation (0 to 1) */
   pdfProgress: number;
+  /** Cloud deck ID currently being edited (if loaded from cloud) */
+  editingCloudDeckId: string | null;
+  /** Title of the cloud deck currently being edited */
+  editingCloudDeckTitle: string | null;
   /**
    * Adds a new card to the deck.
    * 
@@ -48,6 +52,8 @@ interface ExportState {
   setCards(cards: Card[]): void;
   /** Sets the cloud card ID on a local card */
   setCardCloudId(localId: string, cloudCardId: string): void;
+  /** Track which cloud deck is being edited */
+  setEditingCloudDeck(id: string | null, title: string | null): void;
   /**
    * Generates a PDF from the specified cards.
    * 
@@ -64,6 +70,8 @@ interface ExportState {
 const useExportCards = create<ExportState>((set, get) => ({
   cards: [],
   pdfProgress: 0,
+  editingCloudDeckId: null,
+  editingCloudDeckTitle: null,
 
   addCard(elements, imgUrl, theme, cloudCardId) {
     set((state) => ({
@@ -95,6 +103,10 @@ const useExportCards = create<ExportState>((set, get) => ({
     set((state) => ({
       cards: state.cards.map((c) => c.id === localId ? { ...c, cloudCardId } : c),
     }));
+  },
+
+  setEditingCloudDeck(id, title) {
+    set({ editingCloudDeckId: id, editingCloudDeckTitle: title });
   },
 
   loadFile(unknownData) {

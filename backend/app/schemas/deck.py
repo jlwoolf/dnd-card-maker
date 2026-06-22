@@ -21,6 +21,7 @@ class DeckCardInput(BaseModel):
 class DeckSaveRequest(BaseModel):
     title: str = Field(min_length=1, max_length=200)
     cards: list[DeckCardInput]
+    deck_id: str | None = None
 
 
 class DeckUpdate(BaseModel):

@@ -291,7 +291,7 @@ export default function CloudDeckPreview({
   };
 
   const handleCopy = (card: PreviewCard) => {
-    addCard(card.elements, card.img_url, card.theme);
+    addCard(card.elements, card.img_url, card.theme, card.id);
     showSnackbar("Card copied to local deck", "success");
   };
 
@@ -308,7 +308,7 @@ export default function CloudDeckPreview({
 
   const handleLoadAll = () => {
     for (const card of cards) {
-      addCard(card.elements, card.img_url, card.theme);
+      addCard(card.elements, card.img_url, card.theme, card.id);
     }
     showSnackbar(`Loaded ${cards.length} card(s) to local deck`, "success");
   };

@@ -200,6 +200,7 @@ export const deckApi = {
   save: (data: {
     title: string;
     cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
+    deck_id?: string;
   }) => api.post<DeckResponse>("/decks/save", data),
   update: (id: string, data: { title?: string; card_ids?: string[] }) =>
     api.put<DeckResponse>(`/decks/${id}`, data),

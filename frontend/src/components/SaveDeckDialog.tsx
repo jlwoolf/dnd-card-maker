@@ -3,6 +3,7 @@ import { Check, Close, Save } from "@mui/icons-material";
 import {
   Box,
   Button,
+  CircularProgress,
   Stack,
   TextField,
   Typography,
@@ -20,12 +21,17 @@ interface SaveDeckDialogProps {
 
 export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
   const localCards = useExportCards((s) => s.cards);
+  const editingCloudDeckId = useExportCards((s) => s.editingCloudDeckId);
+  const editingCloudDeckTitle = useExportCards((s) => s.editingCloudDeckTitle);
+  const setCardCloudId = useExportCards((s) => s.setCardCloudId);
+  const setEditingCloudDeck = useExportCards((s) => s.setEditingCloudDeck);
   const showSnackbar = useSnackbar((s) => s.showSnackbar);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [title, setTitle] = useState(() => `Deck ${new Date().toLocaleDateString()}`);
   const [saving, setSaving] = useState(false);
   const [prevOpen, setPrevOpen] = useState(open);
+  const [prevTitle, setPrevTitle] = useState(editingCloudDeckTitle);
   const [prevCards, setPrevCards] = useState(localCards);
 
   let needsSync = false;
@@ -33,12 +39,19 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
     setPrevOpen(open);
     if (open) needsSync = true;
   }
+  if (editingCloudDeckTitle !== prevTitle && open) {
+    setPrevTitle(editingCloudDeckTitle);
+    needsSync = true;
+  }
   if (localCards !== prevCards) {
     setPrevCards(localCards);
     if (open) needsSync = true;
   }
   if (needsSync) {
     setSelectedIds(localCards.map((c) => c.id));
+    if (editingCloudDeckTitle) {
+      setTitle(editingCloudDeckTitle);
+    }
   }
 
   const toggleSelection = (id: string) => {
@@ -67,14 +80,29 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
 
     setSaving(true);
     try {
-      await deckApi.save({ title, cards });
+      const response = await deckApi.save({ title, cards, deck_id: editingCloudDeckId || undefined });
+      for (const card of response.data.cards) {
+        const match = localCards.find(
+          (lc) =>
+            lc.cloudCardId === card.id ||
+            (card.elements && JSON.stringify(lc.elements) === JSON.stringify(card.elements)),
+        );
+        if (match && !match.cloudCardId) {
+          setCardCloudId(match.id, card.id);
+        }
+      }
       showSnackbar("Deck saved to cloud!", "success");
-      onClose();
+      handleClose();
     } catch {
       showSnackbar("Failed to save deck", "error");
     } finally {
       setSaving(false);
     }
+  };
+
+  const handleClose = () => {
+    setEditingCloudDeck(null, null);
+    onClose();
   };
 
   if (!open) return null;
@@ -246,11 +274,17 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
           <Button
             onClick={handleSave}
             disabled={saving || selectedIds.length === 0}
-            startIcon={<Save />}
+            startIcon={saving ? <CircularProgress size={20} /> : <Save />}
+            sx={{
+              "&.Mui-disabled": {
+                bgcolor: "grey.800",
+                color: "rgba(255, 255, 255, 0.5)",
+              },
+            }}
           >
             Save
           </Button>
-          <Button onClick={onClose} startIcon={<Close />}>
+          <Button onClick={handleClose} startIcon={<Close />}>
             Cancel
           </Button>
         </RoundedButtonGroup>

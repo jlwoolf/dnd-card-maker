@@ -105,6 +105,7 @@ def save_deck_endpoint(
             for c in body.cards
         ],
         db=db,
+        deck_id=body.deck_id,
     )
     return _build_deck_response(deck, db)
 
