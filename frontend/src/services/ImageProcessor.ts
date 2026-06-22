@@ -1,11 +1,22 @@
 import { toPng } from "html-to-image";
 
 /**
- * ImageProcessor service provides a centralized suite of utilities for 
+ * ImageProcessor service provides a centralized suite of utilities for
  * handling image transformations, remote source proxying, and DOM-to-image capture.
+ *
+ * SECURITY NOTE: The CORS_PROXY configuration sends remote image URLs through
+ * a third-party service to bypass CORS restrictions for canvas export. In
+ * production, replace this with a self-hosted backend proxy endpoint to avoid
+ * leaking user image URLs to external services.
  */
 export class ImageProcessor {
-  private static CORS_PROXY = "https://cors-anywhere.com/";
+  /**
+   * CORS proxy URL used to fetch cross-origin images for canvas capture.
+   * Override via VITE_CORS_PROXY environment variable. Set to empty string to
+   * disable proxying (cross-origin images will fail during PNG export).
+   */
+  private static CORS_PROXY =
+    import.meta.env.VITE_CORS_PROXY ?? "https://cors-anywhere.com/";
 
   /**
    * Converts any image URL (remote, blob, or local) into a base64 Data URL.
@@ -32,9 +43,10 @@ export class ImageProcessor {
   }
 
   /**
-   * Pre-processes a URL for safe cross-origin usage. If the URL is remote,
-   * it applies a CORS proxy before converting it to a data URL.
-   * 
+   * Pre-processes a URL for safe cross-origin usage. If the URL is remote and
+   * a CORS proxy is configured, it applies the proxy before converting to a
+   * data URL.
+   *
    * @param src - The image source URL.
    * @returns A promise resolving to a safe data URL or undefined if conversion fails.
    */
@@ -43,7 +55,7 @@ export class ImageProcessor {
 
     let urlToFetch = src;
 
-    if (src.startsWith("http") || src.startsWith("https")) {
+    if (this.CORS_PROXY && (src.startsWith("http") || src.startsWith("https"))) {
       urlToFetch = this.CORS_PROXY + src;
     }
 

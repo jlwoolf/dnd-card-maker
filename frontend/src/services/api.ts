@@ -152,7 +152,7 @@ export const cardApi = {
     api.post<CloudCard>(`/cards/${id}/share`, { mode }),
   unshare: (id: string) => api.delete(`/cards/${id}/share`),
   toggleSave: (id: string, action?: "save" | "unsave") =>
-    api.post<{ message: string }>(`/cards/${id}/toggle-save`, undefined, {
+    api.post<{ message: string; saved: boolean }>(`/cards/${id}/toggle-save`, undefined, {
       params: action ? { action } : undefined,
     }),
   getDecks: (id: string) =>

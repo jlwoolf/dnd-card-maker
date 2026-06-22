@@ -6,6 +6,8 @@ interface CloudCardMappingState {
   setMapping: (localId: string, cloudId: string) => void;
   getCloudId: (localId: string) => string | undefined;
   removeMapping: (localId: string) => void;
+  /** Clear all mappings (e.g., on logout / user switch) */
+  reset: () => void;
 }
 
 export const useCloudCardMapping = create<CloudCardMappingState>((set, get) => ({
@@ -21,4 +23,5 @@ export const useCloudCardMapping = create<CloudCardMappingState>((set, get) => (
       delete next[localId];
       return { mapping: next };
     }),
+  reset: () => set({ mapping: {} }),
 }));

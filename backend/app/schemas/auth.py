@@ -13,3 +13,8 @@ class RefreshRequest(BaseModel):
 
 class MessageResponse(BaseModel):
     message: str
+
+
+class SaveToggleResponse(BaseModel):
+    message: str
+    saved: bool

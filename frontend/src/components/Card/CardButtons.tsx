@@ -22,7 +22,10 @@ export default function CardButtons() {
   const isAuthenticated = useAuthStore((state) => state.isAuthenticated);
   
   const validCard = useExportCards(
-    (state) => !!state.cards.find((card) => card.id === cardId) || !!cloudCardId,
+    (state) =>
+      !!state.cards.find(
+        (card) => card.id === cardId || card.cloudCardId === cloudCardId,
+      ),
   );
   const { addCard, updateCard, setCardCloudId } = useExportCards();
   const showSnackbar = useSnackbar((state) => state.showSnackbar);

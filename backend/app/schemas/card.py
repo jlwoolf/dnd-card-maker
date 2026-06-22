@@ -1,16 +1,29 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, ConfigDict, Field
+
+
+def _to_camel(snake: str) -> str:
+    """Convert snake_case to camelCase."""
+    head, *tail = snake.split("_")
+    return head + "".join(w.capitalize() for w in tail)
 
 
 class CardThemeSchema(BaseModel):
+    """Visual theme configuration for a card.
+
+    All fields are hex color strings (e.g., '#ff0000').
+    """
+
     fill: str
-    banner_fill: str
-    box_fill: str
+    banner_fill: str = Field(alias="bannerFill")
+    box_fill: str = Field(alias="boxFill")
     stroke: str
-    banner_text: str
-    box_text: str
+    banner_text: str = Field(alias="bannerText")
+    box_text: str = Field(alias="boxText")
+
+    model_config = ConfigDict(populate_by_name=True)
 
 
 class CardCreate(BaseModel):
@@ -57,7 +70,7 @@ class CardResponse(BaseModel):
 
 
 class ShareToggle(BaseModel):
-    mode: str  # "view_only" | "view_and_copy"
+    mode: Literal["view_only", "view_and_copy"]
 
 
 class SharedCardResponse(BaseModel):

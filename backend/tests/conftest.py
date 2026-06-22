@@ -25,12 +25,17 @@ def override_get_db() -> Generator[Session, None, None]:
     db = TestSessionLocal()
     try:
         yield db
+    except Exception:
+        db.rollback()
+        raise
     finally:
         db.close()
 
 
 @pytest.fixture(autouse=True)
 def setup_db(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
+    from slowapi import Limiter
+
     from app import database
     from app.database import get_db
 
@@ -38,6 +43,14 @@ def setup_db(monkeypatch: pytest.MonkeyPatch) -> Generator[None, None, None]:
 
     Base.metadata.create_all(bind=test_engine)
     app.dependency_overrides[get_db] = override_get_db
+
+    # Disable rate limiting in tests
+    app.state.limiter = Limiter(
+        key_func=lambda: "test",
+        storage_uri="memory://",
+        default_limits=[],
+    )
+
     yield
     app.dependency_overrides.clear()
 
@@ -53,14 +66,18 @@ def client() -> TestClient:
 
 @pytest.fixture
 def auth_headers(client: TestClient) -> dict[str, str]:
-    client.post("/api/auth/register", json={
-        "email": "auth-test@example.com",
-        "password": "testpass123",
-    })
+    client.post(
+        "/api/auth/register",
+        json={
+            "email": "auth-test@example.com",
+            "password": "testpass123",
+        },
+    )
 
     db = TestSessionLocal()
     try:
         from app.models.user import User
+
         user = db.query(User).filter(User.email == "auth-test@example.com").first()
         user.is_verified = True
         user.verify_token = None
@@ -68,9 +85,12 @@ def auth_headers(client: TestClient) -> dict[str, str]:
     finally:
         db.close()
 
-    response = client.post("/api/auth/login", json={
-        "email": "auth-test@example.com",
-        "password": "testpass123",
-    })
+    response = client.post(
+        "/api/auth/login",
+        json={
+            "email": "auth-test@example.com",
+            "password": "testpass123",
+        },
+    )
     token = response.json()["access_token"]
     return {"Authorization": f"Bearer {token}"}

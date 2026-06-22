@@ -43,7 +43,7 @@ interface ExportState {
    * 
    * @param data - The raw data to parse.
    */
-  loadFile(data: unknown): void;
+  loadFile(data: unknown): boolean;
   /** Sets the entire cards array */
   setCards(cards: Card[]): void;
   /** Sets the cloud card ID on a local card */
@@ -100,6 +100,7 @@ const useExportCards = create<ExportState>((set, get) => ({
   loadFile(unknownData) {
     const { success, data } = z.array(CardSchema).safeParse(unknownData);
     if (success) set({ cards: data });
+    return success;
   },
 
   generatePdf: async (cardIds) => {

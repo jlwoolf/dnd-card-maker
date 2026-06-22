@@ -1,9 +1,8 @@
-from app.schemas.user import (  # noqa: F401
-    ForgotPasswordRequest,
-    LoginRequest,
-    RegisterRequest,
-    ResetPasswordRequest,
-    UserResponse,
+from app.schemas.auth import (  # noqa: F401
+    MessageResponse,
+    RefreshRequest,
+    SaveToggleResponse,
+    TokenResponse,
 )
 from app.schemas.card import (  # noqa: F401
     CardCreate,
@@ -11,10 +10,9 @@ from app.schemas.card import (  # noqa: F401
     CardSummary,
     CardThemeSchema,
     CardUpdate,
-    ShareToggle,
     SharedCardResponse,
+    ShareToggle,
 )
-from app.schemas.auth import MessageResponse, RefreshRequest, TokenResponse  # noqa: F401
 from app.schemas.deck import (  # noqa: F401
     CardDecksResponse,
     CardDecksUpdate,
@@ -26,4 +24,11 @@ from app.schemas.deck import (  # noqa: F401
     DeckSummary,
     DeckUpdate,
     SharedDeckResponse,
+)
+from app.schemas.user import (  # noqa: F401
+    ForgotPasswordRequest,
+    LoginRequest,
+    RegisterRequest,
+    ResetPasswordRequest,
+    UserResponse,
 )

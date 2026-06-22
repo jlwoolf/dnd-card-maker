@@ -12,6 +12,12 @@ router = APIRouter(prefix="/api/shared", tags=["shared"])
 
 @router.get("/{slug}", response_model=SharedCardResponse)
 def get_shared_card(slug: str, db: Session = Depends(get_db)):
+    """Retrieve a publicly shared card by its slug.
+
+    No authentication required. Returns 200 with the card data and a
+    ``can_copy`` flag based on the share mode. Returns 404 if no shared
+    card matches the slug.
+    """
     card = db.query(Card).filter(Card.share_slug == slug).first()
     if not card:
         raise HTTPException(

@@ -1,6 +1,6 @@
 import json
 import secrets
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
@@ -18,48 +18,37 @@ from app.schemas import (
     CardSummary,
     CardThemeSchema,
     CardUpdate,
-    MessageResponse,
+    SaveToggleResponse,
     ShareToggle,
 )
+from app.utils.deck_helpers import _cleanup_orphaned_card, _get_or_create_default_deck
 
 router = APIRouter(prefix="/api/cards", tags=["cards"])
 
 
-def _get_or_create_default_deck(user_id: str, db: Session) -> Deck:
-    deck = db.query(Deck).filter(Deck.user_id == user_id, Deck.is_default == True).first()
-    if not deck:
-        deck = Deck(user_id=user_id, title="My Cards", is_default=True)
-        db.add(deck)
-        db.commit()
-        db.refresh(deck)
-    return deck
-
-
-def _cleanup_orphaned_card(card_id: str, db: Session) -> None:
-    count = db.query(DeckCard).filter(DeckCard.card_id == card_id).count()
-    if count == 0:
-        db.query(Card).filter(Card.id == card_id).delete()
-
-
-@router.post("/{card_id}/toggle-save", response_model=MessageResponse)
+@router.post("/{card_id}/toggle-save", response_model=SaveToggleResponse)
 def toggle_save_card(
     card_id: str,
     action: str = Query("toggle", pattern="^(toggle|save|unsave)$"),
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Toggle a card's saved status in the current user's default deck.
+
+    The ``action`` query parameter must be ``toggle``, ``save``, or ``unsave``.
+    Requires authentication (``current_user``). Returns 200 with the new saved
+    state. Returns 404 if the card does not belong to the user.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
     default_deck = _get_or_create_default_deck(current_user.id, db)
-    existing = db.query(DeckCard).filter(
-        DeckCard.deck_id == default_deck.id, DeckCard.card_id == card_id
-    ).first()
+    existing = (
+        db.query(DeckCard)
+        .filter(DeckCard.deck_id == default_deck.id, DeckCard.card_id == card_id)
+        .first()
+    )
 
     if action == "save":
         if not existing:
@@ -72,7 +61,7 @@ def toggle_save_card(
             next_pos = (max_pos[0] + 1) if max_pos else 0
             db.add(DeckCard(deck_id=default_deck.id, card_id=card_id, position=next_pos))
             db.commit()
-        return MessageResponse(message="saved")
+        return {"message": "saved", "saved": True}
 
     if action == "unsave":
         if existing:
@@ -80,14 +69,14 @@ def toggle_save_card(
             db.commit()
             _cleanup_orphaned_card(card_id, db)
             db.commit()
-        return MessageResponse(message="unsaved")
+        return {"message": "unsaved", "saved": False}
 
     if existing:
         db.delete(existing)
         db.commit()
         _cleanup_orphaned_card(card_id, db)
         db.commit()
-        return MessageResponse(message="unsaved")
+        return {"message": "unsaved", "saved": False}
     else:
         max_pos = (
             db.query(DeckCard.position)
@@ -98,7 +87,7 @@ def toggle_save_card(
         next_pos = (max_pos[0] + 1) if max_pos else 0
         db.add(DeckCard(deck_id=default_deck.id, card_id=card_id, position=next_pos))
         db.commit()
-        return MessageResponse(message="saved")
+        return {"message": "saved", "saved": True}
 
 
 @router.get("/{card_id}/decks", response_model=list[CardDecksResponse])
@@ -107,6 +96,10 @@ def get_card_decks(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Return all of the current user's decks that contain the given card.
+
+    Requires authentication. Returns 200 with a list of deck references.
+    """
     deck_cards = (
         db.query(Deck)
         .join(DeckCard, DeckCard.deck_id == Deck.id)
@@ -114,8 +107,7 @@ def get_card_decks(
         .all()
     )
     return [
-        CardDecksResponse(deck_id=d.id, title=d.title, is_default=d.is_default)
-        for d in deck_cards
+        CardDecksResponse(deck_id=d.id, title=d.title, is_default=d.is_default) for d in deck_cards
     ]
 
 
@@ -126,19 +118,18 @@ def update_card_decks(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Replace the set of decks a card belongs to with the given ``deck_ids``.
+
+    All provided ``deck_ids`` must belong to the current user. Requires
+    authentication. Returns 204 on success or 404 if the card is not found.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
     db.query(DeckCard).filter(
         DeckCard.card_id == card_id,
-        DeckCard.deck_id.in_(
-            db.query(Deck.id).filter(Deck.user_id == current_user.id)
-        ),
+        DeckCard.deck_id.in_(db.query(Deck.id).filter(Deck.user_id == current_user.id)),
     ).delete(synchronize_session=False)
 
     for i, deck_id in enumerate(body.deck_ids):
@@ -149,14 +140,8 @@ def update_card_decks(
     db.commit()
 
 
-def _get_default_deck_card_ids(user_id: str, db: Session) -> set[str]:
-    deck = db.query(Deck).filter(Deck.user_id == user_id, Deck.is_default == True).first()
-    if not deck:
-        return set()
-    return {dc.card_id for dc in deck.deck_cards}
-
-
 def card_to_response(card: Card) -> CardResponse:
+    """Serialize a Card ORM model into a CardResponse schema."""
     return CardResponse(
         id=card.id,
         user_id=card.user_id,
@@ -177,15 +162,19 @@ def list_cards(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """List cards saved to the current user's default deck.
+
+    Requires authentication. Returns 200 with card summaries ordered by
+    most recently updated.
+    """
     deck_cards = (
         db.query(Card)
         .join(DeckCard, DeckCard.card_id == Card.id)
         .join(Deck, Deck.id == DeckCard.deck_id)
-        .filter(Deck.user_id == current_user.id, Deck.is_default == True)
+        .filter(Deck.user_id == current_user.id, Deck.is_default)
         .order_by(Card.updated_at.desc())
         .all()
     )
-    saved_ids = {c.id for c in deck_cards}
     seen = set()
     result = []
     for c in deck_cards:
@@ -213,6 +202,10 @@ def create_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
+    """Create a new card and add it to the current user's default deck.
+
+    Requires authentication. Returns 201 with the created card on success.
+    """
     card = Card(
         user_id=current_user.id,
         title=body.title,
@@ -244,11 +237,12 @@ def get_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Get a single card owned by the current user.
+
+    Requires authentication. Returns 200 with the card data or 404 if the
+    card is not found or does not belong to the user.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
     return card_to_response(card)
@@ -261,11 +255,13 @@ def update_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Update a card's title, elements, image URL, or theme.
+
+    Only fields present in the request body are updated. Requires
+    authentication and ownership. Returns 200 on success or 404 if the card
+    is not found.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
@@ -289,11 +285,12 @@ def delete_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Delete a card owned by the current user.
+
+    Requires authentication and ownership. Returns 204 on success or 404 if
+    the card is not found.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
@@ -308,25 +305,18 @@ def share_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    if body.mode not in ("view_only", "view_and_copy"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail="Mode must be 'view_only' or 'view_and_copy'",
-        )
+    """Enable sharing for a card with the given mode (``view`` or ``view_and_copy``).
 
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    Generates a unique share slug. Requires authentication and ownership.
+    Returns 200 with the updated card or 404 if the card is not found.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 
-    from datetime import datetime, timezone
-
     card.share_slug = secrets.token_urlsafe(6)[:8]
     card.share_mode = body.mode
-    card.share_at = datetime.now(timezone.utc)
+    card.share_at = datetime.now(UTC)
 
     db.commit()
     db.refresh(card)
@@ -339,11 +329,12 @@ def unshare_card(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    card = (
-        db.query(Card)
-        .filter(Card.id == card_id, Card.user_id == current_user.id)
-        .first()
-    )
+    """Disable sharing for a card, removing its share slug and mode.
+
+    Requires authentication and ownership. Returns 204 on success or 404 if
+    the card is not found.
+    """
+    card = db.query(Card).filter(Card.id == card_id, Card.user_id == current_user.id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
 

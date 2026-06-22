@@ -270,8 +270,14 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
               <Tooltip title="Upload File">
                 <UploadButton
                   onUpload={(data) => {
-                    loadFile(data);
-                    showSnackbar("Deck loaded successfully", "success");
+                    if (loadFile(data)) {
+                      showSnackbar("Deck loaded successfully", "success");
+                    } else {
+                      showSnackbar(
+                        "Failed to load deck: invalid file format",
+                        "error",
+                      );
+                    }
                   }}
                   icon={<Upload />}
                   data-testid="upload-deck-btn"

@@ -113,7 +113,7 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
   const handleToggleSave = async (id: string) => {
     try {
       const res = await cardApi.toggleSave(id);
-      const saved = res.data.message === "saved";
+      const saved = res.data.saved;
       setCards((prev) =>
         prev.map((c) => (c.id === id ? { ...c, saved } : c)),
       );

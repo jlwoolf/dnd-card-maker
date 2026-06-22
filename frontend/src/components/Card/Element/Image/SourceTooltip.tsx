@@ -26,7 +26,7 @@ interface SourceTooltipProps {
 
 /**
  * SourceTooltip provides a dual-input interface for updating an image source.
- * It supports both manual URL entry and local file uploads via the browser's 
+ * It supports both manual URL entry and local file uploads via the browser's
  * file picker.
  */
 const SourceTooltip = ({
@@ -36,6 +36,15 @@ const SourceTooltip = ({
   onUpdate,
 }: SourceTooltipProps) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const objectUrlRef = useRef<string | null>(null);
+
+  /** Revoke any previously-created object URL to prevent memory leaks. */
+  const revokeObjectUrl = () => {
+    if (objectUrlRef.current) {
+      URL.revokeObjectURL(objectUrlRef.current);
+      objectUrlRef.current = null;
+    }
+  };
 
   /**
    * Triggers the click event on the hidden file input element.
@@ -45,15 +54,17 @@ const SourceTooltip = ({
   };
 
   /**
-   * Processes the selected local file and converts it into a transient 
+   * Processes the selected local file and converts it into a transient
    * object URL for immediate preview.
-   * 
+   *
    * @param event - The input change event.
    */
   const handleFileChange = (event: ChangeEvent<HTMLInputElement>) => {
     const file = event.target.files?.[0];
     if (file) {
+      revokeObjectUrl();
       const objectUrl = URL.createObjectURL(file);
+      objectUrlRef.current = objectUrl;
       onUpdate(objectUrl);
     }
   };
@@ -61,7 +72,10 @@ const SourceTooltip = ({
   return (
     <SettingsTooltip
       open={isOpen}
-      onClose={onClose}
+      onClose={() => {
+        revokeObjectUrl();
+        onClose();
+      }}
       title={
         <Box p={1} display="flex" alignItems="center">
           <input

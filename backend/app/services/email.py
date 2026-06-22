@@ -50,12 +50,22 @@ def _send_email(to_email: str, subject: str, html_body: str) -> None:
 
 
 def send_verification_email(email: str, token: str) -> None:
+    """Send an account verification email to the given address.
+
+    Includes a link to ``{frontend_url}/verify/{token}``. The email is stored
+    in the database and, if SMTP is configured, sent via SMTP.
+    """
     verify_url = f"{settings.frontend_url}/verify/{token}"
     html_body = render_template("verify_email.html", verify_url=verify_url)
     _send_email(email, "Verify your DnD Card Maker account", html_body)
 
 
 def send_reset_email(email: str, token: str) -> None:
+    """Send a password-reset email to the given address.
+
+    Includes a link to ``{frontend_url}/reset-password/{token}``. The email
+    is stored in the database and, if SMTP is configured, sent via SMTP.
+    """
     reset_url = f"{settings.frontend_url}/reset-password/{token}"
     html_body = render_template("reset_email.html", reset_url=reset_url)
     _send_email(email, "Reset your DnD Card Maker password", html_body)

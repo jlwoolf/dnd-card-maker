@@ -284,7 +284,7 @@ export default function CloudDeckPreview({ deckId, onClose, onCloseAll }: CloudD
   const handleToggleSave = async (cardId: string) => {
     try {
       const res = await cardApi.toggleSave(cardId);
-      const saved = res.data.message === "saved";
+      const saved = res.data.saved;
       if (saved) {
         setSavedCards((prev) => new Set(prev).add(cardId));
       } else {

@@ -2,19 +2,23 @@ from fastapi import APIRouter, Depends, HTTPException, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
+from app.dependencies import get_current_user
 from app.models.email import SentEmail
+from app.models.user import User
 
 router = APIRouter(prefix="/api/dev", tags=["dev"])
 
 
 @router.get("/mail")
-def list_mail(db: Session = Depends(get_db)):
-    emails = (
-        db.query(SentEmail)
-        .order_by(SentEmail.sent_at.desc())
-        .limit(50)
-        .all()
-    )
+def list_mail(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """List the 50 most recently sent emails (dev/testing endpoint).
+
+    Requires authentication. Returns 200 with email summaries (to, subject, sent_at).
+    """
+    emails = db.query(SentEmail).order_by(SentEmail.sent_at.desc()).limit(50).all()
     return [
         {
             "id": e.id,
@@ -27,7 +31,16 @@ def list_mail(db: Session = Depends(get_db)):
 
 
 @router.get("/mail/{email_id}")
-def get_mail(email_id: str, db: Session = Depends(get_db)):
+def get_mail(
+    email_id: str,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Retrieve a single sent email by ID, including its HTML body (dev/testing).
+
+    Requires authentication. Returns 200 on success or 404 if the email is
+    not found.
+    """
     email = db.query(SentEmail).filter(SentEmail.id == email_id).first()
     if not email:
         raise HTTPException(
@@ -44,6 +57,13 @@ def get_mail(email_id: str, db: Session = Depends(get_db)):
 
 
 @router.delete("/mail", status_code=status.HTTP_204_NO_CONTENT)
-def clear_mail(db: Session = Depends(get_db)):
+def clear_mail(
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Delete all stored sent emails (dev/testing endpoint).
+
+    Requires authentication. Returns 204 on success.
+    """
     db.query(SentEmail).delete()
     db.commit()

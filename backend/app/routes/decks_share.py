@@ -13,6 +13,12 @@ router = APIRouter(prefix="/api/shared/decks", tags=["shared_decks"])
 
 @router.get("/{slug}", response_model=SharedDeckResponse)
 def get_shared_deck(slug: str, db: Session = Depends(get_db)):
+    """Retrieve a publicly shared deck by its slug.
+
+    No authentication required. Returns 200 with the deck data including its
+    cards and a ``can_copy`` flag based on the share mode. Returns 404 if no
+    shared deck matches the slug.
+    """
     deck = db.query(Deck).filter(Deck.share_slug == slug).first()
     if not deck:
         raise HTTPException(
@@ -28,15 +34,17 @@ def get_shared_deck(slug: str, db: Session = Depends(get_db)):
     for dc in deck.deck_cards:
         c = card_map.get(dc.card_id)
         if c:
-            cards_data.append({
-                "id": c.id,
-                "title": c.title,
-                "img_url": c.img_url,
-                "elements": json.loads(c.elements),
-                "theme": json.loads(c.theme),
-                "share_slug": c.share_slug,
-                "share_mode": c.share_mode,
-            })
+            cards_data.append(
+                {
+                    "id": c.id,
+                    "title": c.title,
+                    "img_url": c.img_url,
+                    "elements": json.loads(c.elements),
+                    "theme": json.loads(c.theme),
+                    "share_slug": c.share_slug,
+                    "share_mode": c.share_mode,
+                }
+            )
 
     return SharedDeckResponse(
         id=deck.id,

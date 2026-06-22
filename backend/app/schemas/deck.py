@@ -1,11 +1,13 @@
 from datetime import datetime
-from typing import Any
+from typing import Any, Literal
 
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
+
+from app.schemas.card import CardThemeSchema
 
 
 class DeckCreate(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=200)
     card_ids: list[str]
 
 
@@ -13,16 +15,16 @@ class DeckCardInput(BaseModel):
     id: str | None = None
     elements: list[dict[str, Any]]
     img_url: str
-    theme: dict[str, str]
+    theme: CardThemeSchema
 
 
 class DeckSaveRequest(BaseModel):
-    title: str
+    title: str = Field(min_length=1, max_length=200)
     cards: list[DeckCardInput]
 
 
 class DeckUpdate(BaseModel):
-    title: str | None = None
+    title: str | None = Field(default=None, min_length=1, max_length=200)
     card_ids: list[str] | None = None
 
 
@@ -54,7 +56,7 @@ class DeckResponse(BaseModel):
 
 
 class DeckShareToggle(BaseModel):
-    mode: str
+    mode: Literal["view_only", "view_and_copy"]
 
 
 class SharedDeckResponse(BaseModel):
