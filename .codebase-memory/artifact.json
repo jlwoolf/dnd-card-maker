@@ -1,0 +1,11 @@
+{
+    "schema_version": 1,
+    "commit": "603ff04bf636555bf9d3e7e60dad2481b125571a",
+    "indexed_at": "2026-06-23T17:00:19Z",
+    "project": "home-jonathan-Projects-dnd-card-maker",
+    "nodes": 1948,
+    "edges": 5456,
+    "original_size": 5046272,
+    "compressed_size": 982882,
+    "compression_level": 9
+}
