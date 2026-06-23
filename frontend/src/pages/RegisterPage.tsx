@@ -1,7 +1,8 @@
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
   Alert,
+  Box,
   Button,
   Link,
   TextField,
@@ -10,6 +11,22 @@ import {
 import AuthPageLayout from "@src/components/AuthPageLayout";
 import { useAuthStore } from "@src/stores/useAuthStore";
 import { extractApiError } from "@src/utils/apiErrors";
+
+declare global {
+  interface Window {
+    turnstile?: {
+      render: (container: HTMLElement, options: {
+        sitekey: string;
+        callback?: (token: string) => void;
+        "expired-callback"?: () => void;
+        "error-callback"?: () => void;
+      }) => string;
+      reset: (widgetId: string) => void;
+    };
+  }
+}
+
+const TURNSTILE_SITE_KEY = import.meta.env.VITE_TURNSTILE_SITE_KEY || "1x00000000000000000000AA";
 
 export default function RegisterPage() {
   const navigate = useNavigate();
@@ -20,6 +37,35 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
+  const turnstileRef = useRef<HTMLDivElement>(null);
+  const turnstileTokenRef = useRef<string>("");
+
+  useEffect(() => {
+    if (!turnstileRef.current) return;
+
+    const observer = new MutationObserver(() => {
+      if (window.turnstile && turnstileRef.current) {
+        window.turnstile.render(turnstileRef.current, {
+          sitekey: TURNSTILE_SITE_KEY,
+          callback: (token: string) => { turnstileTokenRef.current = token; },
+          "expired-callback": () => { turnstileTokenRef.current = ""; },
+        });
+        observer.disconnect();
+      }
+    });
+    observer.observe(turnstileRef.current, { childList: true, subtree: true });
+
+    if (window.turnstile) {
+      window.turnstile.render(turnstileRef.current, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => { turnstileTokenRef.current = token; },
+        "expired-callback": () => { turnstileTokenRef.current = ""; },
+      });
+      observer.disconnect();
+    }
+
+    return () => observer.disconnect();
+  }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -34,7 +80,7 @@ export default function RegisterPage() {
     }
     setLoading(true);
     try {
-      await register(email, password);
+      await register(email, password, turnstileTokenRef.current);
       setSuccess(true);
     } catch (err: unknown) {
       setError(extractApiError(err, "Registration failed"));
@@ -97,6 +143,8 @@ export default function RegisterPage() {
         onChange={(e) => setConfirmPassword(e.target.value)}
         required
       />
+
+      <Box ref={turnstileRef} sx={{ mt: 2, display: "flex", justifyContent: "center" }} />
 
       <Button
         type="submit"

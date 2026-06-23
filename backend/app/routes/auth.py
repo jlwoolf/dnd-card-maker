@@ -4,11 +4,13 @@ Uses the shared ``get_user_id_from_token`` helper to eliminate token-decode
 duplication and ``app.constants`` for all magic strings.
 """
 
+import json
 import logging
+import urllib.request
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
+from fastapi import APIRouter, Depends, HTTPException, Request, status
 from jose import JWTError
 from sqlalchemy.orm import Session
 
@@ -42,12 +44,43 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 
 
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest, db: Session = Depends(get_db)):
+def register(body: RegisterRequest, request: Request, db: Session = Depends(get_db)):
     """Register a new user account and send a verification email.
 
     If the email is already registered but not yet verified, update the
     password, generate a fresh verification token, and resend the email.
+
+    Requires a Cloudflare Turnstile token (skipped when secret key is not
+    configured, e.g. in local development).
     """
+    if settings.turnstile_secret_key:
+        client_ip = request.client.host if request.client else "127.0.0.1"
+        verify_data = urllib.parse.urlencode({
+            "secret": settings.turnstile_secret_key,
+            "response": body.turnstile_token,
+            "remoteip": client_ip,
+        }).encode()
+        verify_req = urllib.request.Request(
+            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+            data=verify_data,
+            headers={"Content-Type": "application/x-www-form-urlencoded"},
+        )
+        try:
+            with urllib.request.urlopen(verify_req, timeout=5) as resp:
+                result = json.loads(resp.read())
+            if not result.get("success"):
+                raise HTTPException(
+                    status_code=status.HTTP_400_BAD_REQUEST,
+                    detail="Captcha verification failed",
+                )
+        except HTTPException:
+            raise
+        except Exception:
+            logging.getLogger(__name__).exception("Turnstile verification error")
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Captcha verification failed",
+            ) from None
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         if existing.is_verified:

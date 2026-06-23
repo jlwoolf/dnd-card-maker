@@ -6,7 +6,7 @@ interface AuthState {
   isAuthenticated: boolean;
   isLoading: boolean;
   login: (email: string, password: string) => Promise<void>;
-  register: (email: string, password: string) => Promise<void>;
+  register: (email: string, password: string, turnstileToken?: string) => Promise<void>;
   logout: () => void;
   checkAuth: () => Promise<void>;
   setUser: (user: { id: string; email: string }) => void;
@@ -37,8 +37,8 @@ export const useAuthStore = create<AuthState>((set) => ({
     });
   },
 
-  register: async (email: string, password: string) => {
-    await api.post("/auth/register", { email, password });
+  register: async (email: string, password: string, turnstileToken?: string) => {
+    await api.post("/auth/register", { email, password, turnstile_token: turnstileToken || "" });
   },
 
   logout: () => {

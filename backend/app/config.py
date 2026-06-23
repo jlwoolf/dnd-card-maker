@@ -18,6 +18,8 @@ class Settings(BaseSettings):
 
     dev_mail_enabled: bool = False
 
+    turnstile_secret_key: str = ""
+
     model_config = {"env_file": ".env", "env_file_encoding": "utf-8"}
 
 
