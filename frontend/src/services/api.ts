@@ -1,7 +1,7 @@
 import axios from "axios";
 import type { Element } from "@src/schemas";
 
-const API_BASE = "/api";
+const API_BASE = import.meta.env.BASE_URL + "api";
 
 const api = axios.create({
   baseURL: API_BASE,
