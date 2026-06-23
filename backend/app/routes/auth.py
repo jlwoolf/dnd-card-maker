@@ -41,6 +41,7 @@ from app.services import (
 )
 
 router = APIRouter(prefix="/api/auth", tags=["auth"])
+logger = logging.getLogger(__name__)
 
 
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
@@ -55,6 +56,10 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
     """
     if settings.turnstile_secret_key:
         client_ip = request.client.host if request.client else "127.0.0.1"
+        logger.debug(
+            "Turnstile enabled — verifying token (len=%d) for %s from %s",
+            len(body.turnstile_token), body.email, client_ip,
+        )
         verify_data = urllib.parse.urlencode({
             "secret": settings.turnstile_secret_key,
             "response": body.turnstile_token,
@@ -68,39 +73,50 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
         try:
             with urllib.request.urlopen(verify_req, timeout=5) as resp:
                 result = json.loads(resp.read())
+            logger.debug("Turnstile siteverify response: %s", result)
             if not result.get("success"):
+                logger.warning(
+                    "Turnstile verification failed for %s: error-codes=%s",
+                    body.email, result.get("error-codes", "unknown"),
+                )
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Captcha verification failed",
                 )
+            logger.info("Turnstile verification passed for %s", body.email)
         except HTTPException:
             raise
         except Exception:
-            logging.getLogger(__name__).exception("Turnstile verification error")
+            logger.exception("Turnstile network error for %s", body.email)
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
                 detail="Captcha verification failed",
             ) from None
+    else:
+        logger.debug("Turnstile disabled — skipping verification for %s", body.email)
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         if existing.is_verified:
+            logger.info("Registration rejected: %s already verified", body.email)
             raise HTTPException(
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Email already registered",
             )
+        logger.info("Re-registration: %s exists unverified — updating password, resending verification", body.email)
         existing.password_hash = hash_password(body.password)
         existing.verify_token = str(uuid4())
         db.commit()
         try:
             send_verification_email(existing.email, existing.verify_token)
         except Exception:
-            logging.getLogger(__name__).exception(
+            logger.exception(
                 "Failed to send verification email to %s", existing.email
             )
         return MessageResponse(
             message="A verification email has been resent. Check your email to verify your account."
         )
 
+    logger.info("New registration: %s — creating user, sending verification", body.email)
     user = User(
         email=body.email,
         password_hash=hash_password(body.password),
@@ -112,8 +128,9 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
     try:
         send_verification_email(user.email, user.verify_token)
     except Exception:
-        logging.getLogger(__name__).exception("Failed to send verification email to %s", user.email)
+        logger.exception("Failed to send verification email to %s", user.email)
 
+    logger.debug("Verification token set for %s (token=%s)", user.email, user.verify_token)
     return MessageResponse(
         message="Registration successful. Check your email to verify your account."
     )
@@ -124,6 +141,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     """Verify a user's email address using the token sent after registration."""
     user = db.query(User).filter(User.verify_token == token).first()
     if not user:
+        logger.info("Email verification failed: invalid token")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Invalid verification token",
@@ -133,6 +151,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
     user.verify_token = None
     db.commit()
 
+    logger.info("Email verified for %s", user.email)
     return MessageResponse(message="Email verified successfully")
 
 
@@ -141,12 +160,14 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
     """Authenticate a user and return access and refresh JWT tokens."""
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not verify_password(body.password, user.password_hash):
+        logger.info("Login failed for %s: %s", body.email, "user not found" if not user else "invalid password")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Invalid email or password",
         )
 
     if not user.is_verified:
+        logger.info("Login rejected: %s is not verified", body.email)
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Email not verified",
@@ -163,6 +184,7 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
         timedelta(days=settings.jwt_refresh_expire_days),
     )
 
+    logger.info("Login successful for %s", body.email)
     return TokenResponse(
         access_token=access_token,
         refresh_token=refresh_token,
@@ -221,8 +243,11 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
         try:
             send_reset_email(user.email, user.reset_token)
+            logger.info("Password reset email sent to %s", body.email)
         except Exception:
-            logging.getLogger(__name__).exception("Failed to send reset email to %s", user.email)
+            logger.exception("Failed to send reset email to %s", user.email)
+    else:
+        logger.info("Password reset requested for unknown email: %s", body.email)
 
     return MessageResponse(message="If the email is registered, a reset link has been sent.")
 
@@ -245,6 +270,7 @@ def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends
     )
 
     if not user:
+        logger.info("Password reset failed: invalid or expired token")
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
             detail="Invalid or expired reset token",
@@ -257,6 +283,8 @@ def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends
     if not user.is_verified:
         user.is_verified = True
         user.verify_token = None
+        logger.info("Password reset auto-verified %s", user.email)
     db.commit()
 
+    logger.info("Password reset successful for %s", user.email)
     return MessageResponse(message="Password reset successfully")

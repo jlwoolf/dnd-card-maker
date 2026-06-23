@@ -20,6 +20,8 @@ class Settings(BaseSettings):
 
     turnstile_secret_key: str = ""
 
+    log_level: str = "warn"
+
     model_config = {"env_file": "../.env", "env_file_encoding": "utf-8"}
 
 

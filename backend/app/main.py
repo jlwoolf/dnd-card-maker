@@ -1,3 +1,5 @@
+import logging
+import sys
 from contextlib import asynccontextmanager
 
 from fastapi import FastAPI
@@ -19,6 +21,19 @@ from app.routes import (
     share_router,
     users_router,
 )
+
+_level = getattr(logging, settings.log_level.upper(), logging.WARNING)
+logging.basicConfig(
+    level=_level,
+    format="%(asctime)s %(levelname)-8s [%(name)s] %(message)s",
+    datefmt="%Y-%m-%dT%H:%M:%S",
+    stream=sys.stderr,
+)
+logging.getLogger("uvicorn").setLevel(max(_level, logging.INFO))
+logging.getLogger("uvicorn.access").setLevel(_level)
+
+log = logging.getLogger(__name__)
+log.info("Log level set to %s", settings.log_level.upper())
 
 
 @asynccontextmanager
