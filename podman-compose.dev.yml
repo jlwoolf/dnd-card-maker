@@ -12,7 +12,8 @@ services:
       - VITE_API_TARGET=http://backend:8000
       - VITE_TURNSTILE_SITE_KEY=${VITE_TURNSTILE_SITE_KEY:-}
     depends_on:
-      - backend
+      backend:
+        condition: service_healthy
     restart: unless-stopped
 
   backend:
@@ -31,6 +32,12 @@ services:
       - FRONTEND_URL=http://localhost:5173
       - LOG_LEVEL=debug
     restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+      start_period: 15s
 
 volumes:
   db_data:
