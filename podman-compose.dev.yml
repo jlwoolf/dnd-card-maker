@@ -26,7 +26,7 @@ services:
       - /app/.venv
       - db_data:/app/data
     env_file:
-      - ./backend/.env
+      - ./.env
     environment:
       - FRONTEND_URL=http://localhost:5173
     restart: unless-stopped

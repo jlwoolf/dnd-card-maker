@@ -8,6 +8,7 @@ const BASE_PATH = process.env.VITE_BASE_PATH || "/dnd-card-maker/";
 
 // https://vite.dev/config/
 export default defineConfig({
+  envDir: path.resolve(__dirname, ".."),
   base: process.env.NODE_ENV === "production" ? BASE_PATH : undefined,
   plugins: [react()],
   resolve: {

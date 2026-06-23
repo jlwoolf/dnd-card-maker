@@ -26,10 +26,10 @@ cd backend
 # Install dependencies
 uv sync --all-extras
 
-# Copy and configure environment
-cp .env.example .env
-# Edit .env — at minimum set JWT_SECRET:
-python -c "import secrets; print(secrets.token_hex(32))"
+# Copy and configure the environment (at the project root)
+cp ../.env.example ../.env
+python3 -c "import secrets; print(secrets.token_hex(32))"
+# Edit ../.env — set JWT_SECRET and other values
 ```
 
 ### Run the server
@@ -98,11 +98,13 @@ podman build --target test -t dnd-card-backend-test -f Containerfile .
 ```bash
 podman run -d --name dnd-card-backend \
   -p 8000:8000 \
-  --env-file .env \
+  --env-file ../.env \
   dnd-card-backend
 ```
 
 ## Environment Variables
+
+All configuration lives in the project root `.env` file. See `../.env.example` for the full template.
 
 | Variable | Required | Default | Description |
 |----------|----------|---------|-------------|
@@ -116,6 +118,8 @@ podman run -d --name dnd-card-backend \
 | `SMTP_PASSWORD` | No | — | SMTP password |
 | `SMTP_FROM` | No | — | Sender email address |
 | `FRONTEND_URL` | No | `http://localhost:5173` | Base URL for email links |
+| `DEV_MAIL_ENABLED` | No | `false` | Enable dev mail/admin routes |
+| `TURNSTILE_SECRET_KEY` | No | — | Cloudflare Turnstile secret key |
 
 ## Project Structure
 
@@ -143,5 +147,4 @@ backend/
 ├── pyproject.toml         # Project config + dependencies
 ├── uv.lock                # Locked dependencies
 ├── Containerfile          # Multi-stage container build
-└── .env.example           # Environment template
 ```

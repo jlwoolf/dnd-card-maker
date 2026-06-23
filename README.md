@@ -21,8 +21,8 @@ A self-hosted web app for creating custom tabletop RPG cards. Design, preview, o
 ### Production
 
 ```bash
-cp backend/.env.example backend/.env
-# Edit backend/.env — at minimum set JWT_SECRET
+cp .env.example .env
+# Edit .env — at minimum set JWT_SECRET and VITE_TURNSTILE_SITE_KEY
 podman compose up
 ```
 
@@ -32,8 +32,8 @@ podman compose up
 ### Development (hot reload)
 
 ```bash
-cp backend/.env.example backend/.env
-# Edit backend/.env — at minimum set JWT_SECRET
+cp .env.example .env
+# Edit .env — at minimum set JWT_SECRET
 podman compose -f podman-compose.dev.yml up
 ```
 
@@ -45,7 +45,8 @@ podman compose -f podman-compose.dev.yml up
 
 ```bash
 # Terminal 1 — Backend
-cp backend/.env.example backend/.env
+cp .env.example .env
+# Edit .env — at minimum set JWT_SECRET
 cd backend && uv sync --all-extras
 uv run uvicorn app.main:app --reload --port 8000
 
@@ -57,41 +58,33 @@ Vite proxies `/api` to `http://localhost:8000` (override with `VITE_API_TARGET`)
 
 ## Configuration
 
-### Backend (`backend/.env`)
-
-| Variable | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `JWT_SECRET` | Yes | — | Secret key for signing JWT tokens (generate with `openssl rand -hex 32`) |
-| `JWT_ACCESS_EXPIRE_MINUTES` | No | `15` | Access token lifetime |
-| `JWT_REFRESH_EXPIRE_DAYS` | No | `7` | Refresh token lifetime |
-| `SQLITE_PATH` | No | `./data/cards.db` | Database file path |
-| `SMTP_HOST` | No | `localhost` | SMTP server host |
-| `SMTP_PORT` | No | `587` | SMTP server port |
-| `SMTP_USER` | No | — | SMTP username |
-| `SMTP_PASSWORD` | No | — | SMTP password |
-| `SMTP_FROM` | No | — | Sender email address |
-| `FRONTEND_URL` | No | `http://localhost:5173` | Base URL for verification/reset links in emails |
-| `DEV_MAIL_ENABLED` | No | `false` | Enable `/mail` and `/admin` dev-only routes |
-| `TURNSTILE_SECRET_KEY` | No | — | Cloudflare Turnstile secret key (leave empty to disable CAPTCHA) |
-
-### Frontend (`frontend/.env` — optional)
+Copy `.env.example` to `.env` and fill in the values.
 
 | Variable | Default | Description |
 |----------|---------|-------------|
-| `VITE_TURNSTILE_SITE_KEY` | test key | Cloudflare Turnstile site key for registration CAPTCHA |
-| `VITE_API_TARGET` | `http://localhost:8000` | API proxy target for Vite dev server |
+| `JWT_SECRET` | — | Secret key for signing JWT tokens (generate with `openssl rand -hex 32`) |
+| `JWT_ACCESS_EXPIRE_MINUTES` | `15` | Access token lifetime |
+| `JWT_REFRESH_EXPIRE_DAYS` | `7` | Refresh token lifetime |
+| `SQLITE_PATH` | `./data/cards.db` | Database file path |
+| `SMTP_HOST` | `localhost` | SMTP server host |
+| `SMTP_PORT` | `587` | SMTP server port |
+| `SMTP_USER` | — | SMTP username |
+| `SMTP_PASSWORD` | — | SMTP password |
+| `SMTP_FROM` | — | Sender email address |
+| `FRONTEND_URL` | `http://localhost:5173` | Base URL for verification/reset links in emails |
+| `DEV_MAIL_ENABLED` | `false` | Enable `/mail` and `/admin` dev-only routes |
+| `TURNSTILE_SECRET_KEY` | — | Cloudflare Turnstile secret key (leave empty to disable CAPTCHA) |
+| `VITE_TURNSTILE_SITE_KEY` | — | Cloudflare Turnstile site key (leave empty for test key — dev only) |
 | `VITE_BASE_PATH` | `/dnd-card-maker/` | Base path for production deployment |
+| `VITE_API_TARGET` | `http://localhost:8000` | API proxy target for Vite dev server |
 | `VITE_CORS_PROXY` | — | CORS proxy URL for cross-origin image capture |
-
-Copy `frontend/.env.example` to `frontend/.env` and fill in as needed (only required if using CAPTCHA or customizing the proxy).
 
 ### Cloudflare Turnstile (CAPTCHA)
 
 1. Go to [Cloudflare Dashboard → Turnstile](https://dash.cloudflare.com/)
 2. Create a site with domain `localhost` (for dev) and your production domain
 3. Copy the site key and secret key
-4. Set in backend `.env`: `TURNSTILE_SECRET_KEY=<secret>`
-5. Set in frontend (dev only): `export VITE_TURNSTILE_SITE_KEY=<site-key>` before `podman compose up`
+4. Set in `.env`: `TURNSTILE_SECRET_KEY=<secret>` and `VITE_TURNSTILE_SITE_KEY=<site-key>`
 
 Leave both keys empty to disable CAPTCHA (not recommended for production).
 
@@ -99,13 +92,13 @@ Leave both keys empty to disable CAPTCHA (not recommended for production).
 
 ```
 dnd-card-maker/
+├── .env.example                  # All environment variables
 ├── frontend/
 │   ├── Containerfile              # Production build (Nginx + SPA)
 │   ├── Containerfile.dev          # Dev image (Vite HMR)
 │   ├── nginx.conf                 # SPA fallback, gzip, cache headers
 │   ├── vite.config.ts             # Build config, proxy, manualChunks
 │   ├── package.json
-│   ├── .env.example               # Frontend env template
 │   └── src/
 │       ├── App.tsx                # Router + routes
 │       ├── main.tsx               # React entry
@@ -127,7 +120,6 @@ dnd-card-maker/
 │   ├── Containerfile.dev          # Dev image (uvicorn --reload)
 │   ├── pyproject.toml             # Dependencies + tool config
 │   ├── uv.lock                    # Locked dependencies
-│   ├── .env.example               # Backend env template
 │   └── app/
 │       ├── main.py                # FastAPI app, CORS, router registration
 │       ├── config.py              # Pydantic Settings
