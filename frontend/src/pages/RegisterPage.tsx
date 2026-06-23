@@ -15,14 +15,16 @@ import { extractApiError } from "@src/utils/apiErrors";
 declare global {
   interface Window {
     turnstile?: {
-      render: (container: HTMLElement, options: {
+      render: (container: string | HTMLElement, options: {
         sitekey: string;
         callback?: (token: string) => void;
+        "error-callback"?: (errorCode: string) => void;
         "expired-callback"?: () => void;
-        "error-callback"?: () => void;
+        "timeout-callback"?: () => void;
       }) => string;
-      reset: (widgetId: string) => void;
+      reset: (widgetId?: string) => void;
     };
+    __onTurnstileLoad?: () => void;
   }
 }
 
@@ -37,34 +39,43 @@ export default function RegisterPage() {
   const [error, setError] = useState("");
   const [success, setSuccess] = useState(false);
   const [loading, setLoading] = useState(false);
-  const turnstileRef = useRef<HTMLDivElement>(null);
+  const [turnstileError, setTurnstileError] = useState("");
+  const turnstileContainerId = useRef(`cf-turnstile-${crypto.randomUUID()}`);
   const turnstileTokenRef = useRef<string>("");
+  const turnstileWidgetId = useRef<string>("");
 
   useEffect(() => {
-    if (!turnstileRef.current) return;
-
-    const observer = new MutationObserver(() => {
-      if (window.turnstile && turnstileRef.current) {
-        window.turnstile.render(turnstileRef.current, {
-          sitekey: TURNSTILE_SITE_KEY,
-          callback: (token: string) => { turnstileTokenRef.current = token; },
-          "expired-callback": () => { turnstileTokenRef.current = ""; },
-        });
-        observer.disconnect();
-      }
-    });
-    observer.observe(turnstileRef.current, { childList: true, subtree: true });
+    window.__onTurnstileLoad = () => {
+      if (!window.turnstile) return;
+      turnstileWidgetId.current = window.turnstile.render(`#${turnstileContainerId.current}`, {
+        sitekey: TURNSTILE_SITE_KEY,
+        callback: (token: string) => {
+          turnstileTokenRef.current = token;
+          setTurnstileError("");
+        },
+        "error-callback": (errorCode: string) => {
+          turnstileTokenRef.current = "";
+          setTurnstileError(`CAPTCHA error (${errorCode}). Please refresh the page and try again.`);
+        },
+        "expired-callback": () => {
+          turnstileTokenRef.current = "";
+        },
+        "timeout-callback": () => {
+          turnstileTokenRef.current = "";
+        },
+      });
+    };
 
     if (window.turnstile) {
-      window.turnstile.render(turnstileRef.current, {
-        sitekey: TURNSTILE_SITE_KEY,
-        callback: (token: string) => { turnstileTokenRef.current = token; },
-        "expired-callback": () => { turnstileTokenRef.current = ""; },
-      });
-      observer.disconnect();
+      window.__onTurnstileLoad();
     }
 
-    return () => observer.disconnect();
+    return () => {
+      delete window.__onTurnstileLoad;
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+      }
+    };
   }, []);
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -84,6 +95,9 @@ export default function RegisterPage() {
       setSuccess(true);
     } catch (err: unknown) {
       setError(extractApiError(err, "Registration failed"));
+      if (turnstileWidgetId.current && window.turnstile) {
+        window.turnstile.reset(turnstileWidgetId.current);
+      }
     } finally {
       setLoading(false);
     }
@@ -111,6 +125,12 @@ export default function RegisterPage() {
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
           {error}
+        </Alert>
+      )}
+
+      {turnstileError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {turnstileError}
         </Alert>
       )}
 
@@ -144,7 +164,7 @@ export default function RegisterPage() {
         required
       />
 
-      <Box ref={turnstileRef} sx={{ mt: 2, display: "flex", justifyContent: "center" }} />
+      <Box id={turnstileContainerId.current} sx={{ mt: 2, display: "flex", justifyContent: "center" }} />
 
       <Button
         type="submit"
