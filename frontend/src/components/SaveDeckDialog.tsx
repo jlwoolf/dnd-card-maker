@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Check, Close, Save } from "@mui/icons-material";
+import { Add, Check, Close, Save } from "@mui/icons-material";
 import {
   Box,
   Button,
@@ -68,6 +68,17 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
   const deselectAll = () => setSelectedIds([]);
 
   const handleSave = async () => {
+    if (!editingCloudDeckId) return;
+    await doSave(editingCloudDeckId);
+  };
+
+  const handleSaveAs = async () => {
+    await doSave(undefined);
+  };
+
+  const doSave = async (deckId: string | undefined) => {
+    const isSaveAs = deckId === undefined;
+
     if (selectedIds.length === 0) {
       showSnackbar("Select at least one card", "error");
       return;
@@ -90,7 +101,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
       let response: Awaited<ReturnType<typeof deckApi.save>>;
 
       if (cards.length <= BATCH_SIZE) {
-        response = await deckApi.save({ title, cards, deck_id: editingCloudDeckId || undefined });
+        response = await deckApi.save({ title, cards, deck_id: deckId });
       } else {
         const batchCount = Math.ceil(cards.length / BATCH_SIZE);
         const allCardIds: string[] = [];
@@ -105,7 +116,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
         setSaveProgress(`Linking ${allCardIds.length} cards to deck...`);
         response = await deckApi.save({
           title,
-          deck_id: editingCloudDeckId || undefined,
+          deck_id: deckId,
           card_ids: allCardIds,
         });
       }
@@ -120,8 +131,15 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
           setCardCloudId(match.id, card.id);
         }
       }
+
+      if (isSaveAs) {
+        // Save As creates a new deck — set it as the editing context so
+        // subsequent saves update this deck rather than creating another one.
+        setEditingCloudDeck(response.data.id, title);
+      }
+
       showSnackbar("Deck saved to cloud!", "success");
-      handleClose();
+      onClose();
     } catch {
       showSnackbar("Failed to save deck", "error");
     } finally {
@@ -275,7 +293,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
         <RoundedButtonGroup>
           <Button
             onClick={handleSave}
-            disabled={saving || selectedIds.length === 0}
+            disabled={!editingCloudDeckId || saving || selectedIds.length === 0}
             startIcon={saving ? <CircularProgress size={20} /> : <Save />}
             sx={{
               "&.Mui-disabled": {
@@ -285,6 +303,13 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
             }}
           >
             {saving ? saveProgress || "Saving..." : "Save"}
+          </Button>
+          <Button
+            onClick={handleSaveAs}
+            disabled={saving || selectedIds.length === 0}
+            startIcon={<Add />}
+          >
+            Save As
           </Button>
           <Button onClick={handleClose} startIcon={<Close />}>
             Cancel

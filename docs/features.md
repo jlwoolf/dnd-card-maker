@@ -104,6 +104,8 @@ Create an account to unlock cloud features:
 - Save any card to your cloud account
 - Cards are stored with their full element data, theme, and a rendered thumbnail image
 - **Batch upload** for large decks — cards are uploaded in groups of 10 to avoid request size limits
+- **Save** (visible when editing a loaded cloud deck) updates the existing deck
+- **Save As** creates a new deck (even when editing an existing one), then sets it as the active editing target for subsequent saves
 
 ### My Cards & Decks
 
