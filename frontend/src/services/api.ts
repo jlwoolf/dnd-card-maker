@@ -200,9 +200,14 @@ export const deckApi = {
     api.post<DeckResponse>("/decks", data),
   save: (data: {
     title: string;
-    cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
+    cards?: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
     deck_id?: string;
+    card_ids?: string[];
   }) => api.post<DeckResponse>("/decks/save", data),
+
+  uploadCards: (data: {
+    cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
+  }) => api.post<{ card_ids: string[] }>("/decks/save/cards", data),
   update: (id: string, data: { title?: string; card_ids?: string[] }) =>
     api.put<DeckResponse>(`/decks/${id}`, data),
   delete: (id: string) => api.delete(`/decks/${id}`),

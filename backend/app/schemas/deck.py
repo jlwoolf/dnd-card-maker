@@ -20,8 +20,17 @@ class DeckCardInput(BaseModel):
 
 class DeckSaveRequest(BaseModel):
     title: str = Field(min_length=1, max_length=200)
-    cards: list[DeckCardInput]
+    cards: list[DeckCardInput] | None = None
     deck_id: str | None = None
+    card_ids: list[str] | None = None
+
+
+class DeckCardsBatchRequest(BaseModel):
+    cards: list[DeckCardInput]
+
+
+class DeckCardsBatchResponse(BaseModel):
+    card_ids: list[str]
 
 
 class DeckUpdate(BaseModel):

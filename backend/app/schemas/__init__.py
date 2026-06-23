@@ -17,6 +17,8 @@ from app.schemas.deck import (  # noqa: F401
     CardDecksResponse,
     CardDecksUpdate,
     DeckCardInput,
+    DeckCardsBatchRequest,
+    DeckCardsBatchResponse,
     DeckCreate,
     DeckResponse,
     DeckSaveRequest,

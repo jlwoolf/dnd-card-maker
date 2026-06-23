@@ -12,6 +12,8 @@ from app.dependencies import get_current_user
 from app.models.deck import Deck
 from app.models.user import User
 from app.schemas import (
+    DeckCardsBatchRequest,
+    DeckCardsBatchResponse,
     DeckCreate,
     DeckResponse,
     DeckSaveRequest,
@@ -30,6 +32,7 @@ from app.services.deck_service import (
     share_deck,
     unshare_deck,
     update_deck,
+    upsert_deck_cards_batch,
 )
 
 router = APIRouter(prefix="/api/decks", tags=["decks"])
@@ -91,11 +94,14 @@ def save_deck_endpoint(
     current_user: User = Depends(get_current_user),
     db: Session = Depends(get_db),
 ):
-    """Save or update an entire deck with cards in a single request."""
-    deck = save_deck_with_cards(
-        user_id=current_user.id,
-        title=body.title,
-        cards_input=[
+    """Save or update an entire deck in a single request.
+
+    Accepts either ``cards`` (full card data) for small decks, or ``card_ids``
+    (pre-uploaded card IDs) for large decks that were batched.
+    """
+    cards_input = None
+    if body.cards:
+        cards_input = [
             {
                 "id": c.id,
                 "elements": c.elements,
@@ -103,11 +109,38 @@ def save_deck_endpoint(
                 "theme": c.theme,
             }
             for c in body.cards
-        ],
+        ]
+
+    deck = save_deck_with_cards(
+        user_id=current_user.id,
+        title=body.title,
+        cards_input=cards_input or [],
         db=db,
         deck_id=body.deck_id,
+        card_ids=body.card_ids,
     )
     return _build_deck_response(deck, db)
+
+
+@router.post("/save/cards", response_model=DeckCardsBatchResponse, status_code=status.HTTP_201_CREATED)
+def save_deck_cards_batch_endpoint(
+    body: DeckCardsBatchRequest,
+    current_user: User = Depends(get_current_user),
+    db: Session = Depends(get_db),
+):
+    """Upload cards in a batch for large decks."""
+    cards_input = [
+        {
+            "id": c.id,
+            "elements": c.elements,
+            "img_url": c.img_url,
+            "theme": c.theme,
+        }
+        for c in body.cards
+    ]
+    card_ids = upsert_deck_cards_batch(current_user.id, cards_input, db)
+    db.commit()
+    return DeckCardsBatchResponse(card_ids=card_ids)
 
 
 @router.get("/{deck_id}", response_model=DeckResponse)

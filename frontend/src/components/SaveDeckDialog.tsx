@@ -30,6 +30,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const [title, setTitle] = useState(() => `Deck ${new Date().toLocaleDateString()}`);
   const [saving, setSaving] = useState(false);
+  const [saveProgress, setSaveProgress] = useState("");
   const [prevOpen, setPrevOpen] = useState(open);
   const [prevTitle, setPrevTitle] = useState(editingCloudDeckTitle);
   const [prevCards, setPrevCards] = useState(localCards);
@@ -78,9 +79,34 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
         theme: themeToSnake(c.theme),
       }));
 
+    const BATCH_SIZE = 10;
     setSaving(true);
+    setSaveProgress("");
+
     try {
-      const response = await deckApi.save({ title, cards, deck_id: editingCloudDeckId || undefined });
+      let response: Awaited<ReturnType<typeof deckApi.save>>;
+
+      if (cards.length <= BATCH_SIZE) {
+        response = await deckApi.save({ title, cards, deck_id: editingCloudDeckId || undefined });
+      } else {
+        const batchCount = Math.ceil(cards.length / BATCH_SIZE);
+        const allCardIds: string[] = [];
+
+        for (let i = 0; i < batchCount; i++) {
+          setSaveProgress(`Uploading cards ${i + 1}/${batchCount}...`);
+          const batch = cards.slice(i * BATCH_SIZE, (i + 1) * BATCH_SIZE);
+          const batchRes = await deckApi.uploadCards({ cards: batch });
+          allCardIds.push(...batchRes.data.card_ids);
+        }
+
+        setSaveProgress(`Linking ${allCardIds.length} cards to deck...`);
+        response = await deckApi.save({
+          title,
+          deck_id: editingCloudDeckId || undefined,
+          card_ids: allCardIds,
+        });
+      }
+
       for (const card of response.data.cards) {
         const match = localCards.find(
           (lc) =>
@@ -97,6 +123,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
       showSnackbar("Failed to save deck", "error");
     } finally {
       setSaving(false);
+      setSaveProgress("");
     }
   };
 
@@ -283,7 +310,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
               },
             }}
           >
-            Save
+            {saving ? saveProgress || "Saving..." : "Save"}
           </Button>
           <Button onClick={handleClose} startIcon={<Close />}>
             Cancel

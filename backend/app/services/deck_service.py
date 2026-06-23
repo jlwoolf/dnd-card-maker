@@ -168,21 +168,15 @@ def update_deck(
     return deck
 
 
-def save_deck_with_cards(
+def _upsert_cards(
     user_id: str,
-    title: str,
     cards_input: list[dict],
     db: Session,
-    deck_id: str | None = None,
-) -> Deck:
-    """Save or update an entire deck with cards in a single operation.
+) -> list[str]:
+    """Create or update cards and return their IDs.
 
     Each item in ``cards_input`` must have ``elements``, ``img_url``, ``theme``
     and optionally an ``id`` for updates.
-
-    If ``deck_id`` is provided, that specific deck is updated.  Otherwise the
-    deck is matched by title.  When no matching deck exists a new one is
-    created.  Orphaned cards are cleaned up.
     """
     card_ids: list[str] = []
     for card_input in cards_input:
@@ -207,6 +201,28 @@ def save_deck_with_cards(
         db.add(card)
         db.flush()
         card_ids.append(card.id)
+    return card_ids
+
+
+def save_deck_with_cards(
+    user_id: str,
+    title: str,
+    cards_input: list[dict],
+    db: Session,
+    deck_id: str | None = None,
+    card_ids: list[str] | None = None,
+) -> Deck:
+    """Save or update an entire deck with cards in a single operation.
+
+    Two modes:
+    - ``cards_input`` provided: cards are created/updated and linked to the deck.
+    - ``card_ids`` provided (cards_input empty): existing cards are linked to the deck.
+    """
+    if cards_input:
+        card_ids = _upsert_cards(user_id, cards_input, db)
+
+    if not card_ids:
+        card_ids = []
 
     if deck_id:
         existing = (
@@ -256,6 +272,15 @@ def delete_deck(deck: Deck, db: Session) -> None:
     for card_id in old_card_ids:
         _cleanup_orphaned_card(card_id, db)
     db.commit()
+
+
+def upsert_deck_cards_batch(
+    user_id: str,
+    cards_input: list[dict],
+    db: Session,
+) -> list[str]:
+    """Create or update cards and return their IDs without deck association."""
+    return _upsert_cards(user_id, cards_input, db)
 
 
 def share_deck(deck: Deck, mode: str, db: Session) -> Deck:
