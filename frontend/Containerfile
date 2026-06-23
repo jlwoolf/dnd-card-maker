@@ -4,6 +4,9 @@ COPY package*.json ./
 RUN npm install
 COPY . .
 ENV NODE_ENV=production
+ARG VITE_TURNSTILE_SITE_KEY
+ARG VITE_BASE_PATH
+ARG VITE_CORS_PROXY
 RUN npm run build
 
 # Stage 2: Production stage
