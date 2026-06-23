@@ -1,77 +1,120 @@
 """Deck business logic extracted from route handlers.
 
-All functions accept a SQLAlchemy ``Session``. The ``_get_deck_cards`` helper
+All functions accept a SQLAlchemy ``Session``. The ``get_deck_cards`` helper
 is shared between the authenticated deck endpoints and the public share endpoint.
 """
 
 import json
-from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
+from app.constants import DEFAULT_DECK_TITLE
 from app.models.card import Card
 from app.models.deck import Deck, DeckCard
-from app.utils.deck_helpers import _cleanup_orphaned_card
-from app.utils.shared import generate_share_slug
+from app.schemas.deck import DeckResponse, SharedDeckResponse
+from app.utils.shared import apply_share, remove_share
 
 
-def _get_deck_cards(deck: Deck, db: Session) -> list[dict]:
-    """Return card data for every card in the given deck, including saved status.
+def get_or_create_default_deck(user_id: str, db: Session) -> Deck:
+    """Return the default deck for a user, creating it if it does not exist."""
+    deck = db.query(Deck).filter(Deck.user_id == user_id, Deck.is_default).first()
+    if not deck:
+        deck = Deck(user_id=user_id, title=DEFAULT_DECK_TITLE, is_default=True)
+        db.add(deck)
+        db.commit()
+        db.refresh(deck)
+    return deck
 
-    This is the canonical helper used by both authenticated deck routes and the
-    public shared-deck endpoint. It builds a list of dicts suitable for
-    serialization into ``DeckResponse`` or ``SharedDeckResponse``.
+
+def cleanup_orphaned_card(card_id: str, db: Session) -> None:
+    """Delete a card if it is no longer referenced by any deck."""
+    count = db.query(DeckCard).filter(DeckCard.card_id == card_id).count()
+    if count == 0:
+        db.query(Card).filter(Card.id == card_id).delete()
+
+
+def get_next_deck_position(deck_id: str, db: Session) -> int:
+    """Return the next available position index for a card in the given deck.
+
+    Position is zero-based and sequential. Returns 0 for an empty deck.
+    """
+    max_pos = (
+        db.query(DeckCard.position)
+        .filter(DeckCard.deck_id == deck_id)
+        .order_by(DeckCard.position.desc())
+        .first()
+    )
+    return (max_pos[0] + 1) if max_pos else 0
+
+
+def get_deck_cards(deck: Deck, db: Session, include_saved: bool = False) -> list[dict]:
+    """Return card data for every card in the given deck.
+
+    This is the canonical helper used by authenticated deck endpoints and
+    the public shared-deck endpoint.  When ``include_saved`` is True the
+    returned dicts include a ``saved`` flag indicating whether each card is
+    also in the user's default deck.
     """
     card_ids = [dc.card_id for dc in deck.deck_cards]
     cards = db.query(Card).filter(Card.id.in_(card_ids)).all() if card_ids else []
     card_map = {c.id: c for c in cards}
 
-    default_deck = db.query(Deck).filter(Deck.user_id == deck.user_id, Deck.is_default).first()
     default_card_ids: set[str] = set()
-    if default_deck:
-        default_card_ids = {dc.card_id for dc in default_deck.deck_cards}
+    if include_saved:
+        default_deck = db.query(Deck).filter(
+            Deck.user_id == deck.user_id, Deck.is_default
+        ).first()
+        if default_deck:
+            default_card_ids = {dc.card_id for dc in default_deck.deck_cards}
 
     result: list[dict] = []
     for dc in deck.deck_cards:
         c = card_map.get(dc.card_id)
         if c:
-            result.append(
-                {
-                    "id": c.id,
-                    "title": c.title,
-                    "saved": c.id in default_card_ids,
-                    "elements": json.loads(c.elements),
-                    "theme": json.loads(c.theme),
-                    "img_url": c.img_url,
-                    "share_slug": c.share_slug,
-                    "share_mode": c.share_mode,
-                }
-            )
+            entry: dict = {
+                "id": c.id,
+                "title": c.title,
+                "elements": json.loads(c.elements),
+                "theme": json.loads(c.theme),
+                "img_url": c.img_url,
+                "share_slug": c.share_slug,
+                "share_mode": c.share_mode,
+            }
+            if include_saved:
+                entry["saved"] = c.id in default_card_ids
+            result.append(entry)
     return result
 
 
-def get_deck_cards_for_share(deck: Deck, db: Session) -> list[dict]:
-    """Return card data for a shared deck (no ``saved`` flag, no ownership info)."""
-    card_ids = [dc.card_id for dc in deck.deck_cards]
-    cards = db.query(Card).filter(Card.id.in_(card_ids)).all() if card_ids else []
-    card_map = {c.id: c for c in cards}
+def deck_to_response(deck: Deck, db: Session) -> DeckResponse:
+    """Serialize a Deck ORM model into a DeckResponse including its cards."""
+    cards_data = get_deck_cards(deck, db, include_saved=True)
+    return DeckResponse(
+        id=deck.id,
+        user_id=deck.user_id,
+        title=deck.title,
+        is_default=deck.is_default,
+        cards=cards_data,
+        share_slug=deck.share_slug,
+        share_mode=deck.share_mode,
+        share_at=deck.share_at,
+        created_at=deck.created_at,
+        updated_at=deck.updated_at,
+    )
 
-    cards_data: list[dict] = []
-    for dc in deck.deck_cards:
-        c = card_map.get(dc.card_id)
-        if c:
-            cards_data.append(
-                {
-                    "id": c.id,
-                    "title": c.title,
-                    "elements": json.loads(c.elements),
-                    "theme": json.loads(c.theme),
-                    "img_url": c.img_url,
-                    "share_slug": c.share_slug,
-                    "share_mode": c.share_mode,
-                }
-            )
-    return cards_data
+
+def deck_to_shared_response(deck: Deck, db: Session) -> SharedDeckResponse:
+    """Serialize a Deck ORM model into a public SharedDeckResponse."""
+    from app.constants import SHARE_MODE_VIEW_AND_COPY
+
+    cards_data = get_deck_cards(deck, db, include_saved=False)
+    return SharedDeckResponse(
+        id=deck.id,
+        title=deck.title,
+        cards=cards_data,
+        mode=deck.share_mode,
+        can_copy=deck.share_mode == SHARE_MODE_VIEW_AND_COPY,
+    )
 
 
 def list_user_decks(user_id: str, db: Session) -> list[dict]:
@@ -158,7 +201,7 @@ def update_deck(
             db.add(DeckCard(deck_id=deck.id, card_id=card_id, position=i))
         db.commit()
         for card_id in old_card_ids:
-            _cleanup_orphaned_card(card_id, db)
+            cleanup_orphaned_card(card_id, db)
         db.commit()
     else:
         db.commit()
@@ -257,7 +300,7 @@ def save_deck_with_cards(
 
     db.commit()
     for card_id in old_card_ids:
-        _cleanup_orphaned_card(card_id, db)
+        cleanup_orphaned_card(card_id, db)
     db.commit()
     db.refresh(deck)
     return deck
@@ -269,7 +312,7 @@ def delete_deck(deck: Deck, db: Session) -> None:
     db.delete(deck)
     db.commit()
     for card_id in old_card_ids:
-        _cleanup_orphaned_card(card_id, db)
+        cleanup_orphaned_card(card_id, db)
     db.commit()
 
 
@@ -284,9 +327,7 @@ def upsert_deck_cards_batch(
 
 def share_deck(deck: Deck, mode: str, db: Session) -> Deck:
     """Enable sharing for a deck with the given mode."""
-    deck.share_slug = generate_share_slug()
-    deck.share_mode = mode
-    deck.share_at = datetime.now(UTC)
+    apply_share(deck, mode)
     db.commit()
     db.refresh(deck)
     return deck
@@ -294,9 +335,7 @@ def share_deck(deck: Deck, mode: str, db: Session) -> Deck:
 
 def unshare_deck(deck: Deck, db: Session) -> None:
     """Disable sharing for a deck, clearing share fields."""
-    deck.share_slug = None
-    deck.share_mode = None
-    deck.share_at = None
+    remove_share(deck)
     db.commit()
 
 

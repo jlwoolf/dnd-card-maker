@@ -153,11 +153,11 @@ List the current user's cards in their default deck.
     "id": "uuid",
     "title": "My Card",
     "img_url": "data:image/jpeg;base64,...",
-    "theme": { "fill": "#...", ... },
-    "share_slug": "abc12345",
-    "share_at": "2025-01-01T00:00:00Z",
+    "saved": true,
     "created_at": "2025-01-01T00:00:00Z",
-    "updated_at": "2025-01-01T00:00:00Z"
+    "updated_at": "2025-01-01T00:00:00Z",
+    "share_slug": "abc12345",
+    "share_mode": "view_only"
   }
 ]
 ```
@@ -227,13 +227,7 @@ Update a card.
 
 Delete a card. Removes it from all decks. If it was the last remaining deck membership, the card is permanently deleted.
 
-**Response** `200`:
-
-```json
-{
-  "message": "Card deleted"
-}
-```
+**Response** `204 No Content` (no response body).
 
 ---
 
@@ -251,14 +245,7 @@ Create or update a share link for a card.
 
 Valid modes: `"view_only"`, `"view_and_copy"`.
 
-**Response** `200`:
-
-```json
-{
-  "share_slug": "abc12345",
-  "share_url": "http://localhost:5173/share/abc12345"
-}
-```
+**Response** `200`: Returns the full `CardResponse` including the newly generated `share_slug`.
 
 ---
 
@@ -266,13 +253,7 @@ Valid modes: `"view_only"`, `"view_and_copy"`.
 
 Remove a card's share link. The card becomes private.
 
-**Response** `200`:
-
-```json
-{
-  "message": "Share link removed"
-}
-```
+**Response** `204 No Content` (no response body).
 
 ---
 
@@ -316,7 +297,7 @@ Replace the deck assignments for a card.
 }
 ```
 
-**Response** `200`: Updated `CardDecksResponse`.
+**Response** `204 No Content` (no response body).
 
 ---
 
@@ -408,14 +389,9 @@ Batch upload cards only (max 10 per request). Cards are created or updated and r
 **Response** `200`:
 
 ```json
-[
-  {
-    "id": "uuid",
-    "elements": [...],
-    "img_url": "data:...",
-    "theme": {...}
-  }
-]
+{
+  "card_ids": ["uuid1", "uuid2"]
+}
 ```
 
 ---
@@ -449,13 +425,7 @@ Update a deck's title and/or card list.
 
 Delete a deck. The default deck cannot be deleted. Cards are only deleted if they become orphaned (not in any other deck).
 
-**Response** `200`:
-
-```json
-{
-  "message": "Deck deleted"
-}
-```
+**Response** `204 No Content` (no response body).
 
 ---
 
@@ -471,14 +441,7 @@ Share a deck.
 }
 ```
 
-**Response** `200`:
-
-```json
-{
-  "share_slug": "xyz98765",
-  "share_url": "http://localhost:5173/share/deck/xyz98765"
-}
-```
+**Response** `200`: Returns the full `DeckResponse` including the newly generated `share_slug`.
 
 ---
 
@@ -486,13 +449,7 @@ Share a deck.
 
 Remove a deck's share link.
 
-**Response** `200`:
-
-```json
-{
-  "message": "Share link removed"
-}
-```
+**Response** `204 No Content` (no response body).
 
 ---
 
@@ -631,7 +588,9 @@ Permanently delete the current user's account and all associated data (cards, de
 
 ## Dev Endpoints
 
-Only available when `DEV_MAIL_ENABLED=true`. No authentication required.
+Only available when `DEV_MAIL_ENABLED=true`. All dev endpoints require an
+`X-Dev-Auth` header set to the server's `JWT_SECRET` value.
+Without this header, the endpoints return `404` (as if they don't exist).
 
 ### GET `/api/dev/mail`
 
@@ -716,12 +675,27 @@ List rows from a database table with pagination.
 | `413`  | Request body too large                          |
 | `422`  | Request validation failed (Pydantic)            |
 | `429`  | Rate limit exceeded                             |
+| `500`  | Unhandled internal server error                 |
 
 ### Error Response Format
 
 ```json
 {
   "detail": "Human-readable error message"
+}
+```
+
+For `422` validation errors the `detail` field contains Pydantic error entries:
+
+```json
+{
+  "detail": [
+    {
+      "loc": ["body", "field_name"],
+      "msg": "field required",
+      "type": "value_error.missing"
+    }
+  ]
 }
 ```
 

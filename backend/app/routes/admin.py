@@ -1,4 +1,3 @@
-import json
 from datetime import datetime
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
@@ -6,12 +5,13 @@ from sqlalchemy.orm import Session
 
 from app.constants import ADMIN_DEFAULT_LIMIT
 from app.database import get_db
+from app.dependencies import DBSession, check_dev_mode
 from app.models.card import Card
 from app.models.deck import Deck, DeckCard
 from app.models.email import SentEmail
 from app.models.user import User
-from app.schemas.card import CardResponse, CardThemeSchema
-from app.services.deck_service import _get_deck_cards
+from app.services.card_service import card_to_response
+from app.services.deck_service import get_deck_cards
 
 TABLES: dict[str, type] = {
     "users": User,
@@ -21,7 +21,7 @@ TABLES: dict[str, type] = {
     "sent_emails": SentEmail,
 }
 
-router = APIRouter(prefix="/api/admin", tags=["admin"])
+router = APIRouter(prefix="/api/admin", tags=["admin"], dependencies=[Depends(check_dev_mode)])
 
 
 def _serialize(model) -> dict[str, object]:
@@ -36,7 +36,7 @@ def _serialize(model) -> dict[str, object]:
 
 @router.get("/tables")
 def list_tables(
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     return {"tables": list(TABLES.keys())}
 
@@ -66,34 +66,22 @@ def get_table_rows(
     }
 
 
-@router.get("/cards/{card_id}", response_model=CardResponse)
-def get_admin_card(card_id: str, db: Session = Depends(get_db)):
+@router.get("/cards/{card_id}")
+def get_admin_card(card_id: str, db: DBSession):
     """Return a single card in full detail (dev-only, no auth)."""
     card = db.query(Card).filter(Card.id == card_id).first()
     if not card:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-    return CardResponse(
-        id=card.id,
-        user_id=card.user_id,
-        title=card.title,
-        elements=json.loads(card.elements),
-        img_url=card.img_url,
-        theme=CardThemeSchema(**json.loads(card.theme)),
-        share_slug=card.share_slug,
-        share_mode=card.share_mode,
-        share_at=card.share_at,
-        created_at=card.created_at,
-        updated_at=card.updated_at,
-    )
+    return card_to_response(card)
 
 
 @router.get("/decks/{deck_id}")
-def get_admin_deck(deck_id: str, db: Session = Depends(get_db)):
+def get_admin_deck(deck_id: str, db: DBSession):
     """Return a deck with full card data (dev-only, no auth)."""
     deck = db.query(Deck).filter(Deck.id == deck_id).first()
     if not deck:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
-    cards_data = _get_deck_cards(deck, db)
+    cards_data = get_deck_cards(deck, db, include_saved=True)
     return {
         "id": deck.id,
         "title": deck.title,

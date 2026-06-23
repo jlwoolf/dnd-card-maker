@@ -12,7 +12,6 @@ from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response
-from jose import JWTError
 from PIL import Image
 from sqlalchemy.orm import Session
 
@@ -20,7 +19,7 @@ from app.config import settings
 from app.constants import TOKEN_TYPE_ACCESS
 from app.database import get_db
 from app.models.card import Card
-from app.services.auth import decode_token, get_user_id_from_token
+from app.services.auth import validate_token_and_get_user
 
 router = APIRouter(prefix="/api/images", tags=["images"])
 
@@ -69,37 +68,15 @@ def get_card_image(
     only served if it is publicly shared (has a non-null ``share_slug``).
     """
     if token:
-        try:
-            user_id = get_user_id_from_token(token, TOKEN_TYPE_ACCESS, settings.jwt_secret)
-            payload = decode_token(token, settings.jwt_secret)
-        except (JWTError, ValueError):
-            pass
-        else:
-            from app.models.user import User
-
-            user = db.query(User).filter(User.id == user_id).first()
-            if user is None:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED,
-                    detail="User not found",
-                )
-
-            token_version = payload.get("tv")
-            if token_version is not None and user.token_version != token_version:
-                raise HTTPException(
-                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Token version mismatch"
-                )
-
-            if not user.is_verified:
-                raise HTTPException(
-                    status_code=status.HTTP_403_FORBIDDEN,
-                    detail="Email not verified",
-                )
-
+        user = validate_token_and_get_user(
+            token, TOKEN_TYPE_ACCESS, settings.jwt_secret, db
+        )
+        if user is not None:
             card = db.query(Card).filter(Card.id == card_id).first()
             if not card:
-                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-
+                raise HTTPException(
+                    status_code=status.HTTP_404_NOT_FOUND, detail="Card not found"
+                )
             return _serve_card_image(card, scale)
 
     # No (valid) token — allow access only for publicly shared cards

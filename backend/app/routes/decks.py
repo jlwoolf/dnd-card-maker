@@ -4,13 +4,10 @@ All business logic is delegated to ``app.services.deck_service`` so route
 handlers stay thin.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import CurrentUser, DBSession
 from app.models.deck import Deck
-from app.models.user import User
 from app.schemas import (
     DeckCardsBatchRequest,
     DeckCardsBatchResponse,
@@ -22,9 +19,9 @@ from app.schemas import (
     DeckUpdate,
 )
 from app.services.deck_service import (
-    _get_deck_cards,
     count_user_cards_by_ids,
     create_deck_with_cards,
+    deck_to_response,
     delete_deck,
     get_deck_by_id,
     list_user_decks,
@@ -38,27 +35,10 @@ from app.services.deck_service import (
 router = APIRouter(prefix="/api/decks", tags=["decks"])
 
 
-def _build_deck_response(deck: Deck, db: Session) -> DeckResponse:
-    """Serialize a Deck model into a DeckResponse including its cards."""
-    cards_data = _get_deck_cards(deck, db)
-    return DeckResponse(
-        id=deck.id,
-        user_id=deck.user_id,
-        title=deck.title,
-        is_default=deck.is_default,
-        cards=cards_data,
-        share_slug=deck.share_slug,
-        share_mode=deck.share_mode,
-        share_at=deck.share_at,
-        created_at=deck.created_at,
-        updated_at=deck.updated_at,
-    )
-
-
 @router.get("", response_model=list[DeckSummary])
 def list_decks_endpoint(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """List all decks belonging to the current user."""
     return list_user_decks(current_user.id, db)
@@ -67,8 +47,8 @@ def list_decks_endpoint(
 @router.post("", response_model=DeckResponse, status_code=status.HTTP_201_CREATED)
 def create_deck_endpoint(
     body: DeckCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Create a new deck with optional initial card assignments."""
     if body.card_ids:
@@ -85,14 +65,14 @@ def create_deck_endpoint(
         card_ids=body.card_ids,
         db=db,
     )
-    return _build_deck_response(deck, db)
+    return deck_to_response(deck, db)
 
 
 @router.post("/save", response_model=DeckResponse, status_code=status.HTTP_201_CREATED)
 def save_deck_endpoint(
     body: DeckSaveRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Save or update an entire deck in a single request.
 
@@ -119,14 +99,14 @@ def save_deck_endpoint(
         deck_id=body.deck_id,
         card_ids=body.card_ids,
     )
-    return _build_deck_response(deck, db)
+    return deck_to_response(deck, db)
 
 
 @router.post("/save/cards", response_model=DeckCardsBatchResponse, status_code=status.HTTP_201_CREATED)
 def save_deck_cards_batch_endpoint(
     body: DeckCardsBatchRequest,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Upload cards in a batch for large decks."""
     cards_input = [
@@ -146,22 +126,22 @@ def save_deck_cards_batch_endpoint(
 @router.get("/{deck_id}", response_model=DeckResponse)
 def get_deck_endpoint(
     deck_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Get a single deck owned by the current user."""
     deck: Deck | None = get_deck_by_id(deck_id, current_user.id, db)
     if not deck:
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
-    return _build_deck_response(deck, db)
+    return deck_to_response(deck, db)
 
 
 @router.put("/{deck_id}", response_model=DeckResponse)
 def update_deck_endpoint(
     deck_id: str,
     body: DeckUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Update a deck's title and/or its card assignments."""
     deck: Deck | None = get_deck_by_id(deck_id, current_user.id, db)
@@ -183,14 +163,14 @@ def update_deck_endpoint(
         user_id=current_user.id,
         db=db,
     )
-    return _build_deck_response(updated, db)
+    return deck_to_response(updated, db)
 
 
 @router.delete("/{deck_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_deck_endpoint(
     deck_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Delete a deck and clean up any orphaned cards."""
     deck: Deck | None = get_deck_by_id(deck_id, current_user.id, db)
@@ -209,8 +189,8 @@ def delete_deck_endpoint(
 def share_deck_endpoint(
     deck_id: str,
     body: DeckShareToggle,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Enable sharing for a deck with the given mode."""
     deck: Deck | None = get_deck_by_id(deck_id, current_user.id, db)
@@ -218,14 +198,14 @@ def share_deck_endpoint(
         raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Deck not found")
 
     updated = share_deck(deck, body.mode, db)
-    return _build_deck_response(updated, db)
+    return deck_to_response(updated, db)
 
 
 @router.delete("/{deck_id}/share", status_code=status.HTTP_204_NO_CONTENT)
 def unshare_deck_endpoint(
     deck_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Disable sharing for a deck, removing its share slug and mode."""
     deck: Deck | None = get_deck_by_id(deck_id, current_user.id, db)

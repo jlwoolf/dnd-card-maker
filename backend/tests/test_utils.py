@@ -6,10 +6,10 @@ from sqlalchemy.orm import Session
 from app.models.card import Card
 from app.models.deck import Deck, DeckCard
 from app.templates import render_template
-from app.utils.deck_helpers import (
-    _cleanup_orphaned_card,
-    _get_or_create_default_deck,
+from app.services.deck_service import (
+    cleanup_orphaned_card,
     get_next_deck_position,
+    get_or_create_default_deck,
 )
 from app.utils.shared import generate_share_slug
 
@@ -72,42 +72,44 @@ class TestRenderTemplate:
         assert "verify_url" not in result  # placeholder is replaced
 
     def test_missing_template_raises(self):
-        with pytest.raises(FileNotFoundError):
+        import jinja2
+
+        with pytest.raises(jinja2.exceptions.TemplateNotFound):
             render_template("nonexistent.html", var="val")
 
 
 class TestDeckHelpers:
-    def test_get_or_create_default_deck_creates(self, db_session: Session):
+    def testget_or_create_default_deck_creates(self, db_session: Session):
         _ensure_user(db_session, "user-1")
-        deck = _get_or_create_default_deck("user-1", db_session)
+        deck = get_or_create_default_deck("user-1", db_session)
         assert deck is not None
         assert deck.user_id == "user-1"
         assert deck.is_default is True
         assert deck.title == "My Cards"
 
-    def test_get_or_create_default_deck_returns_existing(self, db_session: Session):
+    def testget_or_create_default_deck_returns_existing(self, db_session: Session):
         _ensure_user(db_session, "user-2")
-        first = _get_or_create_default_deck("user-2", db_session)
-        second = _get_or_create_default_deck("user-2", db_session)
+        first = get_or_create_default_deck("user-2", db_session)
+        second = get_or_create_default_deck("user-2", db_session)
         assert first.id == second.id
 
-    def test_cleanup_orphaned_card_deletes_if_no_refs(self, db_session: Session):
+    def testcleanup_orphaned_card_deletes_if_no_refs(self, db_session: Session):
         _ensure_user(db_session, "u1")
         card = Card(id="card-orphan", user_id="u1", elements="[]", img_url="data:img", theme="{}")
         db_session.add(card)
         db_session.commit()
-        _cleanup_orphaned_card("card-orphan", db_session)
+        cleanup_orphaned_card("card-orphan", db_session)
         db_session.commit()
         assert db_session.get(Card, "card-orphan") is None
 
-    def test_cleanup_orphaned_card_keeps_if_referenced(self, db_session: Session):
+    def testcleanup_orphaned_card_keeps_if_referenced(self, db_session: Session):
         _ensure_user(db_session, "u1")
         card = Card(id="card-keep", user_id="u1", elements="[]", img_url="data:img", theme="{}")
         deck = Deck(id="deck-1", user_id="u1", title="Test")
         dc = DeckCard(deck_id="deck-1", card_id="card-keep", position=0)
         db_session.add_all([card, deck, dc])
         db_session.commit()
-        _cleanup_orphaned_card("card-keep", db_session)
+        cleanup_orphaned_card("card-keep", db_session)
         db_session.commit()
         assert db_session.get(Card, "card-keep") is not None
 

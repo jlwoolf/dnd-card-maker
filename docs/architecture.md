@@ -190,13 +190,12 @@ backend/app/
 │   ├── admin.py         # /api/admin/* — dev-only DB browser
 │   └── dev.py           # /api/dev/mail — dev-only email viewer
 ├── services/
-│   ├── auth.py          # Password hashing, JWT create/decode
+│   ├── auth.py          # Password hashing, JWT create/decode, token validation
 │   ├── email.py         # SMTP sender + DB storage
 │   ├── card_service.py  # Card CRUD, share/unshare, toggle-save
-│   └── deck_service.py  # Deck CRUD, batch save, deck-card management
+│   └── deck_service.py  # Deck CRUD, batch save, deck-card management, orphan cleanup
 ├── utils/
-│   ├── shared.py        # generate_share_slug (8-char URL-safe)
-│   └── deck_helpers.py  # Default deck creation, orphan cleanup
+│   └── shared.py        # generate_share_slug, apply_share, remove_share
 └── templates/
     ├── verify_email.html
     └── reset_email.html

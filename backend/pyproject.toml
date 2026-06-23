@@ -12,6 +12,7 @@ dependencies = [
     "pydantic[email]>=2.0.0",
     "pydantic-settings>=2.0.0",
     "slowapi>=0.1.10",
+    "jinja2>=3.0.0",
 ]
 
 [project.optional-dependencies]

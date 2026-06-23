@@ -215,8 +215,8 @@ dnd-card-maker/
 │   │   ├── schemas/               # Pydantic request/response schemas
 │   │   ├── routes/                # API route modules
 │   │   ├── services/              # Business logic
-│   │   ├── utils/                 # Helpers
-│   │   └── templates/             # Email HTML templates
+│   │   ├── utils/                 # Helpers (share slugs, etc.)
+│   │   └── templates/             # Email HTML templates (Jinja2)
 │   └── tests/                     # pytest tests
 └── docs/                          # Documentation
 ```

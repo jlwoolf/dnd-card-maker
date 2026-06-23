@@ -168,4 +168,4 @@ When `DEV_MAIL_ENABLED=true`:
 - **`/mail`** — view sent emails (verification, password reset) directly in the browser
 - **`/admin`** — browse database tables, inspect cards and decks
 
-These routes are only available when the dev flag is enabled and should **never be enabled in production**.
+These routes are only available when the dev flag is enabled and should **never be enabled in production**. Access requires an `X-Dev-Auth` header matching the server's `JWT_SECRET`.

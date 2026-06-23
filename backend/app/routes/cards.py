@@ -8,7 +8,7 @@ from fastapi import APIRouter, Depends, HTTPException, Query, status
 from sqlalchemy.orm import Session
 
 from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import CurrentUser, DBSession, get_current_user
 from app.models.card import Card
 from app.models.user import User
 from app.schemas import (
@@ -60,8 +60,8 @@ def toggle_save_card_endpoint(
 @router.get("/{card_id}/decks", response_model=list[CardDecksResponse])
 def get_card_decks(
     card_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Return all of the current user's decks that contain the given card."""
     from app.models.deck import Deck, DeckCard
@@ -81,8 +81,8 @@ def get_card_decks(
 def update_card_decks(
     card_id: str,
     body: CardDecksUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Replace the set of decks a card belongs to with the given ``deck_ids``."""
     from app.models.deck import Deck, DeckCard
@@ -100,16 +100,16 @@ def update_card_decks(
         db.add(DeckCard(deck_id=deck_id, card_id=card_id, position=i))
 
     db.commit()
-    from app.utils.deck_helpers import _cleanup_orphaned_card
+    from app.services.deck_service import cleanup_orphaned_card
 
-    _cleanup_orphaned_card(card_id, db)
+    cleanup_orphaned_card(card_id, db)
     db.commit()
 
 
 @router.get("", response_model=list[CardSummary])
 def list_cards_endpoint(
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """List cards saved to the current user's default deck."""
     return list_user_cards(current_user.id, db)
@@ -118,8 +118,8 @@ def list_cards_endpoint(
 @router.post("", response_model=CardResponse, status_code=status.HTTP_201_CREATED)
 def create_card_endpoint(
     body: CardCreate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Create a new card and add it to the current user's default deck."""
     card = create_card(
@@ -136,8 +136,8 @@ def create_card_endpoint(
 @router.get("/{card_id}", response_model=CardResponse)
 def get_card_endpoint(
     card_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Get a single card owned by the current user."""
     card: Card | None = get_card_by_id(card_id, current_user.id, db)
@@ -150,8 +150,8 @@ def get_card_endpoint(
 def update_card_endpoint(
     card_id: str,
     body: CardUpdate,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Update a card's title, elements, image URL, or theme."""
     card: Card | None = get_card_by_id(card_id, current_user.id, db)
@@ -172,8 +172,8 @@ def update_card_endpoint(
 @router.delete("/{card_id}", status_code=status.HTTP_204_NO_CONTENT)
 def delete_card_endpoint(
     card_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Delete a card owned by the current user."""
     if not delete_card_by_id(card_id, current_user.id, db):
@@ -184,8 +184,8 @@ def delete_card_endpoint(
 def share_card_endpoint(
     card_id: str,
     body: ShareToggle,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Enable sharing for a card with the given mode."""
     card: Card | None = get_card_by_id(card_id, current_user.id, db)
@@ -199,8 +199,8 @@ def share_card_endpoint(
 @router.delete("/{card_id}/share", status_code=status.HTTP_204_NO_CONTENT)
 def unshare_card_endpoint(
     card_id: str,
-    current_user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    current_user: CurrentUser,
+    db: DBSession,
 ):
     """Disable sharing for a card, removing its share slug and mode."""
     card: Card | None = get_card_by_id(card_id, current_user.id, db)

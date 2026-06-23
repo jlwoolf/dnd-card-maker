@@ -10,7 +10,7 @@ import urllib.request
 from datetime import UTC, datetime, timedelta
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, Request, status
+from fastapi import APIRouter, HTTPException, Request, status
 from jose import JWTError
 from sqlalchemy.orm import Session
 
@@ -19,7 +19,7 @@ from app.constants import (
     RESET_TOKEN_EXPIRY_HOURS,
     TOKEN_TYPE_REFRESH,
 )
-from app.database import get_db
+from app.dependencies import DBSession
 from app.models.user import User
 from app.schemas import (
     ForgotPasswordRequest,
@@ -44,8 +44,73 @@ router = APIRouter(prefix="/api/auth", tags=["auth"])
 logger = logging.getLogger(__name__)
 
 
+def _verify_turnstile(body: RegisterRequest, request: Request) -> None:
+    """Validate the Cloudflare Turnstile token from a registration request.
+
+    Raises ``HTTPException(400)`` when verification fails or the network
+    request errors out.  Silently succeeds when Turnstile is not configured
+    (``settings.turnstile_secret_key`` is empty).
+    """
+    if not settings.turnstile_secret_key:
+        logger.debug("Turnstile disabled — skipping verification for %s", body.email)
+        return
+
+    client_ip = request.client.host if request.client else "127.0.0.1"
+    logger.debug(
+        "Turnstile enabled — verifying token (len=%d) for %s from %s",
+        len(body.turnstile_token), body.email, client_ip,
+    )
+    verify_data = urllib.parse.urlencode({
+        "secret": settings.turnstile_secret_key,
+        "response": body.turnstile_token,
+        "remoteip": client_ip,
+    }).encode()
+    verify_req = urllib.request.Request(
+        "https://challenges.cloudflare.com/turnstile/v0/siteverify",
+        data=verify_data,
+        headers={"Content-Type": "application/x-www-form-urlencoded"},
+    )
+    try:
+        with urllib.request.urlopen(verify_req, timeout=5) as resp:
+            result = json.loads(resp.read())
+        logger.debug("Turnstile siteverify response: %s", result)
+        if not result.get("success"):
+            logger.warning(
+                "Turnstile verification failed for %s: error-codes=%s",
+                body.email, result.get("error-codes", "unknown"),
+            )
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Captcha verification failed",
+            )
+        logger.info("Turnstile verification passed for %s", body.email)
+    except HTTPException:
+        raise
+    except Exception:
+        logger.exception("Turnstile network error for %s", body.email)
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Captcha verification failed",
+        ) from None
+
+
+def _handle_existing_unverified_user(user: User, password: str, db: Session) -> MessageResponse:
+    """Re-register an unverified user: update password, issue new token, resend email."""
+    logger.info("Re-registration: %s exists unverified — updating password, resending", user.email)
+    user.password_hash = hash_password(password)
+    user.verify_token = str(uuid4())
+    db.commit()
+    try:
+        send_verification_email(db, user.email, user.verify_token)
+    except Exception:
+        logger.exception("Failed to send verification email to %s", user.email)
+    return MessageResponse(
+        message="A verification email has been resent. Check your email to verify your account."
+    )
+
+
 @router.post("/register", response_model=MessageResponse, status_code=status.HTTP_201_CREATED)
-def register(body: RegisterRequest, request: Request, db: Session = Depends(get_db)):
+def register(body: RegisterRequest, request: Request, db: DBSession):
     """Register a new user account and send a verification email.
 
     If the email is already registered but not yet verified, update the
@@ -54,46 +119,8 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
     Requires a Cloudflare Turnstile token (skipped when secret key is not
     configured, e.g. in local development).
     """
-    if settings.turnstile_secret_key:
-        client_ip = request.client.host if request.client else "127.0.0.1"
-        logger.debug(
-            "Turnstile enabled — verifying token (len=%d) for %s from %s",
-            len(body.turnstile_token), body.email, client_ip,
-        )
-        verify_data = urllib.parse.urlencode({
-            "secret": settings.turnstile_secret_key,
-            "response": body.turnstile_token,
-            "remoteip": client_ip,
-        }).encode()
-        verify_req = urllib.request.Request(
-            "https://challenges.cloudflare.com/turnstile/v0/siteverify",
-            data=verify_data,
-            headers={"Content-Type": "application/x-www-form-urlencoded"},
-        )
-        try:
-            with urllib.request.urlopen(verify_req, timeout=5) as resp:
-                result = json.loads(resp.read())
-            logger.debug("Turnstile siteverify response: %s", result)
-            if not result.get("success"):
-                logger.warning(
-                    "Turnstile verification failed for %s: error-codes=%s",
-                    body.email, result.get("error-codes", "unknown"),
-                )
-                raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Captcha verification failed",
-                )
-            logger.info("Turnstile verification passed for %s", body.email)
-        except HTTPException:
-            raise
-        except Exception:
-            logger.exception("Turnstile network error for %s", body.email)
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Captcha verification failed",
-            ) from None
-    else:
-        logger.debug("Turnstile disabled — skipping verification for %s", body.email)
+    _verify_turnstile(body, request)
+
     existing = db.query(User).filter(User.email == body.email).first()
     if existing:
         if existing.is_verified:
@@ -102,19 +129,7 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
                 status_code=status.HTTP_409_CONFLICT,
                 detail="Email already registered",
             )
-        logger.info("Re-registration: %s exists unverified — updating password, resending verification", body.email)
-        existing.password_hash = hash_password(body.password)
-        existing.verify_token = str(uuid4())
-        db.commit()
-        try:
-            send_verification_email(existing.email, existing.verify_token)
-        except Exception:
-            logger.exception(
-                "Failed to send verification email to %s", existing.email
-            )
-        return MessageResponse(
-            message="A verification email has been resent. Check your email to verify your account."
-        )
+        return _handle_existing_unverified_user(existing, body.password, db)
 
     logger.info("New registration: %s — creating user, sending verification", body.email)
     user = User(
@@ -126,7 +141,7 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
     db.commit()
 
     try:
-        send_verification_email(user.email, user.verify_token)
+        send_verification_email(db, user.email, user.verify_token)
     except Exception:
         logger.exception("Failed to send verification email to %s", user.email)
 
@@ -137,7 +152,7 @@ def register(body: RegisterRequest, request: Request, db: Session = Depends(get_
 
 
 @router.get("/verify/{token}", response_model=MessageResponse)
-def verify_email(token: str, db: Session = Depends(get_db)):
+def verify_email(token: str, db: DBSession):
     """Verify a user's email address using the token sent after registration."""
     user = db.query(User).filter(User.verify_token == token).first()
     if not user:
@@ -156,7 +171,7 @@ def verify_email(token: str, db: Session = Depends(get_db)):
 
 
 @router.post("/login", response_model=TokenResponse)
-def login(body: LoginRequest, db: Session = Depends(get_db)):
+def login(body: LoginRequest, db: DBSession):
     """Authenticate a user and return access and refresh JWT tokens."""
     user = db.query(User).filter(User.email == body.email).first()
     if not user or not verify_password(body.password, user.password_hash):
@@ -192,7 +207,7 @@ def login(body: LoginRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/refresh", response_model=TokenResponse)
-def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
+def refresh(body: RefreshRequest, db: DBSession):
     """Issue a new access token AND a new refresh token (rotation).
 
     On success, the old refresh token is effectively invalidated because the
@@ -233,7 +248,7 @@ def refresh(body: RefreshRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/forgot-password", response_model=MessageResponse)
-def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
+def forgot_password(body: ForgotPasswordRequest, db: DBSession):
     """Send a password-reset email if the given email is registered."""
     user = db.query(User).filter(User.email == body.email).first()
     if user:
@@ -242,7 +257,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
         db.commit()
 
         try:
-            send_reset_email(user.email, user.reset_token)
+            send_reset_email(db, user.email, user.reset_token)
             logger.info("Password reset email sent to %s", body.email)
         except Exception:
             logger.exception("Failed to send reset email to %s", user.email)
@@ -253,7 +268,7 @@ def forgot_password(body: ForgotPasswordRequest, db: Session = Depends(get_db)):
 
 
 @router.post("/reset-password/{token}", response_model=MessageResponse)
-def reset_password(token: str, body: ResetPasswordRequest, db: Session = Depends(get_db)):
+def reset_password(token: str, body: ResetPasswordRequest, db: DBSession):
     """Reset the user's password using a valid reset token.
 
     Increments ``token_version`` to invalidate all existing sessions.

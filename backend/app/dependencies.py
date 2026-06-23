@@ -1,13 +1,14 @@
-from fastapi import Depends, HTTPException, status
+from typing import Annotated
+
+from fastapi import Depends, HTTPException, Request, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
-from jose import JWTError
 from sqlalchemy.orm import Session
 
 from app.config import settings
 from app.constants import TOKEN_TYPE_ACCESS
 from app.database import get_db
 from app.models.user import User
-from app.services.auth import decode_token, get_user_id_from_token
+from app.services.auth import validate_token_and_get_user
 
 security_scheme = HTTPBearer()
 
@@ -18,38 +19,37 @@ def get_current_user(
 ) -> User:
     """FastAPI dependency that extracts and validates the current user from a Bearer token.
 
-    Decodes the JWT access token, verifies its type and token version, and
-    ensures the user exists and is verified. Returns the ``User`` model on
-    success. Raises 401 for invalid/missing/expired tokens or version
-    mismatches, and 403 if the email is not verified.
+    Delegates to ``validate_token_and_get_user`` for the shared JWT validation
+    logic. Raises 401 when the token is invalid or cannot be decoded, and 401/403
+    for token version mismatches or unverified emails.
     """
-    token = credentials.credentials
-    try:
-        user_id = get_user_id_from_token(token, TOKEN_TYPE_ACCESS, settings.jwt_secret)
-        payload = decode_token(token, settings.jwt_secret)
-    except (JWTError, ValueError) as err:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Invalid token",
-        ) from err
-
-    user = db.query(User).filter(User.id == user_id).first()
+    user = validate_token_and_get_user(
+        credentials.credentials, TOKEN_TYPE_ACCESS, settings.jwt_secret, db
+    )
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="User not found",
-        )
-
-    token_version = payload.get("tv")
-    if token_version is not None and user.token_version != token_version:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Token version mismatch - please re-login",
-        )
-
-    if not user.is_verified:
-        raise HTTPException(
-            status_code=status.HTTP_403_FORBIDDEN,
-            detail="Email not verified",
+            detail="Invalid token",
         )
     return user
+
+
+def check_dev_mode(request: Request) -> None:
+    """Guard dev/admin routes behind the ``dev_mail_enabled`` flag.
+
+    Returns 404 (as if the routes do not exist) when dev mode is off, and
+    requires an ``X-Dev-Auth`` header matching ``JWT_SECRET`` when enabled
+    so the routes are never accidentally exposed in production even when
+    the flag is misconfigured.
+    """
+    if not settings.dev_mail_enabled:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+    header = request.headers.get("X-Dev-Auth")
+    if not header or header != settings.jwt_secret:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND)
+
+
+# Reusable dependency type aliases following the FastAPI ``Annotated`` convention.
+DBSession = Annotated[Session, Depends(get_db)]
+CurrentUser = Annotated[User, Depends(get_current_user)]

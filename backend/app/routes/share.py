@@ -1,20 +1,16 @@
 """Public shared-card endpoint."""
 
-import json
+from fastapi import APIRouter, HTTPException, status
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
-
-from app.constants import SHARE_MODE_VIEW_AND_COPY
-from app.database import get_db
+from app.dependencies import DBSession
 from app.models.card import Card
-from app.schemas import CardThemeSchema, SharedCardResponse
+from app.services.card_service import card_to_shared_response
 
 router = APIRouter(prefix="/api/shared", tags=["shared"])
 
 
-@router.get("/{slug}", response_model=SharedCardResponse)
-def get_shared_card(slug: str, db: Session = Depends(get_db)):
+@router.get("/{slug}")
+def get_shared_card(slug: str, db: DBSession):
     """Retrieve a publicly shared card by its slug.
 
     No authentication required. Returns 200 with the card data and a
@@ -28,12 +24,4 @@ def get_shared_card(slug: str, db: Session = Depends(get_db)):
             detail="Shared card not found",
         )
 
-    return SharedCardResponse(
-        id=card.id,
-        title=card.title,
-        elements=json.loads(card.elements),
-        img_url=card.img_url,
-        theme=CardThemeSchema(**json.loads(card.theme)),
-        mode=card.share_mode,
-        can_copy=card.share_mode == SHARE_MODE_VIEW_AND_COPY,
-    )
+    return card_to_shared_response(card)

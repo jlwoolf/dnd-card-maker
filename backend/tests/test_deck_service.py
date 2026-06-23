@@ -9,12 +9,11 @@ from app.models.card import Card
 from app.models.deck import Deck, DeckCard
 from app.schemas.card import CardThemeSchema
 from app.services.deck_service import (
-    _get_deck_cards,
     count_user_cards_by_ids,
     create_deck_with_cards,
     delete_deck,
     get_deck_by_id,
-    get_deck_cards_for_share,
+    get_deck_cards,
     get_shared_deck_by_slug,
     list_user_decks,
     save_deck_with_cards,
@@ -85,13 +84,13 @@ def _add_cards_to_deck(db: Session, deck_id: str, *card_ids: str):
 
 
 # ---------------------------------------------------------------------------
-# _get_deck_cards
+# get_deck_cards
 # ---------------------------------------------------------------------------
 
 class TestGetDeckCards:
     def test_empty_deck(self, db_session: Session):
         deck = _make_deck(db_session, "d-empty")
-        cards = _get_deck_cards(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=True)
         assert cards == []
 
     def test_populated_deck_includes_img_url(self, db_session: Session):
@@ -99,7 +98,7 @@ class TestGetDeckCards:
         deck = _make_deck(db_session, "d-img")
         _add_cards_to_deck(db_session, "d-img", "c-img")
 
-        cards = _get_deck_cards(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=True)
         assert len(cards) == 1
         assert cards[0]["id"] == "c-img"
         assert cards[0]["img_url"] == "data:image/png;base64,img-c-img"
@@ -110,13 +109,13 @@ class TestGetDeckCards:
         _add_cards_to_deck(db_session, "d-saved", "c-saved")
 
         # No default deck — saved should be False
-        cards = _get_deck_cards(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=True)
         assert cards[0]["saved"] is False
 
         # Add a default deck with the same card
         default = _make_deck(db_session, "d-default", is_default=True)
         _add_cards_to_deck(db_session, "d-default", "c-saved")
-        cards = _get_deck_cards(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=True)
         assert cards[0]["saved"] is True
 
     def test_includes_share_info(self, db_session: Session):
@@ -128,13 +127,13 @@ class TestGetDeckCards:
         deck = _make_deck(db_session, "d-share")
         _add_cards_to_deck(db_session, "d-share", "c-share")
 
-        cards = _get_deck_cards(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=True)
         assert cards[0]["share_slug"] == "abc12345"
         assert cards[0]["share_mode"] == "view_only"
 
 
 # ---------------------------------------------------------------------------
-# get_deck_cards_for_share
+# get_deck_cards
 # ---------------------------------------------------------------------------
 
 class TestGetDeckCardsForShare:
@@ -143,7 +142,7 @@ class TestGetDeckCardsForShare:
         deck = _make_deck(db_session, "d-sh-img")
         _add_cards_to_deck(db_session, "d-sh-img", "c-sh-img")
 
-        cards = get_deck_cards_for_share(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=False)
         assert len(cards) == 1
         assert cards[0]["img_url"] == "data:image/png;base64,img-c-sh-img"
 
@@ -154,12 +153,12 @@ class TestGetDeckCardsForShare:
         _add_cards_to_deck(db_session, "d-sh-saved", "c-sh-saved")
         _add_cards_to_deck(db_session, "d-sh-def", "c-sh-saved")
 
-        cards = get_deck_cards_for_share(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=False)
         assert "saved" not in cards[0]
 
     def test_empty_deck(self, db_session: Session):
         deck = _make_deck(db_session, "d-sh-empty")
-        cards = get_deck_cards_for_share(deck, db_session)
+        cards = get_deck_cards(deck, db_session, include_saved=False)
         assert cards == []
 
 

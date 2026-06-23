@@ -3,11 +3,9 @@
 import logging
 from uuid import uuid4
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from app.database import get_db
-from app.dependencies import get_current_user
+from app.dependencies import CurrentUser, DBSession
 from app.models.card import Card
 from app.models.deck import Deck
 from app.models.user import User
@@ -29,8 +27,8 @@ router = APIRouter(prefix="/api/users/me", tags=["users"])
 @router.post("/change-password", response_model=MessageResponse)
 def change_password(
     body: ChangePasswordRequest,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    user: CurrentUser,
+    db: DBSession,
 ):
     if not verify_password(body.current_password, user.password_hash):
         raise HTTPException(
@@ -50,8 +48,8 @@ def change_password(
 @router.put("/email", response_model=MessageResponse)
 def update_email(
     body: UpdateEmailRequest,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    user: CurrentUser,
+    db: DBSession,
 ):
     if not verify_password(body.password, user.password_hash):
         raise HTTPException(
@@ -71,7 +69,7 @@ def update_email(
     db.commit()
 
     try:
-        send_verification_email(user.email, user.verify_token)
+        send_verification_email(db, user.email, user.verify_token)
     except Exception:
         logging.getLogger(__name__).exception(
             "Failed to send verification email to %s", user.email
@@ -85,8 +83,8 @@ def update_email(
 @router.delete("", response_model=MessageResponse)
 def delete_account(
     body: DeleteAccountRequest,
-    user: User = Depends(get_current_user),
-    db: Session = Depends(get_db),
+    user: CurrentUser,
+    db: DBSession,
 ):
     if not verify_password(body.password, user.password_hash):
         raise HTTPException(

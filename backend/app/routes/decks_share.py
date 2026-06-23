@@ -1,22 +1,20 @@
 """Public shared-deck endpoint.
 
-Uses the shared ``get_deck_cards_for_share`` helper from the deck service
+Uses the shared ``deck_to_shared_response`` helper from the deck service
 instead of duplicating card-assembly logic.
 """
 
-from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
+from fastapi import APIRouter, HTTPException, status
 
-from app.database import get_db
+from app.dependencies import DBSession
 from app.models.deck import Deck
-from app.schemas import SharedDeckResponse
-from app.services.deck_service import get_deck_cards_for_share, get_shared_deck_by_slug
+from app.services.deck_service import deck_to_shared_response, get_shared_deck_by_slug
 
 router = APIRouter(prefix="/api/shared/decks", tags=["shared_decks"])
 
 
-@router.get("/{slug}", response_model=SharedDeckResponse)
-def get_shared_deck(slug: str, db: Session = Depends(get_db)):
+@router.get("/{slug}")
+def get_shared_deck(slug: str, db: DBSession):
     """Retrieve a publicly shared deck by its slug.
 
     No authentication required. Returns 200 with the deck data including its
@@ -30,11 +28,4 @@ def get_shared_deck(slug: str, db: Session = Depends(get_db)):
             detail="Shared deck not found",
         )
 
-    cards_data = get_deck_cards_for_share(deck, db)
-    return SharedDeckResponse(
-        id=deck.id,
-        title=deck.title,
-        cards=cards_data,
-        mode=deck.share_mode,
-        can_copy=deck.share_mode == "view_and_copy",
-    )
+    return deck_to_shared_response(deck, db)

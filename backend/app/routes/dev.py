@@ -1,16 +1,15 @@
 from fastapi import APIRouter, Depends, HTTPException, status
-from sqlalchemy.orm import Session
 
 from app.constants import DEV_MAIL_LIST_LIMIT
-from app.database import get_db
+from app.dependencies import DBSession, check_dev_mode
 from app.models.email import SentEmail
 
-router = APIRouter(prefix="/api/dev", tags=["dev"])
+router = APIRouter(prefix="/api/dev", tags=["dev"], dependencies=[Depends(check_dev_mode)])
 
 
 @router.get("/mail")
 def list_mail(
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     """List the 50 most recently sent emails (dev/testing endpoint — no auth)."""
     emails = db.query(SentEmail).order_by(SentEmail.sent_at.desc()).limit(DEV_MAIL_LIST_LIMIT).all()
@@ -28,7 +27,7 @@ def list_mail(
 @router.get("/mail/{email_id}")
 def get_mail(
     email_id: str,
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     """Retrieve a single sent email by ID, including its HTML body (dev/testing — no auth)."""
     email = db.query(SentEmail).filter(SentEmail.id == email_id).first()
@@ -48,7 +47,7 @@ def get_mail(
 
 @router.delete("/mail", status_code=status.HTTP_204_NO_CONTENT)
 def clear_mail(
-    db: Session = Depends(get_db),
+    db: DBSession,
 ):
     """Delete all stored sent emails (dev/testing endpoint — no auth)."""
     db.query(SentEmail).delete()

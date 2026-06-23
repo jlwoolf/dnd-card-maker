@@ -6,19 +6,18 @@ service, return response) while keeping business logic testable independently.
 """
 
 import json
-from datetime import UTC, datetime
 
 from sqlalchemy.orm import Session
 
 from app.models.card import Card
 from app.models.deck import Deck, DeckCard
-from app.schemas.card import CardThemeSchema, CardResponse, CardSummary
-from app.utils.deck_helpers import (
-    _cleanup_orphaned_card,
-    _get_or_create_default_deck,
+from app.schemas.card import CardResponse, CardSummary, CardThemeSchema, SharedCardResponse
+from app.services.deck_service import (
+    cleanup_orphaned_card,
     get_next_deck_position,
+    get_or_create_default_deck,
 )
-from app.utils.shared import generate_share_slug
+from app.utils.shared import apply_share, remove_share
 
 
 def card_to_response(card: Card) -> CardResponse:
@@ -35,6 +34,25 @@ def card_to_response(card: Card) -> CardResponse:
         share_at=card.share_at,
         created_at=card.created_at,
         updated_at=card.updated_at,
+    )
+
+
+def card_to_shared_response(card: Card) -> SharedCardResponse:
+    """Serialize a Card ORM model into a public SharedCardResponse.
+
+    Omits ownership fields (``user_id``) and computes the ``can_copy``
+    flag from the card's share mode.
+    """
+    from app.constants import SHARE_MODE_VIEW_AND_COPY
+
+    return SharedCardResponse(
+        id=card.id,
+        title=card.title,
+        elements=json.loads(card.elements),
+        img_url=card.img_url,
+        theme=CardThemeSchema(**json.loads(card.theme)),
+        mode=card.share_mode,
+        can_copy=card.share_mode == SHARE_MODE_VIEW_AND_COPY,
     )
 
 
@@ -88,7 +106,7 @@ def create_card(
     db.add(card)
     db.flush()
 
-    default_deck = _get_or_create_default_deck(user_id, db)
+    default_deck = get_or_create_default_deck(user_id, db)
     next_pos = get_next_deck_position(default_deck.id, db)
     db.add(DeckCard(deck_id=default_deck.id, card_id=card.id, position=next_pos))
 
@@ -146,7 +164,7 @@ def toggle_save_card(
     ``action`` must be ``"toggle"``, ``"save"``, or ``"unsave"``.
     Returns a dict with ``message`` and ``saved`` keys.
     """
-    default_deck = _get_or_create_default_deck(user_id, db)
+    default_deck = get_or_create_default_deck(user_id, db)
     existing = (
         db.query(DeckCard)
         .filter(DeckCard.deck_id == default_deck.id, DeckCard.card_id == card.id)
@@ -164,7 +182,7 @@ def toggle_save_card(
         if existing:
             db.delete(existing)
             db.commit()
-            _cleanup_orphaned_card(card.id, db)
+            cleanup_orphaned_card(card.id, db)
             db.commit()
         return {"message": "unsaved", "saved": False}
 
@@ -172,7 +190,7 @@ def toggle_save_card(
     if existing:
         db.delete(existing)
         db.commit()
-        _cleanup_orphaned_card(card.id, db)
+        cleanup_orphaned_card(card.id, db)
         db.commit()
         return {"message": "unsaved", "saved": False}
     else:
@@ -184,9 +202,7 @@ def toggle_save_card(
 
 def share_card(card: Card, mode: str, db: Session) -> Card:
     """Enable sharing for a card with the given mode."""
-    card.share_slug = generate_share_slug()
-    card.share_mode = mode
-    card.share_at = datetime.now(UTC)
+    apply_share(card, mode)
     db.commit()
     db.refresh(card)
     return card
@@ -194,7 +210,5 @@ def share_card(card: Card, mode: str, db: Session) -> Card:
 
 def unshare_card(card: Card, db: Session) -> None:
     """Disable sharing for a card, clearing share fields."""
-    card.share_slug = None
-    card.share_mode = None
-    card.share_at = None
+    remove_share(card)
     db.commit()
