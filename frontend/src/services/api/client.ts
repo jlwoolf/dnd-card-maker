@@ -13,6 +13,14 @@ api.interceptors.request.use((config) => {
   if (token) {
     config.headers.Authorization = `Bearer ${token}`;
   }
+  // Dev-mode auth header for /mail and /admin pages.
+  // The backend check_dev_mode guard requires X-Dev-Auth to equal JWT_SECRET.
+  if (import.meta.env.DEV) {
+    const devAuth = import.meta.env.VITE_DEV_AUTH;
+    if (devAuth) {
+      config.headers["X-Dev-Auth"] = devAuth;
+    }
+  }
   return config;
 });
 
