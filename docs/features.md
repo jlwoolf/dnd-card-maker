@@ -67,7 +67,7 @@ The preview panel renders your card exactly as it will appear when exported — 
 
 - **Auto-save** — your deck is automatically persisted and restored when you return
   - Logged-in users: saved to the server and synced across devices
-  - Guest users: saved locally in the browser
+  - Guest users: saved to the server under a unique ID (only the ID is stored in the browser — avoids localStorage quota limits). Guest decks auto-expire after 30 days of inactivity.
   - Loaded cloud decks also get auto-saved so work is never lost
 - **Add cards** to a local deck with the **+** button
 - **Browse cards** with an animated stacked card interface (Framer Motion)

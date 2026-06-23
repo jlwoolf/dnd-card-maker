@@ -427,6 +427,44 @@ Save or update the user's auto-saved deck. The autosave deck is hidden from the 
 
 ---
 
+### PUT `/api/decks/local/{deck_id}`
+
+Create or update a **guest** (unauthenticated) auto-save deck. No authentication required. The frontend stores only the deck UUID in `localStorage`; the full payload lives on the server and is automatically deleted after 30 days of inactivity.
+
+**Request Body:**
+
+```json
+{
+  "cards": [
+    {
+      "elements": [...],
+      "img_url": "data:...",
+      "theme": {...}
+    }
+  ],
+  "editing_cloud_deck_id": "uuid | null",
+  "editing_cloud_deck_title": "My Deck | null"
+}
+```
+
+**Response** `201`: `LocalDeckResponse` with `id`, `cards`, `editing_cloud_deck_id`, `editing_cloud_deck_title`.
+
+**Rate limit**: 10 requests per minute per IP.
+
+---
+
+### GET `/api/decks/local/{deck_id}`
+
+Retrieve a guest auto-save deck by its UUID. No authentication required. Access resets the 30-day expiry timer.
+
+**Response** `200`: `LocalDeckResponse`.
+
+**Response** `404`: Guest deck not found (expired or never existed).
+
+**Rate limit**: 10 requests per minute per IP.
+
+---
+
 ### GET `/api/decks/{id}`
 
 Get a deck with its cards.
