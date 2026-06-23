@@ -1,7 +1,7 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
-import useExportCards from "@src/hooks/useExportCards";
+import useExportCards from "@src/stores/useExportCards";
 import type { Card } from "@src/schemas";
 import CardButtons from "../CardButtons";
 

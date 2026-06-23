@@ -10,9 +10,10 @@ import {
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import { sharedDeckApi, type SharedDeckCardEntry, type SharedDeckData } from "@src/services/api";
 import ProgressiveCardImage from "@src/components/Cloud/ProgressiveCardImage";
-import useExportCards from "@src/hooks/useExportCards";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/stores/useExportCards";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import { themeFromSnake } from "@src/utils/themeHelpers";
+import { getCardImageUrl } from "@src/utils/cardImageUrl";
 import { CONTENT_MIN_HEIGHT } from "@src/theme/constants";
 
 export default function SharedDeckPage() {
@@ -35,14 +36,11 @@ export default function SharedDeckPage() {
   }, [shareSlug]);
 
   const handleCopyCard = async (card: SharedDeckCardEntry) => {
-    let imgUrl = card.img_url || "";
-    if (imgUrl && !imgUrl.startsWith("data:")) {
-      try {
-        imgUrl = await ImageProcessor.toDataUrl(imgUrl);
-      } catch {
-        showSnackbar("Failed to copy card image", "error");
-        return;
-      }
+    let imgUrl = "";
+    try {
+      imgUrl = await ImageProcessor.toDataUrl(getCardImageUrl(card.id, 1.0));
+    } catch {
+      // Copy without image on failure
     }
     addCard(card.elements, imgUrl, themeFromSnake(card.theme));
     showSnackbar("Card copied to your deck!", "success");
@@ -51,13 +49,11 @@ export default function SharedDeckPage() {
   const handleCopyAll = async () => {
     if (!deck) return;
     for (const card of deck.cards) {
-      let imgUrl = card.img_url || "";
-      if (imgUrl && !imgUrl.startsWith("data:")) {
-        try {
-          imgUrl = await ImageProcessor.toDataUrl(imgUrl);
-        } catch {
-          continue;
-        }
+      let imgUrl = "";
+      try {
+        imgUrl = await ImageProcessor.toDataUrl(getCardImageUrl(card.id, 1.0));
+      } catch {
+        // Continue without image on failure for this card
       }
       addCard(card.elements, imgUrl, themeFromSnake(card.theme));
     }

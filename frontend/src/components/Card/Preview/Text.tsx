@@ -1,5 +1,6 @@
 import React from "react";
-import { Box as MuiBox, styled } from "@mui/material";
+import { Box as MuiBox } from "@mui/material";
+import { SvgBackground } from "./Background";
 
 interface TextProps {
   /** The text or rich-text nodes to render */
@@ -11,16 +12,6 @@ interface TextProps {
   /** Width as a percentage of the card container */
   width?: number;
 }
-
-const SvgBackground = styled("svg")({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  zIndex: 0,
-  overflow: "visible",
-});
 
 /**
  * Renders a rectangular box container for preview text.

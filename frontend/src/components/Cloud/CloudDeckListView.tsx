@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
 import {
-  Close,
   ContentCopy,
   Delete,
   Edit,
@@ -16,21 +15,19 @@ import {
   DialogContent,
   DialogContentText,
   DialogTitle,
-  Fab,
-  IconButton,
-  Snackbar,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import { deckApi, type DeckSummary } from "@src/services/api";
 import ProgressiveCardImage from "./ProgressiveCardImage";
 import { themeFromSnake } from "@src/utils/themeHelpers";
-import useExportCards from "@src/hooks/useExportCards";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/stores/useExportCards";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import ActionButton from "../Deck/ActionButton";
 import CloudDeckPreview from "./CloudDeckPreview";
+import FullScreenOverlay from "../FullScreenOverlay";
+import CardGrid from "../CardGrid";
+import CloseFab from "../CloseFab";
+import ShareDialog from "../ShareDialog";
 
 interface CloudDeckListViewProps {
   onClose: () => void;
@@ -54,7 +51,6 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
   const [shareUrl, setShareUrl] = useState("");
   const [deleteOpen, setDeleteOpen] = useState(false);
   const [deleteDeckId, setDeleteDeckId] = useState<string | null>(null);
-  const [copyFeedback, setCopyFeedback] = useState(false);
 
   const fetchDecks = async () => {
     setLoading(true);
@@ -174,21 +170,8 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100dvh",
-        bgcolor: "grey.900",
-        zIndex: 1200,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
+    <FullScreenOverlay
       aria-label="Cloud decks"
-      role="dialog"
     >
       {previewDeckId ? (
         <CloudDeckPreview
@@ -197,22 +180,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
           onCloseAll={onClose}
         />
       ) : (
-        <Box
-          sx={{
-            flexGrow: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            p: 3,
-            pb: { xs: 12, md: 16 },
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(auto-fill, minmax(140px, 1fr))",
-              md: "repeat(auto-fill, minmax(200px, 1fr))",
-            },
-            gap: 3,
-            alignContent: "start",
-          }}
-        >
+        <CardGrid>
           {loading && (
             <Box
               sx={{
@@ -393,99 +361,28 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
               </Box>
             </Box>
           ))}
-        </Box>
+        </CardGrid>
       )}
 
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1100,
-        }}
-      >
-        <Fab
-          color="primary"
-          onClick={onClose}
-          aria-label="close"
-          sx={{
-            boxShadow: 4,
-            "&:hover": { transform: "scale(1.1)" },
-            transition: "transform 0.2s",
-            width: { xs: "56px", md: "80px" },
-            height: { xs: "56px", md: "80px" },
-          }}
-        >
-          <Close />
-        </Fab>
-      </Box>
+      <CloseFab
+        onClose={onClose}
+        aria-label="close"
+      />
 
-      {/* Share dialog */}
-      <Dialog
+      <ShareDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>
-          {decks.find((d) => d.id === shareDeckId)?.share_slug
-            ? "Manage Share"
-            : "Share Deck"}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 1 }}>
-          {shareUrl && (
-            <Box sx={{ mt: 1, mb: 2, position: "relative" }}>
-              <TextField
-                fullWidth
-                size="small"
-                value={shareUrl}
-                slotProps={{
-                  input: {
-                    readOnly: true,
-                    endAdornment: (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          navigator.clipboard.writeText(shareUrl);
-                          setCopyFeedback(true);
-                        }}
-                      >
-                        <LinkIcon fontSize="small" />
-                      </IconButton>
-                    ),
-                  },
-                }}
-                label="Share Link"
-                sx={{ mb: 1 }}
-              />
-            </Box>
-          )}
-          <ToggleButtonGroup
-            value={shareMode}
-            exclusive
-            onChange={(_, v) => v && setShareMode(v)}
-            size="small"
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            <ToggleButton value="view_only">View Only</ToggleButton>
-            <ToggleButton value="view_and_copy">View & Copy</ToggleButton>
-          </ToggleButtonGroup>
-          <Box display="flex" gap={1}>
-            <Button variant="contained" onClick={handleShare} fullWidth>
-              {decks.find((d) => d.id === shareDeckId)?.share_slug
-                ? "Update"
-                : "Create Link"}
-            </Button>
-            {decks.find((d) => d.id === shareDeckId)?.share_slug && (
-              <Button variant="outlined" color="error" onClick={handleUnshare}>
-                Remove
-              </Button>
-            )}
-          </Box>
-        </DialogContent>
-      </Dialog>
+        entityType="deck"
+        shareUrl={shareUrl}
+        shareMode={shareMode}
+        hasExistingShare={Boolean(
+          decks.find((d) => d.id === shareDeckId)?.share_slug,
+        )}
+        onShareModeChange={setShareMode}
+        onShare={handleShare}
+        onUnshare={handleUnshare}
+        onCopyLink={() => showSnackbar("Link copied to clipboard", "success")}
+      />
 
       {/* Delete confirmation */}
       <Dialog open={deleteOpen} onClose={() => setDeleteOpen(false)}>
@@ -503,13 +400,6 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
           </Button>
         </DialogActions>
       </Dialog>
-
-      <Snackbar
-        open={copyFeedback}
-        autoHideDuration={2000}
-        onClose={() => setCopyFeedback(false)}
-        message="Link copied to clipboard"
-      />
-    </Box>
+    </FullScreenOverlay>
   );
 }

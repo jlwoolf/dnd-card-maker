@@ -1,6 +1,6 @@
 import { describe, it, expect, vi } from "vitest";
 import { render, screen, fireEvent } from "@testing-library/react";
-import useExportCards from "@src/hooks/useExportCards";
+import useExportCards from "@src/stores/useExportCards";
 import DownloadButton from "../DownloadButton";
 
 describe("Deck DownloadButton", () => {

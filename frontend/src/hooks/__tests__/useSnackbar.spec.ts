@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useSnackbar } from "../useSnackbar";
+import { useSnackbar } from "../../stores/useSnackbar";
 
 describe("useSnackbar", () => {
   beforeEach(() => {

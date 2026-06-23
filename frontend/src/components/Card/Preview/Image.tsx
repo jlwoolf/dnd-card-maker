@@ -1,5 +1,6 @@
 import React from "react";
-import { Box, styled } from "@mui/material";
+import { Box } from "@mui/material";
+import { SvgBackground } from "./Background";
 
 interface ImageProps {
   /** The image content to display */
@@ -9,16 +10,6 @@ interface ImageProps {
   /** Width as a percentage of the card container */
   width?: number;
 }
-
-const SvgBackground = styled("svg")({
-  position: "absolute",
-  top: 0,
-  left: 0,
-  width: "100%",
-  height: "100%",
-  zIndex: 0,
-  overflow: "visible",
-});
 
 /**
  * Image component for the preview card. 

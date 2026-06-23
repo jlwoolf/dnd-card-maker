@@ -7,6 +7,8 @@ interface CardGridProps {
   children: ReactNode;
   /** Additional styles to merge with the grid container. */
   sx?: SxProps<Theme>;
+  /** Test identifier for the grid container. */
+  "data-testid"?: string;
 }
 
 /** Responsive CSS-grid container for card thumbnails.
@@ -15,9 +17,10 @@ interface CardGridProps {
   Replaces 4 duplications of the same grid layout with
   ``gridTemplateColumns: "repeat(auto-fill, minmax(...))"``.
 */
-export default function CardGrid({ children, sx }: CardGridProps) {
+export default function CardGrid({ children, sx, "data-testid": dataTestid }: CardGridProps) {
   return (
     <Box
+      data-testid={dataTestid}
       sx={{
         flexGrow: 1,
         minHeight: 0,

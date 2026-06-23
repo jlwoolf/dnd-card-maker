@@ -10,10 +10,12 @@ import {
 } from "@mui/material";
 import RoundedButtonGroup from "@src/components/RoundedButtonGroup";
 import { deckApi } from "@src/services/api";
-import useExportCards from "@src/hooks/useExportCards";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/stores/useExportCards";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
 import { themeToSnake } from "@src/utils/themeHelpers";
+import FullScreenOverlay from "./FullScreenOverlay";
+import CardGrid from "./CardGrid";
 
 interface SaveDeckDialogProps {
   open: boolean;
@@ -136,22 +138,9 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
   if (!open) return null;
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100dvh",
-        bgcolor: "grey.900",
-        zIndex: 1200,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
+    <FullScreenOverlay
       data-testid="save-deck-overlay"
       aria-label="Save deck to cloud"
-      role="dialog"
     >
       <Box
         sx={{
@@ -201,23 +190,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
         </Box>
       </Box>
 
-      <Box
-        sx={{
-          flexGrow: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          p: 3,
-          pb: 16,
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "repeat(auto-fill, minmax(140px, 1fr))",
-            md: "repeat(auto-fill, minmax(200px, 1fr))",
-          },
-          gridAutoRows: "max-content",
-          gap: 3,
-          alignContent: "start",
-        }}
-      >
+      <CardGrid sx={{ pb: 16 }}>
         {localCards.map((card) => {
           const isSelected = selectedIds.includes(card.id);
           return (
@@ -288,7 +261,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
             </Box>
           );
         })}
-      </Box>
+      </CardGrid>
 
       <Box
         sx={{
@@ -318,6 +291,6 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
           </Button>
         </RoundedButtonGroup>
       </Box>
-    </Box>
+    </FullScreenOverlay>
   );
 }

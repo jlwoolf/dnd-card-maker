@@ -76,7 +76,6 @@ def get_deck_cards(deck: Deck, db: Session, include_saved: bool = False) -> list
                 "title": c.title,
                 "elements": json.loads(c.elements),
                 "theme": json.loads(c.theme),
-                "img_url": c.img_url,
                 "share_slug": c.share_slug,
                 "share_mode": c.share_mode,
             }

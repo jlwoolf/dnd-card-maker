@@ -34,3 +34,18 @@ export const DESIGN_TOKENS = {
   authCardWidth: AUTH_CARD_WIDTH,
   zIndex: Z_INDEX,
 } as const;
+
+/** Standard card aspect ratio (5:7), used across card rendering and grid layouts. */
+export const CARD_ASPECT_RATIO = "5 / 7";
+
+/** Placeholder image URL for elements with no source set. */
+export const PLACEHOLDER_IMAGE = "https://placehold.co/600x400";
+
+/** Number of cards uploaded per batch when saving large decks. */
+export const DECK_SAVE_BATCH_SIZE = 10;
+
+/** Number of rows per page in admin table views. */
+export const ADMIN_PAGE_SIZE = 100;
+
+/** Progressive blur amount for low-quality image placeholders. */
+export const PROGRESSIVE_BLUR = "blur(10px)";

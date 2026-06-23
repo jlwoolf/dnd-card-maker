@@ -15,10 +15,12 @@ import {
   rectSortingStrategy,
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
-import { Close } from "@mui/icons-material";
-import { Box, Fab, Typography } from "@mui/material";
-import useExportCards from "@src/hooks/useExportCards";
+import { Box, Typography } from "@mui/material";
+import useExportCards from "@src/stores/useExportCards";
 import SortableCard from "./SortableCard";
+import FullScreenOverlay from "../FullScreenOverlay";
+import CardGrid from "../CardGrid";
+import CloseFab from "../CloseFab";
 
 /**
  * Props for the DeckView component.
@@ -74,22 +76,9 @@ export default function DeckView({ onClose }: DeckViewProps) {
   };
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100dvh",
-        bgcolor: "grey.900",
-        zIndex: 1200,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
+    <FullScreenOverlay
       data-testid="deck-view-overlay"
       aria-label="Full deck view"
-      role="dialog"
     >
       <DndContext
         sensors={sensors}
@@ -97,24 +86,7 @@ export default function DeckView({ onClose }: DeckViewProps) {
         onDragEnd={handleDragEnd}
         modifiers={[restrictToWindowEdges]}
       >
-        <Box
-          data-testid="deck-grid-container"
-          sx={{
-            flexGrow: 1,
-            minHeight: 0,
-            overflowY: "auto",
-            p: 3,
-            pb: { xs: 12, md: 16 },
-            display: "grid",
-            gridTemplateColumns: {
-              xs: "repeat(auto-fill, minmax(140px, 1fr))",
-              md: "repeat(auto-fill, minmax(200px, 1fr))",
-            },
-            gridAutoRows: "max-content",
-            gap: 3,
-            alignContent: "start",
-          }}
-        >
+        <CardGrid data-testid="deck-grid-container">
           {cards.length === 0 ? (
             <Box
               sx={{
@@ -136,36 +108,14 @@ export default function DeckView({ onClose }: DeckViewProps) {
               ))}
             </SortableContext>
           )}
-        </Box>
+        </CardGrid>
       </DndContext>
 
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1100,
-        }}
-      >
-        <Fab
-          color="primary"
-          onClick={onClose}
-          aria-label="close deck view"
-          data-testid="close-deck-view-btn"
-          sx={{
-            boxShadow: 4,
-            "&:hover": {
-              transform: "scale(1.1)",
-            },
-            transition: "transform 0.2s",
-            width: { xs: "56px", md: "80px" },
-            height: { xs: "56px", md: "80px" },
-          }}
-        >
-          <Close />
-        </Fab>
-      </Box>
-    </Box>
+      <CloseFab
+        onClose={onClose}
+        aria-label="close deck view"
+        data-testid="close-deck-view-btn"
+      />
+    </FullScreenOverlay>
   );
 }

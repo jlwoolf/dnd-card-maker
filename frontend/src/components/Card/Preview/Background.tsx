@@ -2,7 +2,7 @@ import React, { forwardRef } from "react";
 import { Box, Paper, styled } from "@mui/material";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 
-const SvgBackground = styled("svg")({
+export const SvgBackground = styled("svg")({
   position: "absolute",
   top: 0,
   left: 0,

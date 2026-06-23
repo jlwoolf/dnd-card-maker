@@ -9,7 +9,7 @@ import {
 import { IconButton } from "@mui/material";
 import ColorSettingsModal from "../Color/ColorSettingsModal";
 import Tooltip from "../Tooltip";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import CardMenu from "./CardMenu";
 

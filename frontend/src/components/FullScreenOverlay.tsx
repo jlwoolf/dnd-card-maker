@@ -10,6 +10,10 @@ interface FullScreenOverlayProps {
   sx?: SxProps<Theme>;
   /** Override the default z-index. */
   zIndex?: number;
+  /** Accessible label for the overlay container. */
+  "aria-label"?: string;
+  /** Test identifier for the overlay container. */
+  "data-testid"?: string;
 }
 
 /** Full-screen fixed overlay used by DeckView, CloudDeckView,
@@ -22,9 +26,14 @@ export default function FullScreenOverlay({
   children,
   sx,
   zIndex,
+  "aria-label": ariaLabel,
+  "data-testid": dataTestid,
 }: FullScreenOverlayProps) {
   return (
     <Box
+      aria-label={ariaLabel}
+      data-testid={dataTestid}
+      role="dialog"
       sx={{
         position: "fixed",
         top: 0,

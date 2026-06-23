@@ -18,6 +18,6 @@ export { default as CloudDeckListView } from "./Cloud/CloudDeckListView";
 export { default as CloudDeckPreview } from "./Cloud/CloudDeckPreview";
 export { ColorPicker } from "./Color/ColorPicker";
 export { default as ColorSettingsModal } from "./Color/ColorSettingsModal";
-export { useSnackbar } from "@src/hooks/useSnackbar";
-export { default as useExportCards } from "@src/hooks/useExportCards";
+export { useSnackbar } from "@src/stores/useSnackbar";
+export { default as useExportCards } from "@src/stores/useExportCards";
 export { useCardPalettes } from "@src/hooks/useCardPalettes";

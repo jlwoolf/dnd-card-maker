@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useState } from "react";
 import {
   Bookmark,
   BookmarkBorder,
-  Close,
   ContentCopy,
   Delete,
   Edit,
@@ -13,15 +12,6 @@ import {
   Box,
   Button,
   CircularProgress,
-  Dialog,
-  DialogContent,
-  DialogTitle,
-  Fab,
-  IconButton,
-  Snackbar,
-  TextField,
-  ToggleButton,
-  ToggleButtonGroup,
   Typography,
 } from "@mui/material";
 import {
@@ -49,13 +39,18 @@ interface PreviewCard {
   title: string | null;
   elements: Element[];
   theme: PreviewTheme;
+  share_slug?: string | null;
+  share_mode?: string | null;
 }
 import type { Element, PreviewTheme } from "@src/schemas"
 import { themeFromSnake } from "@src/utils/themeHelpers";
-import useExportCards from "@src/hooks/useExportCards";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/stores/useExportCards";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import CardHoverActions from "../CardHoverActions";
 import AddToDeckPopover from "../AddToDeckPopover";
+import CardGrid from "../CardGrid";
+import CloseFab from "../CloseFab";
+import ShareDialog from "../ShareDialog";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 
@@ -226,7 +221,6 @@ export default function CloudDeckPreview({
     "view_and_copy",
   );
   const [shareUrl, setShareUrl] = useState("");
-  const [copyFeedback, setCopyFeedback] = useState(false);
 
   const cardIds = useMemo(() => cards.map((c) => c.id), [cards]);
 
@@ -423,23 +417,7 @@ export default function CloudDeckPreview({
           onDragEnd={handleDragEnd}
           modifiers={[restrictToWindowEdges]}
         >
-          <Box
-            sx={{
-              flexGrow: 1,
-              minHeight: 0,
-              overflowY: "auto",
-              p: 3,
-              pb: { xs: 12, md: 16 },
-              display: "grid",
-              gridTemplateColumns: {
-                xs: "repeat(auto-fill, minmax(140px, 1fr))",
-                md: "repeat(auto-fill, minmax(200px, 1fr))",
-              },
-              gridAutoRows: "max-content",
-              gap: 3,
-              alignContent: "start",
-            }}
-          >
+          <CardGrid>
             {cards.length === 0 && (
               <Box sx={{ gridColumn: "1 / -1", textAlign: "center", py: 8 }}>
                 <Typography variant="h6" color="grey.500">
@@ -462,106 +440,30 @@ export default function CloudDeckPreview({
                 />
               ))}
             </SortableContext>
-          </Box>
+          </CardGrid>
         </DndContext>
       )}
 
-      <Box
-        sx={{
-          position: "absolute",
-          bottom: 20,
-          left: "50%",
-          transform: "translateX(-50%)",
-          zIndex: 1100,
-        }}
-      >
-        <Fab
-          color="primary"
-          onClick={onClose}
-          sx={{
-            boxShadow: 4,
-            "&:hover": { transform: "scale(1.1)" },
-            transition: "transform 0.2s",
-            width: { xs: "56px", md: "80px" },
-            height: { xs: "56px", md: "80px" },
-          }}
-        >
-          <Close />
-        </Fab>
-      </Box>
+      <CloseFab onClose={onClose} />
       <AddToDeckPopover
         open={Boolean(addDeckCardId)}
         anchorEl={null}
         cardId={addDeckCardId || ""}
         onClose={() => setAddDeckCardId(null)}
       />
-      <Dialog
+      <ShareDialog
         open={shareOpen}
         onClose={() => setShareOpen(false)}
-        maxWidth="xs"
-        fullWidth
-      >
-        <DialogTitle>
-          {cards.find((c) => c.id === shareCardId)
-            ? "Manage Share"
-            : "Share Card"}
-        </DialogTitle>
-        <DialogContent sx={{ pt: 1 }}>
-          {shareUrl && (
-            <Box sx={{ mb: 2, position: "relative" }}>
-              <TextField
-                fullWidth
-                size="small"
-                value={shareUrl}
-                slotProps={{
-                  input: {
-                    readOnly: true,
-                    endAdornment: (
-                      <IconButton
-                        size="small"
-                        onClick={() => {
-                          navigator.clipboard.writeText(shareUrl);
-                          setCopyFeedback(true);
-                        }}
-                      >
-                        <LinkIcon fontSize="small" />
-                      </IconButton>
-                    ),
-                  },
-                }}
-                label="Share Link"
-                sx={{ mb: 1 }}
-              />
-            </Box>
-          )}
-          <ToggleButtonGroup
-            value={shareMode}
-            exclusive
-            onChange={(_, v) => v && setShareMode(v)}
-            size="small"
-            fullWidth
-            sx={{ mb: 2 }}
-          >
-            <ToggleButton value="view_only">View Only</ToggleButton>
-            <ToggleButton value="view_and_copy">View & Copy</ToggleButton>
-          </ToggleButtonGroup>
-          <Box display="flex" gap={1}>
-            <Button variant="contained" onClick={handleShare} fullWidth>
-              {shareUrl ? "Update" : "Create Link"}
-            </Button>
-            {shareUrl && (
-              <Button variant="outlined" color="error" onClick={handleUnshare}>
-                Remove
-              </Button>
-            )}
-          </Box>
-        </DialogContent>
-      </Dialog>
-      <Snackbar
-        open={copyFeedback}
-        autoHideDuration={2000}
-        onClose={() => setCopyFeedback(false)}
-        message="Link copied to clipboard"
+        entityType="card"
+        shareUrl={shareUrl}
+        shareMode={shareMode}
+        hasExistingShare={Boolean(
+          cards.find((c) => c.id === shareCardId)?.share_slug,
+        )}
+        onShareModeChange={setShareMode}
+        onShare={handleShare}
+        onUnshare={handleUnshare}
+        onCopyLink={() => showSnackbar("Link copied to clipboard", "success")}
       />
     </>
   );

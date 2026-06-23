@@ -1,7 +1,7 @@
 import { ContentCopy, Delete, Download, Edit } from "@mui/icons-material";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
-import useExportCards from "@src/hooks/useExportCards";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import useExportCards from "@src/stores/useExportCards";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import ActionButton from "./ActionButton";
 import type { Card } from "@src/schemas";
 

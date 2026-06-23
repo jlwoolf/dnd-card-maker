@@ -9,9 +9,11 @@ import {
   Typography,
 } from "@mui/material";
 import RoundedButtonGroup from "../RoundedButtonGroup";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import FullScreenOverlay from "../FullScreenOverlay";
+import CardGrid from "../CardGrid";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
-import useExportCards from "@src/hooks/useExportCards";
+import useExportCards from "@src/stores/useExportCards";
 import { useExportModal } from "./ExportContext";
 
 /**
@@ -97,22 +99,9 @@ export default function ExportModal() {
   }
 
   return (
-    <Box
-      sx={{
-        position: "fixed",
-        top: 0,
-        left: 0,
-        width: "100vw",
-        height: "100dvh",
-        bgcolor: "grey.900",
-        zIndex: 1200,
-        display: "flex",
-        flexDirection: "column",
-        overflow: "hidden",
-      }}
+    <FullScreenOverlay
       data-testid="export-modal-overlay"
       aria-label="Export deck to PDF"
-      role="dialog"
     >
       {/* Header with selection summaries and global toggles */}
       <Box
@@ -158,24 +147,7 @@ export default function ExportModal() {
       </Box>
 
       {/* Grid of selectable card previews */}
-      <Box
-        data-testid="export-card-grid"
-        sx={{
-          flexGrow: 1,
-          minHeight: 0,
-          overflowY: "auto",
-          p: 3,
-          pb: 16,
-          display: "grid",
-          gridTemplateColumns: {
-            xs: "repeat(auto-fill, minmax(140px, 1fr))",
-            md: "repeat(auto-fill, minmax(200px, 1fr))",
-          },
-          gridAutoRows: "max-content",
-          gap: 3,
-          alignContent: "start",
-        }}
-      >
+      <CardGrid data-testid="export-card-grid" sx={{ pb: 16 }}>
         {cards.map((card) => {
           const isSelected = selectedIds.includes(card.id);
           return (
@@ -248,7 +220,7 @@ export default function ExportModal() {
             </Box>
           );
         })}
-      </Box>
+      </CardGrid>
 
       {/* Footer action buttons */}
       <Box
@@ -309,6 +281,6 @@ export default function ExportModal() {
           </Typography>
         </Box>
       </Backdrop>
-    </Box>
+    </FullScreenOverlay>
   );
 }

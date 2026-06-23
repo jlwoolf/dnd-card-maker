@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import useExportCards from "../useExportCards";
+import useExportCards from "../../stores/useExportCards";
 
 vi.mock("jspdf", () => {
   const MockJsPDF = vi.fn().mockImplementation(() => ({

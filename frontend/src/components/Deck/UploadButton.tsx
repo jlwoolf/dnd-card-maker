@@ -1,5 +1,5 @@
 import React, { useRef } from "react";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import ControlButton from "./ControlButton";
 
 interface UploadButtonProps<T> {

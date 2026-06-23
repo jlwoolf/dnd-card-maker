@@ -14,7 +14,7 @@ vi.mock("@src/stores/useAuthStore", () => ({
   },
 }));
 
-vi.mock("@src/hooks/useSnackbar", () => ({
+vi.mock("@src/stores/useSnackbar", () => ({
   useSnackbar: (selector?: (s: unknown) => unknown) => {
     const state = { showSnackbar: mockShowSnackbar, closeSnackbar: vi.fn(), open: false, message: "", severity: "info" as const };
     return selector ? selector(state) : state;

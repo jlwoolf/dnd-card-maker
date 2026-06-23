@@ -29,14 +29,14 @@ vi.mock("@src/stores/useActiveCardStore", () => ({
   },
 }));
 
-vi.mock("@src/hooks/useExportCards", () => ({
+vi.mock("@src/stores/useExportCards", () => ({
   default: (selector?: (s: unknown) => unknown) => {
     const state = { cards: [], addCard: mockAddCard, updateCard: mockUpdateCard, setCardCloudId: mockSetCardCloudId };
     return selector ? selector(state) : state;
   },
 }));
 
-vi.mock("@src/hooks/useSnackbar", () => ({
+vi.mock("@src/stores/useSnackbar", () => ({
   useSnackbar: (selector?: (s: unknown) => unknown) => {
     const state = { showSnackbar: mockShowSnackbar, closeSnackbar: vi.fn(), open: false, message: "", severity: "info" as const };
     return selector ? selector(state) : state;

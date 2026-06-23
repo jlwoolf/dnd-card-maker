@@ -27,7 +27,6 @@
     "@types/classnames": "^2.3.0",
     "axios": "^1.18.0",
     "classnames": "^2.5.1",
-    "clsx": "^2.1.1",
     "framer-motion": "^12.34.0",
     "html-to-image": "^1.11.13",
     "jspdf": "^4.1.0",

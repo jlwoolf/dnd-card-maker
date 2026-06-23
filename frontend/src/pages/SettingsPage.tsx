@@ -16,7 +16,7 @@ import {
 import AuthPageLayout from "@src/components/AuthPageLayout";
 import { userApi } from "@src/services/api";
 import { useAuthStore } from "@src/stores/useAuthStore";
-import { useSnackbar } from "@src/hooks/useSnackbar";
+import { useSnackbar } from "@src/stores/useSnackbar";
 import { extractApiError } from "@src/utils/apiErrors";
 
 export default function SettingsPage() {

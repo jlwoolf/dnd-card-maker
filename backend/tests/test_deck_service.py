@@ -93,7 +93,7 @@ class TestGetDeckCards:
         cards = get_deck_cards(deck, db_session, include_saved=True)
         assert cards == []
 
-    def test_populated_deck_includes_img_url(self, db_session: Session):
+    def test_populated_deck_excludes_img_url(self, db_session: Session):
         card = _make_card(db_session, "c-img")
         deck = _make_deck(db_session, "d-img")
         _add_cards_to_deck(db_session, "d-img", "c-img")
@@ -101,7 +101,7 @@ class TestGetDeckCards:
         cards = get_deck_cards(deck, db_session, include_saved=True)
         assert len(cards) == 1
         assert cards[0]["id"] == "c-img"
-        assert cards[0]["img_url"] == "data:image/png;base64,img-c-img"
+        assert "img_url" not in cards[0]
 
     def test_includes_saved_flag(self, db_session: Session):
         card = _make_card(db_session, "c-saved")
@@ -137,14 +137,14 @@ class TestGetDeckCards:
 # ---------------------------------------------------------------------------
 
 class TestGetDeckCardsForShare:
-    def test_includes_img_url(self, db_session: Session):
+    def test_excludes_img_url(self, db_session: Session):
         card = _make_card(db_session, "c-sh-img")
         deck = _make_deck(db_session, "d-sh-img")
         _add_cards_to_deck(db_session, "d-sh-img", "c-sh-img")
 
         cards = get_deck_cards(deck, db_session, include_saved=False)
         assert len(cards) == 1
-        assert cards[0]["img_url"] == "data:image/png;base64,img-c-sh-img"
+        assert "img_url" not in cards[0]
 
     def test_excludes_saved_flag(self, db_session: Session):
         card = _make_card(db_session, "c-sh-saved")

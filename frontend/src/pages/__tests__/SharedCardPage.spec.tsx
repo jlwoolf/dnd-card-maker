@@ -9,7 +9,7 @@ vi.mock("@src/services/api", () => ({
   },
 }));
 
-vi.mock("@src/hooks/useExportCards", () => ({
+vi.mock("@src/stores/useExportCards", () => ({
   default: Object.assign(
     (selector?: (s: unknown) => unknown) => {
       const state = { cards: [], addCard: vi.fn() };
@@ -23,7 +23,7 @@ vi.mock("@src/hooks/useExportCards", () => ({
   ),
 }));
 
-vi.mock("@src/hooks/useSnackbar", () => ({
+vi.mock("@src/stores/useSnackbar", () => ({
   useSnackbar: (selector?: (s: unknown) => unknown) => {
     const state = { showSnackbar: vi.fn(), closeSnackbar: vi.fn(), open: false, message: "", severity: "info" };
     return selector ? selector(state) : state;
