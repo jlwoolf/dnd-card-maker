@@ -14,11 +14,7 @@ RUN echo "=== Build-stage VITE vars ===" && \
     echo "VITE_BASE_PATH=${VITE_BASE_PATH}" && \
     echo "VITE_TURNSTILE_SITE_KEY=${VITE_TURNSTILE_SITE_KEY}" && \
     echo "VITE_CORS_PROXY=${VITE_CORS_PROXY}"
-RUN npm run build && \
-    echo "=== Checking compiled API_BASE ===" && \
-    grep -r 'API_BASE\|api/images\|"\/api' /app/dist/ 2>/dev/null || echo "(no matches)"
-RUN echo "=== Sample compiled JS ===" && \
-    head -c 2000 /app/dist/assets/*.js 2>/dev/null || true
+RUN npm run build
 
 # Stage 2: Production stage
 FROM nginx:stable-alpine AS production-stage
