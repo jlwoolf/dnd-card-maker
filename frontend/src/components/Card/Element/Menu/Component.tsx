@@ -18,6 +18,7 @@ import {
 import omit from "lodash/omit";
 import { Tooltip } from "@src/components";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
+import { useResponsiveZoom } from "@src/hooks/useResponsiveZoom";
 import { mergeSx } from "@src/utils/mergeSx";
 import usePopperRef from "../usePopperRef";
 import VerticalAlignmentTooltip from "./VerticalAlignmentTooltip";
@@ -65,6 +66,8 @@ export default function Menu({
   const [vaAnchorEl, setVaAnchorEl] = useState<HTMLElement | null>(null);
   const vaOpen = Boolean(vaAnchorEl);
 
+  const { zoom } = useResponsiveZoom();
+
   const anchorRef = useRef<HTMLDivElement>(null);
   const [parentElement, setParentElement] = useState<HTMLElement | null>(null);
 
@@ -99,13 +102,13 @@ export default function Menu({
         style={{ position: "absolute", width: 0, height: 0 }}
       />
 
-      <Popper
-        popperRef={popperRef}
-        open={Boolean(open && parentElement)}
-        anchorEl={parentElement}
+      {Boolean(open && parentElement) && (
+        <Popper
+          popperRef={popperRef}
+          open
+          anchorEl={parentElement}
         placement="bottom-end"
         transition
-        disablePortal={true}
         modifiers={[
           { name: "offset", options: { offset: [0, 0] } },
           { name: "flip", enabled: true, options: { padding: 8 } },
@@ -138,6 +141,7 @@ export default function Menu({
                 pointerEvents: "auto",
                 minHeight: 0,
                 whiteSpace: "nowrap",
+                zoom,
 
                 "& .MuiButtonBase-root": {
                   minHeight: 0,
@@ -244,6 +248,7 @@ export default function Menu({
           </Fade>
         )}
       </Popper>
+      )}
 
       {settingsOpen && settingsAnchor && (
         <Portal container={settingsAnchor}>
