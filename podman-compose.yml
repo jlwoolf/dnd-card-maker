@@ -13,8 +13,6 @@ services:
     restart: always
     environment:
       - NODE_ENV=production
-    depends_on:
-      - backend
 
   backend:
     build:
