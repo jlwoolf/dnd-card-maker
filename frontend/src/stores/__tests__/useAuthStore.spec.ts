@@ -1,6 +1,5 @@
 import { describe, it, expect, beforeEach, vi } from "vitest";
 
-// Mock the API module before importing the store
 vi.mock("../../services/api", () => ({
   default: {
     post: vi.fn(),
@@ -10,7 +9,6 @@ vi.mock("../../services/api", () => ({
 import api from "../../services/api";
 import { useAuthStore } from "../../stores/useAuthStore";
 
-// Helper to create a valid JWT payload (base64url-encoded JSON)
 function makeToken(payload: Record<string, unknown>): string {
   const enc = (s: string) => btoa(s).replace(/=/g, "").replace(/\+/g, "-").replace(/\//g, "_");
   return `header.${enc(JSON.stringify(payload))}.signature`;
@@ -57,6 +55,7 @@ describe("useAuthStore", () => {
     expect(api.post).toHaveBeenCalledWith("/auth/register", {
       email: "new@example.com",
       password: "password123",
+      turnstile_token: "",
     });
     expect(useAuthStore.getState().isAuthenticated).toBe(false);
   });

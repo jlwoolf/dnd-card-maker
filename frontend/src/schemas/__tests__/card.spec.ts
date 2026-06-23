@@ -1,6 +1,6 @@
 import { describe, it, expect } from "vitest";
-import { CardSchema } from "../../schemas/card";
-import { DEFAULT_THEME } from "../../schemas/theme";
+import { CardSchema } from "../card";
+import { DEFAULT_THEME } from "../theme";
 
 describe("CardSchema", () => {
   const validCard = {

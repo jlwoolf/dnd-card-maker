@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useCloudCardMapping } from "../../stores/useCloudCardMapping";
+import { useCloudCardMapping } from "../useCloudCardMapping";
 
 describe("useCloudCardMapping", () => {
   beforeEach(() => {

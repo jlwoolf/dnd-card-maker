@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { ElementSchema, TextElementSchema, ImageElementSchema } from "../../schemas/elements";
+import { ElementSchema, TextElementSchema, ImageElementSchema } from "../elements";
 
 describe("TextElementSchema", () => {
   it("parses a valid text element value with defaults", () => {

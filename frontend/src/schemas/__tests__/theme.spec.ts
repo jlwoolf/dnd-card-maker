@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import { PreviewThemeSchema, DEFAULT_THEME } from "../../schemas/theme";
+import { PreviewThemeSchema, DEFAULT_THEME } from "../theme";
 
 describe("PreviewThemeSchema", () => {
   it("accepts a valid theme object", () => {

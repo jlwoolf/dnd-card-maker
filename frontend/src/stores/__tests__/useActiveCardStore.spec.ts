@@ -1,5 +1,5 @@
 import { describe, it, expect, beforeEach } from "vitest";
-import { useActiveCardStore } from "../../stores/useActiveCardStore";
+import { useActiveCardStore } from "../useActiveCardStore";
 
 describe("useActiveCardStore", () => {
   beforeEach(() => {
@@ -76,7 +76,6 @@ describe("useActiveCardStore", () => {
     useActiveCardStore.getState().moveElement(0, 2);
 
     const idsAfter = useActiveCardStore.getState().elements.map((e) => e.id);
-    // Element at index 0 should now be the former index 1 (original second element)
     expect(idsAfter[0]).toBe(idsBefore[1]);
     expect(idsAfter[2]).toBe(idsBefore[0]);
   });

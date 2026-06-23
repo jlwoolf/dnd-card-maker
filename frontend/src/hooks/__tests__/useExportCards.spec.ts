@@ -1,9 +1,24 @@
-import { describe, it, expect, beforeEach } from "vitest";
-import useExportCards from "../../hooks/useExportCards";
+import { describe, it, expect, beforeEach, vi } from "vitest";
+import useExportCards from "../useExportCards";
+
+vi.mock("jspdf", () => {
+  const MockJsPDF = vi.fn().mockImplementation(() => ({
+    addPage: vi.fn(),
+    addImage: vi.fn(),
+    save: vi.fn(),
+    internal: { getNumberOfPages: vi.fn().mockReturnValue(1) },
+  }));
+  return { jsPDF: MockJsPDF, default: MockJsPDF };
+});
 
 describe("useExportCards", () => {
   beforeEach(() => {
-    useExportCards.setState({ cards: [], pdfProgress: 0 });
+    useExportCards.setState({
+      cards: [],
+      pdfProgress: 0,
+      editingCloudDeckId: null,
+      editingCloudDeckTitle: null,
+    });
   });
 
   it("starts with an empty deck", () => {
@@ -46,7 +61,7 @@ describe("useExportCards", () => {
     expect(cards[0].theme.fill).toBe("#111");
   });
 
-  it("addCard accepts an optional cloudCardId", () => {
+  it("addCard accepts an optional cloudCardId and thumbnailUrl", () => {
     const { addCard } = useExportCards.getState();
     addCard([], "data:img;base64,test", {
       fill: "#aaa",
@@ -55,8 +70,10 @@ describe("useExportCards", () => {
       stroke: "#ddd",
       bannerText: "#eee",
       boxText: "#fff",
-    }, "cloud-123");
-    expect(useExportCards.getState().cards[0].cloudCardId).toBe("cloud-123");
+    }, "cloud-123", "thumb-url");
+    const card = useExportCards.getState().cards[0];
+    expect(card.cloudCardId).toBe("cloud-123");
+    expect(card.thumbnailUrl).toBe("thumb-url");
   });
 
   it("removeCard removes the card by id", () => {
@@ -197,5 +214,28 @@ describe("useExportCards", () => {
     const result = useExportCards.getState().loadFile([]);
     expect(result).toBe(true);
     expect(useExportCards.getState().cards).toEqual([]);
+  });
+
+  it("setEditingCloudDeck sets cloud deck id and title", () => {
+    useExportCards.getState().setEditingCloudDeck("deck-id", "Spell Cards");
+    expect(useExportCards.getState().editingCloudDeckId).toBe("deck-id");
+    expect(useExportCards.getState().editingCloudDeckTitle).toBe("Spell Cards");
+  });
+
+  it("setEditingCloudDeck clears when called with null", () => {
+    useExportCards.getState().setEditingCloudDeck("deck-id", "Some Deck");
+    useExportCards.getState().setEditingCloudDeck(null, null);
+    expect(useExportCards.getState().editingCloudDeckId).toBeNull();
+    expect(useExportCards.getState().editingCloudDeckTitle).toBeNull();
+  });
+
+  it("generatePdf returns undefined when no cards provided", async () => {
+    const result = await useExportCards.getState().generatePdf(undefined);
+    expect(result).toBeUndefined();
+  });
+
+  it("generatePdf returns undefined for empty card list", async () => {
+    const result = await useExportCards.getState().generatePdf([]);
+    expect(result).toBeUndefined();
   });
 });
