@@ -23,6 +23,7 @@ import AdminPage from "./pages/AdminPage";
 import DevMailPage from "./pages/DevMailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
 import LoginPage from "./pages/LoginPage";
+import NotFoundPage from "./pages/NotFoundPage";
 import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
@@ -110,6 +111,7 @@ function AppContent() {
         {!import.meta.env.PROD && (
           <Route path="/admin" element={<AdminPage />} />
         )}
+        <Route path="*" element={<NotFoundPage />} />
       </Routes>
       {isCloudDeckOpen && (
         <CloudDeckView onClose={() => setIsCloudDeckOpen(false)} />
