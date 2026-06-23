@@ -633,3 +633,183 @@ class TestDeckUpdateNoChanges:
         )
         assert resp.status_code == 200
         assert resp.json()["title"] == "No Change Deck"
+
+
+class TestAutosaveEndpoints:
+    """Tests for GET/PUT /api/decks/autosave."""
+
+    def test_get_autosave_empty(self, client, auth_headers):
+        """GET /api/decks/autosave returns null when no autosave exists."""
+        resp = client.get("/api/decks/autosave", headers=auth_headers)
+        assert resp.status_code == 200
+        assert resp.json() is None
+
+    def test_put_autosave_creates(self, client, auth_headers):
+        """PUT /api/decks/autosave creates an autosave deck with cards."""
+        resp = client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [],
+                        "img_url": "data:image/png;base64,abc",
+                        "theme": {
+                            "fill": "#111111",
+                            "banner_fill": "#222222",
+                            "box_fill": "#333333",
+                            "stroke": "#444444",
+                            "banner_text": "#555555",
+                            "box_text": "#666666",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["title"] == "__autosave__"
+        assert len(data["cards"]) == 1
+
+    def test_put_then_get_autosave(self, client, auth_headers):
+        """Saving then fetching autosave returns the same cards."""
+        client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [{"type": "paragraph", "children": [{"text": "Hello"}]}],
+                        "img_url": "data:image/png;base64,xyz",
+                        "theme": {
+                            "fill": "#aaaaaa",
+                            "banner_fill": "#bbbbbb",
+                            "box_fill": "#cccccc",
+                            "stroke": "#dddddd",
+                            "banner_text": "#eeeeee",
+                            "box_text": "#ffffff",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+
+        resp = client.get("/api/decks/autosave", headers=auth_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data is not None
+        assert len(data["cards"]) == 1
+        assert data["cards"][0]["elements"] == [{"type": "paragraph", "children": [{"text": "Hello"}]}]
+
+    def test_autosave_not_in_deck_list(self, client, auth_headers):
+        """Autosave deck should not appear in GET /api/decks."""
+        # Create autosave deck
+        client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [],
+                        "img_url": "data:image/png;base64,zzz",
+                        "theme": {
+                            "fill": "#111111",
+                            "banner_fill": "#222222",
+                            "box_fill": "#333333",
+                            "stroke": "#444444",
+                            "banner_text": "#555555",
+                            "box_text": "#666666",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+
+        # Create a regular deck
+        client.post(
+            "/api/decks",
+            json={"title": "Visible Deck", "card_ids": []},
+            headers=auth_headers,
+        )
+
+        resp = client.get("/api/decks", headers=auth_headers)
+        decks = resp.json()
+        titles = [d["title"] for d in decks]
+        assert "Visible Deck" in titles
+        assert "__autosave__" not in titles
+
+    def test_put_autosave_overwrites(self, client, auth_headers):
+        """Putting autosave twice overwrites the cards."""
+        client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [],
+                        "img_url": "data:image/png;base64,abc",
+                        "theme": {
+                            "fill": "#111111",
+                            "banner_fill": "#222222",
+                            "box_fill": "#333333",
+                            "stroke": "#444444",
+                            "banner_text": "#555555",
+                            "box_text": "#666666",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+
+        # Overwrite with different cards
+        resp = client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [{"text": "New"}],
+                        "img_url": "data:image/png;base64,def",
+                        "theme": {
+                            "fill": "#999999",
+                            "banner_fill": "#888888",
+                            "box_fill": "#777777",
+                            "stroke": "#666666",
+                            "banner_text": "#555555",
+                            "box_text": "#444444",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert len(data["cards"]) == 1
+        assert data["cards"][0]["elements"] == [{"text": "New"}]
+
+    def test_autosave_user_isolation(self, client, auth_headers, other_auth_headers):
+        """Each user has their own autosave deck."""
+        client.put(
+            "/api/decks/autosave",
+            json={
+                "cards": [
+                    {
+                        "elements": [{"text": "User A"}],
+                        "img_url": "data:image/png;base64,aaa",
+                        "theme": {
+                            "fill": "#111111",
+                            "banner_fill": "#222222",
+                            "box_fill": "#333333",
+                            "stroke": "#444444",
+                            "banner_text": "#555555",
+                            "box_text": "#666666",
+                        },
+                    }
+                ]
+            },
+            headers=auth_headers,
+        )
+
+        # Other user should see no autosave
+        resp = client.get("/api/decks/autosave", headers=other_auth_headers)
+        assert resp.json() is None

@@ -31,6 +31,16 @@ def _migrate_db(engine) -> None:
                 )
                 conn.commit()
 
+    # is_autosave on decks (added for auto-save deck feature)
+    if "decks" in inspector.get_table_names():
+        cols = {c["name"] for c in inspector.get_columns("decks")}
+        if "is_autosave" not in cols:
+            with engine.connect() as conn:
+                conn.execute(
+                    text("ALTER TABLE decks ADD COLUMN is_autosave BOOLEAN NOT NULL DEFAULT 0")
+                )
+                conn.commit()
+
 
 def init_db() -> None:
     os.makedirs(os.path.dirname(settings.sqlite_path) or ".", exist_ok=True)

@@ -396,6 +396,37 @@ Batch upload cards only (max 10 per request). Cards are created or updated and r
 
 ---
 
+### GET `/api/decks/autosave`
+
+Get the current user's auto-saved deck. Returns `null` if no autosave exists yet.
+
+**Response** `200`: `DeckResponse` or `null`.
+
+---
+
+### PUT `/api/decks/autosave`
+
+Save or update the user's auto-saved deck. The autosave deck is hidden from the normal deck listing and persists across sessions. Each user has exactly one autosave deck.
+
+**Request Body:**
+
+```json
+{
+  "cards": [
+    {
+      "id": "existing-card-uuid",
+      "elements": [...],
+      "img_url": "data:...",
+      "theme": {...}
+    }
+  ]
+}
+```
+
+**Response** `201`: `DeckResponse`.
+
+---
+
 ### GET `/api/decks/{id}`
 
 Get a deck with its cards.

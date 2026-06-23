@@ -122,7 +122,7 @@ def list_user_decks(user_id: str, db: Session) -> list[dict]:
 
     decks = (
         db.query(Deck)
-        .filter(Deck.user_id == user_id)
+        .filter(Deck.user_id == user_id, Deck.is_autosave == False)
         .order_by(Deck.is_default.desc(), Deck.updated_at.desc())
         .all()
     )
@@ -354,3 +354,57 @@ def count_user_cards_by_ids(user_id: str, card_ids: list[str], db: Session) -> i
         .filter(Card.id.in_(card_ids), Card.user_id == user_id)
         .count()
     )
+
+
+def get_autosave_deck(user_id: str, db: Session) -> Deck | None:
+    """Return the user's autosave deck, or None if it doesn't exist."""
+    return (
+        db.query(Deck)
+        .filter(Deck.user_id == user_id, Deck.is_autosave == True)
+        .first()
+    )
+
+
+def save_autosave_deck(
+    user_id: str,
+    cards_input: list[dict],
+    db: Session,
+) -> Deck:
+    """Save or update the user's autosave deck with the given cards.
+
+    Uses ``_upsert_cards`` to create/update the card records, then links
+    them to the autosave deck (creating the deck if it doesn't exist).
+    Old cards that are no longer referenced are cleaned up.
+    """
+    from app.constants import AUTOSAVE_DECK_TITLE
+
+    card_ids = _upsert_cards(user_id, cards_input, db) if cards_input else []
+
+    existing = (
+        db.query(Deck)
+        .filter(Deck.user_id == user_id, Deck.is_autosave == True)
+        .first()
+    )
+
+    if existing:
+        deck = existing
+        old_card_ids = [
+            dc.card_id
+            for dc in db.query(DeckCard).filter(DeckCard.deck_id == deck.id).all()
+        ]
+        db.query(DeckCard).filter(DeckCard.deck_id == deck.id).delete()
+    else:
+        deck = Deck(user_id=user_id, title=AUTOSAVE_DECK_TITLE, is_autosave=True)
+        db.add(deck)
+        db.flush()
+        old_card_ids = []
+
+    for i, card_id in enumerate(card_ids):
+        db.add(DeckCard(deck_id=deck.id, card_id=card_id, position=i))
+
+    db.commit()
+    for card_id in old_card_ids:
+        cleanup_orphaned_card(card_id, db)
+    db.commit()
+    db.refresh(deck)
+    return deck

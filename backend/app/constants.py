@@ -6,6 +6,7 @@ so they can be imported rather than duplicated.
 
 # --- Deck defaults ---
 DEFAULT_DECK_TITLE = "My Cards"
+AUTOSAVE_DECK_TITLE = "__autosave__"
 
 # --- JWT configuration ---
 JWT_ALGORITHM = "HS256"

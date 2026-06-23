@@ -23,8 +23,10 @@ from app.services.deck_service import (
     create_deck_with_cards,
     deck_to_response,
     delete_deck,
+    get_autosave_deck,
     get_deck_by_id,
     list_user_decks,
+    save_autosave_deck,
     save_deck_with_cards,
     share_deck,
     unshare_deck,
@@ -121,6 +123,38 @@ def save_deck_cards_batch_endpoint(
     card_ids = upsert_deck_cards_batch(current_user.id, cards_input, db)
     db.commit()
     return DeckCardsBatchResponse(card_ids=card_ids)
+
+
+@router.get("/autosave", response_model=DeckResponse | None)
+def get_autosave_endpoint(
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """Get the current user's autosave deck, or empty if none exists."""
+    deck = get_autosave_deck(current_user.id, db)
+    if not deck:
+        return None
+    return deck_to_response(deck, db)
+
+
+@router.put("/autosave", response_model=DeckResponse, status_code=status.HTTP_201_CREATED)
+def save_autosave_endpoint(
+    body: DeckCardsBatchRequest,
+    current_user: CurrentUser,
+    db: DBSession,
+):
+    """Save or update the user's autosave deck with the given cards."""
+    cards_input = [
+        {
+            "id": c.id,
+            "elements": c.elements,
+            "img_url": c.img_url,
+            "theme": c.theme,
+        }
+        for c in body.cards
+    ]
+    deck = save_autosave_deck(current_user.id, cards_input, db)
+    return deck_to_response(deck, db)
 
 
 @router.get("/{deck_id}", response_model=DeckResponse)

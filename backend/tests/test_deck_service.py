@@ -12,10 +12,12 @@ from app.services.deck_service import (
     count_user_cards_by_ids,
     create_deck_with_cards,
     delete_deck,
+    get_autosave_deck,
     get_deck_by_id,
     get_deck_cards,
     get_shared_deck_by_slug,
     list_user_decks,
+    save_autosave_deck,
     save_deck_with_cards,
     share_deck,
     unshare_deck,
@@ -467,3 +469,106 @@ class TestCountUserCardsByIds:
 
     def test_empty_list(self, db_session: Session):
         assert count_user_cards_by_ids(USER_ID, [], db_session) == 0
+
+
+# ---------------------------------------------------------------------------
+# Autosave deck
+# ---------------------------------------------------------------------------
+
+class TestAutosaveDeck:
+    def test_get_autosave_returns_none_when_no_autosave(self, db_session: Session):
+        """get_autosave_deck returns None when user has no autosave deck."""
+        assert get_autosave_deck(USER_ID, db_session) is None
+
+    def test_save_autosave_creates_new_deck(self, db_session: Session):
+        """save_autosave_deck creates a new autosave deck when none exists."""
+        c = _make_card(db_session, "auto-c1")
+        deck = save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-c1", "elements": c.elements, "img_url": c.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c.theme))}],
+            db_session,
+        )
+        assert deck is not None
+        assert deck.is_autosave is True
+        assert not deck.is_default
+        assert len(deck.deck_cards) == 1
+
+    def test_save_autosave_updates_existing(self, db_session: Session):
+        """save_autosave_deck updates cards on an existing autosave deck."""
+        c1 = _make_card(db_session, "auto-up1")
+        c2 = _make_card(db_session, "auto-up2")
+
+        # First save with card 1
+        deck1 = save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-up1", "elements": c1.elements, "img_url": c1.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c1.theme))}],
+            db_session,
+        )
+        deck1_id = deck1.id
+        assert len(deck1.deck_cards) == 1
+
+        # Second save with card 2 replaces card 1
+        deck2 = save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-up2", "elements": c2.elements, "img_url": c2.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c2.theme))}],
+            db_session,
+        )
+        assert deck2.id == deck1_id  # same deck
+        assert len(deck2.deck_cards) == 1
+        assert deck2.deck_cards[0].card_id == "auto-up2"
+
+    def test_autosave_not_listed_in_user_decks(self, db_session: Session):
+        """list_user_decks does not include autosave decks."""
+        # Create a regular deck
+        create_deck_with_cards(USER_ID, "Normal Deck", [], db_session)
+
+        # Create an autosave deck
+        c = _make_card(db_session, "auto-hidden")
+        save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-hidden", "elements": c.elements, "img_url": c.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c.theme))}],
+            db_session,
+        )
+
+        decks = list_user_decks(USER_ID, db_session)
+        titles = [d["title"] for d in decks]
+        assert "Normal Deck" in titles
+        assert "__autosave__" not in titles
+
+    def test_get_autosave_after_save(self, db_session: Session):
+        """get_autosave_deck returns the deck after save_autosave_deck."""
+        c = _make_card(db_session, "auto-c2")
+        save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-c2", "elements": c.elements, "img_url": c.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c.theme))}],
+            db_session,
+        )
+
+        found = get_autosave_deck(USER_ID, db_session)
+        assert found is not None
+        assert found.is_autosave is True
+        assert len(found.deck_cards) == 1
+
+    def test_save_autosave_empty_cards(self, db_session: Session):
+        """save_autosave_deck with empty cards creates an empty deck."""
+        deck = save_autosave_deck(USER_ID, [], db_session)
+        assert deck.is_autosave is True
+        assert len(deck.deck_cards) == 0
+
+    def test_get_autosave_user_isolation(self, db_session: Session):
+        """get_autosave_deck only returns the requesting user's autosave."""
+        c = _make_card(db_session, "auto-iso")
+        save_autosave_deck(
+            USER_ID,
+            [{"id": "auto-iso", "elements": c.elements, "img_url": c.img_url,
+              "theme": CardThemeSchema.model_validate(json.loads(c.theme))}],
+            db_session,
+        )
+
+        # Another user should see no autosave
+        assert get_autosave_deck("other-user-id", db_session) is None

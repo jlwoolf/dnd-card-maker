@@ -29,6 +29,11 @@ export const deckApi = {
   share: (id: string, mode: "view_only" | "view_and_copy") =>
     api.post<DeckResponse>(`/decks/${id}/share`, { mode }),
   unshare: (id: string) => api.delete(`/decks/${id}/share`),
+
+  getAutosave: () => api.get<DeckResponse | null>("/decks/autosave"),
+  saveAutosave: (data: {
+    cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
+  }) => api.put<DeckResponse>("/decks/autosave", data),
 };
 
 export const sharedDeckApi = {

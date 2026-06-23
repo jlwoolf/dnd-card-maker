@@ -19,6 +19,7 @@ import SaveDeckDialog from "./components/SaveDeckDialog";
 import { ExportContextProvider } from "./components/ExportModal";
 import ExportModal from "./components/ExportModal/Component";
 import { useResponsiveZoom } from "./hooks/useResponsiveZoom";
+import { useAutosave } from "./hooks/useAutosave";
 import AdminPage from "./pages/AdminPage";
 import DevMailPage from "./pages/DevMailPage";
 import ForgotPasswordPage from "./pages/ForgotPasswordPage";
@@ -74,6 +75,8 @@ function AppContent() {
   useEffect(() => {
     checkAuth();
   }, [checkAuth]);
+
+  useAutosave();
 
   if (isLoading) {
     return (

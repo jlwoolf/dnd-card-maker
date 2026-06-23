@@ -18,6 +18,7 @@ class Deck(Base):
     user_id: Mapped[str] = mapped_column(String, ForeignKey("users.id"), nullable=False, index=True)
     title: Mapped[str] = mapped_column(String, nullable=False)
     is_default: Mapped[bool] = mapped_column(Boolean, default=False)
+    is_autosave: Mapped[bool] = mapped_column(Boolean, default=False)
     share_slug: Mapped[str | None] = mapped_column(
         String, unique=True, nullable=True, default=None, index=True
     )
