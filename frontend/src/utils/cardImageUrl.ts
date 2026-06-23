@@ -5,8 +5,9 @@
 */
 export function getCardImageUrl(cardId: string, scale: number = 0.25): string {
   const token = localStorage.getItem("access_token");
-  if (!token) return "";
-  return `${import.meta.env.BASE_URL}api/images/${cardId}?scale=${scale}&token=${token}`;
+  const params = new URLSearchParams({ scale: String(scale) });
+  if (token) params.set("token", token);
+  return `${import.meta.env.BASE_URL}api/images/${cardId}?${params.toString()}`;
 }
 
 /** Return the best available preview image URL for a card.

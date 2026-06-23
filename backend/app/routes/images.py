@@ -2,6 +2,8 @@
 
 Returns scaled card images. Auth is validated via a ``token`` query
 parameter because ``<img>`` tags cannot send Authorization headers.
+If no token is provided the card is only served when it has been
+publicly shared (has a non-null ``share_slug``).
 """
 
 import io
@@ -35,50 +37,15 @@ def _resize_image(img_bytes: bytes, scale: float) -> bytes:
     return buf.getvalue()
 
 
-@router.get("/{card_id}")
-def get_card_image(
-    card_id: str,
-    scale: float = Query(0.25, ge=0.05, le=1.0),
-    token: str = Query(...),
-    db: Session = Depends(get_db),
-):
-    """Serve a scaled card image (auth via query param for ``<img>`` compatibility)."""
-    try:
-        user_id = get_user_id_from_token(token, TOKEN_TYPE_ACCESS, settings.jwt_secret)
-        payload = decode_token(token, settings.jwt_secret)
-    except (JWTError, ValueError) as err:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Invalid token"
-        ) from err
-
-    from app.models.user import User
-
-    user = db.query(User).filter(User.id == user_id).first()
-    if user is None:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED, detail="User not found")
-
-    token_version = payload.get("tv")
-    if token_version is not None and user.token_version != token_version:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED, detail="Token version mismatch"
-        )
-
-    if not user.is_verified:
-        raise HTTPException(status_code=status.HTTP_403_FORBIDDEN, detail="Email not verified")
-
-    card = db.query(Card).filter(Card.id == card_id).first()
-    if not card:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
-
+def _serve_card_image(card: Card, scale: float) -> Response:
+    """Serve a resized card image from its data URL."""
     if not card.img_url.startswith("data:image/"):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported image format"
         )
-
     header, encoded = card.img_url.split(",", 1)
     img_bytes = b64decode(encoded)
     resized = _resize_image(img_bytes, scale)
-
     return Response(
         content=resized,
         media_type="image/png",
@@ -86,3 +53,64 @@ def get_card_image(
             "Cache-Control": "public, max-age=31536000, immutable",
         },
     )
+
+
+@router.get("/{card_id}")
+def get_card_image(
+    card_id: str,
+    scale: float = Query(0.25, ge=0.05, le=1.0),
+    token: str | None = Query(None),
+    db: Session = Depends(get_db),
+):
+    """Serve a scaled card image (auth via query param for ``<img>`` compatibility).
+
+    When a valid token is provided the image is served after standard auth
+    checks.  When no token (or an invalid token) is provided the card is
+    only served if it is publicly shared (has a non-null ``share_slug``).
+    """
+    if token:
+        try:
+            user_id = get_user_id_from_token(token, TOKEN_TYPE_ACCESS, settings.jwt_secret)
+            payload = decode_token(token, settings.jwt_secret)
+        except (JWTError, ValueError):
+            pass
+        else:
+            from app.models.user import User
+
+            user = db.query(User).filter(User.id == user_id).first()
+            if user is None:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED,
+                    detail="User not found",
+                )
+
+            token_version = payload.get("tv")
+            if token_version is not None and user.token_version != token_version:
+                raise HTTPException(
+                    status_code=status.HTTP_401_UNAUTHORIZED, detail="Token version mismatch"
+                )
+
+            if not user.is_verified:
+                raise HTTPException(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    detail="Email not verified",
+                )
+
+            card = db.query(Card).filter(Card.id == card_id).first()
+            if not card:
+                raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+
+            return _serve_card_image(card, scale)
+
+    # No (valid) token — allow access only for publicly shared cards
+    card = db.query(Card).filter(Card.id == card_id).first()
+    if not card:
+        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND, detail="Card not found")
+
+    if card.share_slug is None:
+        raise HTTPException(
+            status_code=status.HTTP_401_UNAUTHORIZED,
+            detail="Authentication required to view this card image",
+        )
+
+    return _serve_card_image(card, scale)

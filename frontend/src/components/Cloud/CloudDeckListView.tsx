@@ -129,7 +129,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
     try {
       const res = await deckApi.share(shareDeckId, shareMode);
       setShareUrl(
-        `${window.location.origin}${import.meta.env.BASE_URL}share/${res.data.share_slug}`,
+        `${window.location.origin}${import.meta.env.BASE_URL}share/deck/${res.data.share_slug}`,
       );
       setDecks((prev) =>
         prev.map((d) =>

@@ -27,6 +27,7 @@ import RegisterPage from "./pages/RegisterPage";
 import ResetPasswordPage from "./pages/ResetPasswordPage";
 import SettingsPage from "./pages/SettingsPage";
 import SharedCardPage from "./pages/SharedCardPage";
+import SharedDeckPage from "./pages/SharedDeckPage";
 import VerifyPage from "./pages/VerifyPage";
 import { useAuthStore } from "./stores/useAuthStore";
 import { CONTENT_MIN_HEIGHT } from "./theme/constants";
@@ -102,6 +103,7 @@ function AppContent() {
         <Route path="/forgot-password" element={<GuestRoute><ForgotPasswordPage /></GuestRoute>} />
         <Route path="/reset-password/:token" element={<GuestRoute><ResetPasswordPage /></GuestRoute>} />
         <Route path="/share/:shareSlug" element={<SharedCardPage />} />
+        <Route path="/share/deck/:shareSlug" element={<SharedDeckPage />} />
         {!import.meta.env.PROD && (
           <Route path="/mail" element={<DevMailPage />} />
         )}

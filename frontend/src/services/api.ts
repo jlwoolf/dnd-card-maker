@@ -178,8 +178,27 @@ export interface DeckCardEntry {
   saved: boolean;
   elements: Element[];
   theme: SnakeTheme;
+  img_url: string;
   share_slug: string | null;
   share_mode: string | null;
+}
+
+export interface SharedDeckCardEntry {
+  id: string;
+  title: string | null;
+  elements: Element[];
+  theme: SnakeTheme;
+  img_url: string;
+  share_slug: string | null;
+  share_mode: string | null;
+}
+
+export interface SharedDeckData {
+  id: string;
+  title: string;
+  cards: SharedDeckCardEntry[];
+  mode: string | null;
+  can_copy: boolean;
 }
 
 export interface DeckResponse {
@@ -215,7 +234,7 @@ export const deckApi = {
 };
 
 export const sharedDeckApi = {
-  get: (slug: string) => api.get<DeckResponse>(`/shared/decks/${slug}`),
+  get: (slug: string) => api.get<SharedDeckData>(`/shared/decks/${slug}`),
 };
 
 export const sharedApi = {
