@@ -1,4 +1,4 @@
-import { type ChangeEvent, useRef } from "react";
+import { type ChangeEvent, useEffect, useRef } from "react";
 import {
   Folder as FolderIcon,
   Image as ImageIcon,
@@ -69,13 +69,12 @@ const SourceTooltip = ({
     }
   };
 
+  useEffect(() => () => revokeObjectUrl(), []);
+
   return (
     <SettingsTooltip
       open={isOpen}
-      onClose={() => {
-        revokeObjectUrl();
-        onClose();
-      }}
+      onClose={onClose}
       title={
         <Box p={1} display="flex" alignItems="center">
           <input
