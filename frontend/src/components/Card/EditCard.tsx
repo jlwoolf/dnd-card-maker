@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Box } from "@mui/material";
 import BaseCard from "./BaseCard";
 import BottomCardMenu from "./BottomCardMenu";
@@ -12,7 +12,7 @@ import { useSharedElement } from "./ElementRefContext";
  * It renders a dynamic list of elements within a BaseCard, using the ELEMENT_REGISTRY 
  * to determine the correct editor for each element type.
  */
-export default function EditCard() {
+function EditCard() {
   const { elements } = useActiveCardStore();
   const [containerEl, setContainerEl] = useState<HTMLElement | null>(null);
   const { setSettingsAnchor } = useSharedElement();
@@ -58,3 +58,5 @@ export default function EditCard() {
     </Box>
   );
 }
+
+export default memo(EditCard);

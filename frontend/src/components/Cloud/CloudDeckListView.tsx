@@ -25,6 +25,7 @@ import {
   Typography,
 } from "@mui/material";
 import { deckApi, type DeckSummary } from "@src/services/api";
+import { getCardImageUrl } from "@src/utils/cardImageUrl";
 import { themeFromSnake } from "@src/utils/themeHelpers";
 import useExportCards from "@src/hooks/useExportCards";
 import { useSnackbar } from "@src/hooks/useSnackbar";
@@ -273,10 +274,15 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
                 },
               }}
             >
-              {deck.first_card_img_url && (
+              {(deck.first_card_img_url || deck.first_card_id) && (
                 <img
-                  src={deck.first_card_img_url}
+                  src={
+                    deck.first_card_id
+                      ? getCardImageUrl(deck.first_card_id, 0.35)
+                      : deck.first_card_img_url ?? ""
+                  }
                   alt={deck.title}
+                  loading="lazy"
                   style={{
                     position: "absolute",
                     width: "100%",

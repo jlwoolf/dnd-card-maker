@@ -15,7 +15,7 @@ import {
   Portal,
   type ButtonProps,
 } from "@mui/material";
-import { omit } from "lodash";
+import omit from "lodash/omit";
 import { Tooltip } from "@src/components";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { mergeSx } from "@src/utils/mergeSx";

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import { Link as RouterLink, useNavigate } from "react-router-dom";
 import {
   AppBar,
@@ -20,7 +20,7 @@ interface NavBarProps {
   onOpenDecks: () => void;
 }
 
-export default function NavBar({ onOpenCloudDeck, onOpenDecks }: NavBarProps) {
+function NavBar({ onOpenCloudDeck, onOpenDecks }: NavBarProps) {
   const { user, isAuthenticated, logout } = useAuthStore();
   const navigate = useNavigate();
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
@@ -129,3 +129,5 @@ export default function NavBar({ onOpenCloudDeck, onOpenDecks }: NavBarProps) {
     </AppBar>
   );
 }
+
+export default memo(NavBar);

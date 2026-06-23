@@ -16,6 +16,19 @@ export default defineConfig({
       "@src": path.resolve(__dirname, "./src/"),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          "vendor-react": ["react", "react-dom", "react-router-dom"],
+          "vendor-mui": ["@mui/material", "@mui/icons-material", "@emotion/react", "@emotion/styled"],
+          "vendor-dnd": ["@dnd-kit/core", "@dnd-kit/sortable", "@dnd-kit/modifiers", "@dnd-kit/utilities"],
+          "vendor-slate": ["slate", "slate-react"],
+          "vendor-animation": ["framer-motion"],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       "/api": {

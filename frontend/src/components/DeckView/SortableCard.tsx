@@ -69,9 +69,10 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
       }}
     >
       <img
-        src={card.imgUrl}
+        src={card.thumbnailUrl || card.imgUrl}
         alt={`Card ${card.id}`}
         draggable="false"
+        loading="lazy"
         style={{
           width: "100%",
           height: "100%",

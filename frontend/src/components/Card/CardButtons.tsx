@@ -45,7 +45,8 @@ export default function CardButtons() {
     if (cardId) {
       const dataUrl = await getImageUrl();
       if (!dataUrl) return;
-      updateCard(cardId, { elements, imgUrl: dataUrl, theme: previewTheme });
+      const thumbnailUrl = await ImageProcessor.generateThumbnail(dataUrl, 0.25);
+      updateCard(cardId, { elements, imgUrl: dataUrl, theme: previewTheme, thumbnailUrl });
       showSnackbar("Card saved!", "success");
     }
   }, [cardId, getImageUrl, updateCard, elements, previewTheme, showSnackbar]);
@@ -53,7 +54,8 @@ export default function CardButtons() {
   const handleAdd = useCallback(async () => {
     const dataUrl = await getImageUrl();
     if (dataUrl) {
-      addCard(elements, dataUrl, previewTheme);
+      const thumbnailUrl = await ImageProcessor.generateThumbnail(dataUrl, 0.25);
+      addCard(elements, dataUrl, previewTheme, undefined, thumbnailUrl);
       showSnackbar("Card added to deck!", "success");
     }
   }, [addCard, elements, getImageUrl, previewTheme, showSnackbar]);

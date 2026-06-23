@@ -1,4 +1,3 @@
-import { jsPDF } from "jspdf";
 import { v4 as uuid } from "uuid";
 import z from "zod";
 import { create } from "zustand";
@@ -25,7 +24,7 @@ interface ExportState {
    * @param imgUrl - The generated preview image URL.
    * @param theme - The theme applied to the card.
    */
-  addCard(elements: Element[], imgUrl: string, theme: PreviewTheme, cloudCardId?: string): void;
+  addCard(elements: Element[], imgUrl: string, theme: PreviewTheme, cloudCardId?: string, thumbnailUrl?: string): void;
   /**
    * Updates an existing card in the deck.
    * 
@@ -34,7 +33,7 @@ interface ExportState {
    */
   updateCard(
     id: string,
-    data: Partial<{ elements: Element[]; imgUrl: string; theme: PreviewTheme }>,
+    data: Partial<{ elements: Element[]; imgUrl: string; theme: PreviewTheme; thumbnailUrl: string }>,
   ): void;
   /**
    * Removes a card from the deck.
@@ -73,9 +72,9 @@ const useExportCards = create<ExportState>((set, get) => ({
   editingCloudDeckId: null,
   editingCloudDeckTitle: null,
 
-  addCard(elements, imgUrl, theme, cloudCardId) {
+  addCard(elements, imgUrl, theme, cloudCardId, thumbnailUrl) {
     set((state) => ({
-      cards: [...state.cards, { elements, imgUrl, id: uuid(), theme, cloudCardId }],
+      cards: [...state.cards, { elements, imgUrl, id: uuid(), theme, cloudCardId, thumbnailUrl }],
     }));
   },
 
@@ -125,6 +124,7 @@ const useExportCards = create<ExportState>((set, get) => ({
 
     set({ pdfProgress: 0 });
 
+    const { jsPDF } = await import("jspdf");
     const doc = new jsPDF({
       orientation: "landscape",
       unit: "in",

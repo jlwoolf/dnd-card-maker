@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { Box } from "@mui/material";
 import type { Element } from "@src/schemas";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
@@ -27,7 +28,7 @@ const ElementPreview = ({ element }: { element: Element }) => {
  * being edited. It uses the ELEMENT_REGISTRY to dynamically render the
  * correct preview component for each element type.
  */
-export default function PreviewCard() {
+function PreviewCard() {
   const { elements } = useActiveCardStore();
   const { setElement } = useSharedElement();
 
@@ -55,3 +56,5 @@ export default function PreviewCard() {
     </Box>
   );
 }
+
+export default memo(PreviewCard);

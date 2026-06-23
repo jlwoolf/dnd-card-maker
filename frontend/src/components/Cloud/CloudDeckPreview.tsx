@@ -41,6 +41,7 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { deckApi, cardApi } from "@src/services/api";
+import { getCardImageUrl } from "@src/utils/cardImageUrl";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 
 interface PreviewCard {
@@ -124,9 +125,10 @@ function SortableCloudCard({
       }}
     >
       <img
-        src={card.img_url}
+        src={getCardImageUrl(card.id, 0.35)}
         alt={card.title || "Card"}
         draggable="false"
+        loading="lazy"
         style={{
           width: "100%",
           height: "100%",

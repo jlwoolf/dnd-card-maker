@@ -110,6 +110,39 @@ export class ImageProcessor {
   }
 
   /**
+   * Scales a data URL image down by the given factor and returns a reduced PNG.
+   *
+   * @param url - The source data URL.
+   * @param scale - Scale factor (0.0–1.0). Defaults to 0.25.
+   * @returns A promise resolving to the scaled PNG data URL.
+   */
+  static async generateThumbnail(url: string, scale = 0.25): Promise<string> {
+    return new Promise((resolve, reject) => {
+      const img = new Image();
+      img.src = url;
+
+      img.onload = () => {
+        const canvas = document.createElement("canvas");
+        const width = Math.max(1, Math.floor(img.width * scale));
+        const height = Math.max(1, Math.floor(img.height * scale));
+        canvas.width = width;
+        canvas.height = height;
+
+        const ctx = canvas.getContext("2d");
+        if (!ctx) return reject(new Error("ImageProcessor: Failed to create canvas context"));
+
+        ctx.imageSmoothingEnabled = true;
+        ctx.imageSmoothingQuality = "high";
+        ctx.drawImage(img, 0, 0, width, height);
+
+        resolve(canvas.toDataURL("image/png"));
+      };
+
+      img.onerror = () => reject(new Error("ImageProcessor: Failed to load image for thumbnail"));
+    });
+  }
+
+  /**
    * Compresses a large image Data URL into a more efficient JPEG format.
    * 
    * @param url - The source Data URL.

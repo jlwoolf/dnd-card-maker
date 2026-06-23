@@ -9,6 +9,7 @@ import {
 } from "@mui/material";
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import { sharedApi } from "@src/services/api";
+import { getCardImageUrl } from "@src/utils/cardImageUrl";
 import useExportCards from "@src/hooks/useExportCards";
 import { useSnackbar } from "@src/hooks/useSnackbar";
 import { themeFromSnake } from "@src/utils/themeHelpers";
@@ -113,8 +114,9 @@ export default function SharedCardPage() {
         }}
       >
         <img
-          src={card.img_url}
+          src={getCardImageUrl(card.id, 0.6)}
           alt={card.title || "Shared card"}
+          loading="lazy"
           style={{
             width: "100%",
             height: "100%",

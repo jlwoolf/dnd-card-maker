@@ -100,6 +100,7 @@ def list_user_decks(user_id: str, db: Session) -> list[dict]:
                 is_default=d.is_default,
                 card_count=card_count,
                 first_card_img_url=first_card.img_url if first_card else None,
+                first_card_id=first_card.id if first_card else None,
                 share_slug=d.share_slug,
                 share_mode=d.share_mode,
                 created_at=d.created_at,

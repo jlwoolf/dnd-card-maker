@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { memo, useState } from "react";
 import {
   ChevronLeft,
   ChevronRight,
@@ -146,8 +146,9 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
             </AnimatePresence>
 
             <img
-              src={card.imgUrl}
+              src={card.thumbnailUrl || card.imgUrl}
               alt=""
+              loading="lazy"
               style={{
                 width: "100%",
                 height: "100%",
@@ -308,4 +309,4 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
   );
 };
 
-export default Deck;
+export default memo(Deck);

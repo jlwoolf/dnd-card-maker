@@ -24,6 +24,8 @@ export const CardSchema = z.object({
   theme: PreviewThemeSchema,
   /** Optional cloud card ID for cards that have been synced to the server */
   cloudCardId: z.string().optional(),
+  /** Optional reduced-size thumbnail for list and deck views */
+  thumbnailUrl: z.string().optional(),
 });
 
 /**

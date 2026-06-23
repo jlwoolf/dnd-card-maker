@@ -202,8 +202,9 @@ export default function ExportModal() {
               }}
             >
               <img
-                src={card.imgUrl}
+                src={card.thumbnailUrl || card.imgUrl}
                 alt=""
+                loading="lazy"
                 style={{
                   width: "100%",
                   height: "100%",
