@@ -8,3 +8,20 @@ export function getCardImageUrl(cardId: string, scale: number = 0.25): string {
   if (!token) return "";
   return `${import.meta.env.BASE_URL}api/images/${cardId}?scale=${scale}&token=${token}`;
 }
+
+/** Return the best available preview image URL for a card.
+
+  Prefers local images (thumbnail, then full imgUrl) for instant display.
+  Falls back to the backend image endpoint for cloud-synced cards that
+  don't have a cached local image (e.g. after copy-to-local or edit).
+*/
+export function getCardPreviewSrc(card: {
+  thumbnailUrl?: string;
+  imgUrl: string;
+  cloudCardId?: string;
+}): string {
+  if (card.thumbnailUrl) return card.thumbnailUrl;
+  if (card.imgUrl) return card.imgUrl;
+  if (card.cloudCardId) return getCardImageUrl(card.cloudCardId, 0.35);
+  return "";
+}

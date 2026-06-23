@@ -2,6 +2,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { Box } from "@mui/material";
 import type { Card } from "@src/schemas";
+import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
 import CardButtons from "../Deck/CardButtons";
 
 /**
@@ -69,7 +70,7 @@ export default function SortableCard({ card, onClose }: SortableCardProps) {
       }}
     >
       <img
-        src={card.thumbnailUrl || card.imgUrl}
+        src={getCardPreviewSrc(card)}
         alt={`Card ${card.id}`}
         draggable="false"
         loading="lazy"

@@ -12,6 +12,7 @@ import RoundedButtonGroup from "@src/components/RoundedButtonGroup";
 import { deckApi } from "@src/services/api";
 import useExportCards from "@src/hooks/useExportCards";
 import { useSnackbar } from "@src/hooks/useSnackbar";
+import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
 import { themeToSnake } from "@src/utils/themeHelpers";
 
 interface SaveDeckDialogProps {
@@ -243,7 +244,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
               }}
             >
               <img
-                src={card.thumbnailUrl || card.imgUrl}
+                src={getCardPreviewSrc(card)}
                 alt=""
                 loading="lazy"
                 style={{

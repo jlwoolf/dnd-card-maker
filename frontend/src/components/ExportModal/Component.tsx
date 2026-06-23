@@ -10,6 +10,7 @@ import {
 } from "@mui/material";
 import RoundedButtonGroup from "../RoundedButtonGroup";
 import { useSnackbar } from "@src/hooks/useSnackbar";
+import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
 import useExportCards from "@src/hooks/useExportCards";
 import { useExportModal } from "./ExportContext";
 
@@ -202,7 +203,7 @@ export default function ExportModal() {
               }}
             >
               <img
-                src={card.thumbnailUrl || card.imgUrl}
+                src={getCardPreviewSrc(card)}
                 alt=""
                 loading="lazy"
                 style={{

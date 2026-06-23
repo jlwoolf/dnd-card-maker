@@ -11,6 +11,7 @@ import {
 import { Box, useMediaQuery, useTheme } from "@mui/material";
 import { AnimatePresence, motion } from "framer-motion";
 import { useResponsiveZoom } from "@src/hooks/useResponsiveZoom";
+import { getCardPreviewSrc } from "@src/utils/cardImageUrl";
 import SaveDeckDialog from "../SaveDeckDialog";
 import Tooltip from "../Tooltip";
 import useExportCards from "@src/hooks/useExportCards";
@@ -146,7 +147,7 @@ const Deck = ({ onOpenDeckView }: DeckProps) => {
             </AnimatePresence>
 
             <img
-              src={card.thumbnailUrl || card.imgUrl}
+              src={getCardPreviewSrc(card)}
               alt=""
               loading="lazy"
               style={{
