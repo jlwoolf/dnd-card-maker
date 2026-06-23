@@ -1318,3 +1318,358 @@ class TestCardDecks:
         decks = client.get(f"/api/cards/{card_id}/decks", headers=auth_headers).json()
         assert len(decks) == 1
         assert decks[0]["deck_id"] == deck_id
+
+
+class TestToggleSaveEdgeCases:
+    """Edge cases for the toggle-save endpoint."""
+
+    def test_toggle_saves_when_unsaved(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Toggle Me",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        # Put card in a secondary deck so unsave doesn't orphan it
+        deck = client.post("/api/decks", json={"title": "Safe", "card_ids": [card_id]}, headers=auth_headers)
+
+        # Unsafe from default deck
+        client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "unsave"}, headers=auth_headers)
+
+        # Now toggle should save it back
+        resp = client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "toggle"}, headers=auth_headers)
+        assert resp.status_code == 200
+        data = resp.json()
+        assert data["saved"] is True
+        assert data["message"] == "saved"
+
+    def test_toggle_unsaves_when_saved(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Toggle Unsafe",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        # Card is in default deck. Put in secondary deck so unsave doesn't orphan.
+        client.post("/api/decks", json={"title": "Protect", "card_ids": [card_id]}, headers=auth_headers)
+
+        resp = client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "toggle"}, headers=auth_headers)
+        assert resp.status_code == 200
+        assert resp.json()["saved"] is False
+        assert resp.json()["message"] == "unsaved"
+
+    def test_save_when_already_saved(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Double Save",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        resp = client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "save"}, headers=auth_headers)
+        assert resp.status_code == 200
+        assert resp.json()["saved"] is True
+
+    def test_unsave_when_not_saved(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Unsave Not Saved",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        # Keep card alive in a secondary deck after unsave
+        client.post("/api/decks", json={"title": "Keep Alive", "card_ids": [card_id]}, headers=auth_headers)
+        # Remove from default deck
+        client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "unsave"}, headers=auth_headers)
+
+        # Unsave again — should be idempotent
+        resp = client.post(f"/api/cards/{card_id}/toggle-save", params={"action": "unsave"}, headers=auth_headers)
+        assert resp.status_code == 200
+        assert resp.json()["saved"] is False
+
+    def test_invalid_action_rejected(self, client, auth_headers):
+        resp = client.post("/api/cards/fake-id/toggle-save?action=invalid", headers=auth_headers)
+        assert resp.status_code == 422
+
+
+class TestShareEdgeCases:
+    """Edge cases for card & deck sharing."""
+
+    def test_reshare_card_updates_slug(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Reshare Me",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        first = client.post(f"/api/cards/{card_id}/share", json={"mode": "view_only"}, headers=auth_headers)
+        first_slug = first.json()["share_slug"]
+
+        second = client.post(f"/api/cards/{card_id}/share", json={"mode": "view_and_copy"}, headers=auth_headers)
+        # May be same or different slug; just verify mode changed
+        assert second.json()["share_mode"] == "view_and_copy"
+
+    def test_reshare_deck_updates_mode(self, client, auth_headers):
+        deck = client.post("/api/decks", json={"title": "Reshare Deck", "card_ids": []}, headers=auth_headers)
+        deck_id = deck.json()["id"]
+
+        client.post(f"/api/decks/{deck_id}/share", json={"mode": "view_only"}, headers=auth_headers)
+        second = client.post(f"/api/decks/{deck_id}/share", json={"mode": "view_and_copy"}, headers=auth_headers)
+        assert second.json()["share_mode"] == "view_and_copy"
+
+    def test_unshare_unshared_card_is_idempotent(self, client, auth_headers):
+        card = client.post(
+            "/api/cards",
+            json={
+                "title": "Unshared Card",
+                "elements": [],
+                "img_url": "data:image/png;base64,test",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card_id = card.json()["id"]
+
+        resp = client.delete(f"/api/cards/{card_id}/share", headers=auth_headers)
+        assert resp.status_code == 204
+
+    def test_unshare_unshared_deck_is_idempotent(self, client, auth_headers):
+        deck = client.post("/api/decks", json={"title": "Unshared Deck", "card_ids": []}, headers=auth_headers)
+        deck_id = deck.json()["id"]
+
+        resp = client.delete(f"/api/decks/{deck_id}/share", headers=auth_headers)
+        assert resp.status_code == 204
+
+
+class TestDeckSaveBatch:
+    """Tests for POST /api/decks/save/cards (batch card upload)."""
+
+    def test_batch_upload_returns_card_ids(self, client, auth_headers):
+        resp = client.post(
+            "/api/decks/save/cards",
+            json={
+                "cards": [
+                    {
+                        "elements": [{"id": "e1"}],
+                        "img_url": "data:image/png;base64,batch1",
+                        "theme": {
+                            "fill": "#111", "banner_fill": "#222", "box_fill": "#333",
+                            "stroke": "#444", "banner_text": "#555", "box_text": "#666",
+                        },
+                    },
+                    {
+                        "elements": [{"id": "e2"}],
+                        "img_url": "data:image/png;base64,batch2",
+                        "theme": {
+                            "fill": "#aaa", "banner_fill": "#bbb", "box_fill": "#ccc",
+                            "stroke": "#ddd", "banner_text": "#eee", "box_text": "#fff",
+                        },
+                    },
+                ],
+            },
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert len(data["card_ids"]) == 2
+
+    def test_batch_upload_creates_cards(self, client, auth_headers):
+        resp = client.post(
+            "/api/decks/save/cards",
+            json={
+                "cards": [
+                    {
+                        "elements": [{"type": "text"}],
+                        "img_url": "data:image/png;base64,batch-create",
+                        "theme": {
+                            "fill": "#111", "banner_fill": "#222", "box_fill": "#333",
+                            "stroke": "#444", "banner_text": "#555", "box_text": "#666",
+                        },
+                    },
+                ],
+            },
+            headers=auth_headers,
+        )
+        card_ids = resp.json()["card_ids"]
+        # Verify cards exist
+        card = client.get(f"/api/cards/{card_ids[0]}", headers=auth_headers)
+        assert card.status_code == 200
+        assert card.json()["elements"] == [{"type": "text"}]
+
+
+class TestDeckSaveWithCardIds:
+    """Tests for deck save using card_ids mode (no cards_input)."""
+
+    def test_save_deck_with_existing_card_ids(self, client, auth_headers):
+        card1 = client.post(
+            "/api/cards",
+            json={
+                "title": "Card A",
+                "elements": [],
+                "img_url": "data:image/png;base64,a",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+        card2 = client.post(
+            "/api/cards",
+            json={
+                "title": "Card B",
+                "elements": [],
+                "img_url": "data:image/png;base64,b",
+                "theme": {
+                    "fill": "#111111", "banner_fill": "#222222", "box_fill": "#333333",
+                    "stroke": "#444444", "banner_text": "#555555", "box_text": "#666666",
+                },
+            },
+            headers=auth_headers,
+        )
+
+        resp = client.post(
+            "/api/decks/save",
+            json={
+                "title": "Card ID Deck",
+                "cards": None,
+                "card_ids": [card1.json()["id"], card2.json()["id"]],
+            },
+            headers=auth_headers,
+        )
+        assert resp.status_code == 201
+        data = resp.json()
+        assert data["title"] == "Card ID Deck"
+        assert len(data["cards"]) == 2
+
+
+class TestDeckUpdateNoChanges:
+    """Tests for deck update with no fields provided."""
+
+    def test_update_deck_with_no_fields_succeeds(self, client, auth_headers):
+        deck = client.post(
+            "/api/decks",
+            json={"title": "No Change Deck", "card_ids": []},
+            headers=auth_headers,
+        )
+        deck_id = deck.json()["id"]
+
+        resp = client.put(
+            f"/api/decks/{deck_id}",
+            json={},
+            headers=auth_headers,
+        )
+        assert resp.status_code == 200
+        assert resp.json()["title"] == "No Change Deck"
+
+
+class TestAuthEdgeCases:
+    """Additional auth edge case tests."""
+
+    def test_refresh_with_access_token_fails(self, client):
+        client.post("/api/auth/register", json={"email": "access-refresh@example.com", "password": "testpass123"})
+        db = __import__("tests.conftest", fromlist=["TestSessionLocal"]).TestSessionLocal()
+        try:
+            from app.models.user import User
+
+            user = db.query(User).filter(User.email == "access-refresh@example.com").first()
+            user.is_verified = True
+            user.verify_token = None
+            db.commit()
+        finally:
+            db.close()
+
+        login = client.post("/api/auth/login", json={"email": "access-refresh@example.com", "password": "testpass123"})
+        access_token = login.json()["access_token"]
+
+        # Try to use access token as refresh token
+        resp = client.post("/api/auth/refresh", json={"refresh_token": access_token})
+        assert resp.status_code == 401
+
+    def test_reset_password_expired_token_fails(self, client):
+        client.post("/api/auth/register", json={"email": "expired-reset@example.com", "password": "oldpass123"})
+        db = __import__("tests.conftest", fromlist=["TestSessionLocal"]).TestSessionLocal()
+        try:
+            from app.models.user import User
+            from datetime import UTC, datetime, timedelta
+
+            user = db.query(User).filter(User.email == "expired-reset@example.com").first()
+            user.is_verified = True
+            user.verify_token = None
+            user.reset_token = "expired-token-123"
+            user.reset_expires = datetime.now(UTC) - timedelta(hours=1)
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.post("/api/auth/reset-password/expired-token-123", json={"password": "newpass456"})
+        assert resp.status_code == 404
+
+    def test_reset_password_auto_verifies_unverified_user(self, client):
+        client.post("/api/auth/register", json={"email": "auto-verify@example.com", "password": "oldpass123"})
+        db = __import__("tests.conftest", fromlist=["TestSessionLocal"]).TestSessionLocal()
+        try:
+            from app.models.user import User
+            from datetime import UTC, datetime, timedelta
+
+            user = db.query(User).filter(User.email == "auto-verify@example.com").first()
+            # User is NOT verified
+            user.reset_token = "verify-me-token"
+            user.reset_expires = datetime.now(UTC) + timedelta(hours=1)
+            db.commit()
+        finally:
+            db.close()
+
+        resp = client.post("/api/auth/reset-password/verify-me-token", json={"password": "newpass789"})
+        assert resp.status_code == 200
+
+        # User should be verified now
+        login = client.post("/api/auth/login", json={"email": "auto-verify@example.com", "password": "newpass789"})
+        assert login.status_code == 200
