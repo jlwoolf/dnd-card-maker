@@ -2,8 +2,8 @@ import { useState } from "react";
 import { FormatBold, FormatItalic, OpenInFull } from "@mui/icons-material";
 import { Box } from "@mui/material";
 import classNames from "classnames";
-import { type Descendant } from "slate";
-import { Editable, Slate } from "slate-react";
+import { type Descendant, Transforms } from "slate";
+import { Editable, ReactEditor, Slate } from "slate-react";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import Element from "../Element";
 import WidthTooltip from "../WidthTooltip";
@@ -266,6 +266,16 @@ export default function TextElement({ id }: TextElementProps) {
             renderLeaf={renderLeaf}
             onFocus={() => setIsFocused(true)}
             onBlur={() => setIsFocused(false)}
+            onPointerDown={(event) => {
+              setTimeout(() => {
+                try {
+                  const range = ReactEditor.findEventRange(editor, event);
+                  if (range) Transforms.select(editor, range);
+                } catch {
+                  /* tap outside editable text — browser handles it */
+                }
+              }, 0);
+            }}
             placeholder="Enter text..."
           />
         </Box>
