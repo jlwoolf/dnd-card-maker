@@ -6,5 +6,5 @@
 export function getCardImageUrl(cardId: string, scale: number = 0.25): string {
   const token = localStorage.getItem("access_token");
   if (!token) return "";
-  return `/api/images/${cardId}?scale=${scale}&token=${token}`;
+  return `${import.meta.env.BASE_URL}api/images/${cardId}?scale=${scale}&token=${token}`;
 }
