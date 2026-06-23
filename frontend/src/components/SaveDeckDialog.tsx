@@ -31,7 +31,9 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
   const showSnackbar = useSnackbar((s) => s.showSnackbar);
 
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
-  const [title, setTitle] = useState(() => `Deck ${new Date().toLocaleDateString()}`);
+  const [title, setTitle] = useState(
+    () => `Deck ${new Date().toLocaleDateString()}`,
+  );
   const [saving, setSaving] = useState(false);
   const [saveProgress, setSaveProgress] = useState("");
   const [prevOpen, setPrevOpen] = useState(open);
@@ -125,7 +127,8 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
         const match = localCards.find(
           (lc) =>
             lc.cloudCardId === card.id ||
-            (card.elements && JSON.stringify(lc.elements) === JSON.stringify(card.elements)),
+            (card.elements &&
+              JSON.stringify(lc.elements) === JSON.stringify(card.elements)),
         );
         if (match && !match.cloudCardId) {
           setCardCloudId(match.id, card.id);
@@ -181,10 +184,7 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
           fullWidth
         />
         <Box display="flex" alignItems="center" justifyContent="space-between">
-          <Typography
-            color="white"
-            sx={{ fontSize: { xs: 14, md: 18 } }}
-          >
+          <Typography color="white" sx={{ fontSize: { xs: 14, md: 18 } }}>
             Select Cards to Save ({selectedIds.length} / {localCards.length})
           </Typography>
           <Stack direction="row" spacing={1}>
@@ -308,6 +308,12 @@ export default function SaveDeckDialog({ open, onClose }: SaveDeckDialogProps) {
             onClick={handleSaveAs}
             disabled={saving || selectedIds.length === 0}
             startIcon={<Add />}
+            sx={{
+              "&.Mui-disabled": {
+                bgcolor: "grey.800",
+                color: "rgba(255, 255, 255, 0.5)",
+              },
+            }}
           >
             Save As
           </Button>
