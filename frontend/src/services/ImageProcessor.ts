@@ -4,22 +4,15 @@ import { toPng } from "html-to-image";
  * ImageProcessor service provides a centralized suite of utilities for
  * handling image transformations, remote source proxying, and DOM-to-image capture.
  *
- * When a custom CORS_PROXY is not configured, the built-in backend proxy
- * endpoint (GET /api/proxy/image?url=) is used. Set VITE_CORS_PROXY to
- * empty string to disable proxying entirely (cross-origin images will fail
- * during canvas capture).
+ * Cross-origin images are fetched through the built-in backend proxy
+ * endpoint (GET /api/proxy/image?url=) to avoid canvas tainting.
  */
 export class ImageProcessor {
   /**
-   * CORS proxy URL prefix. When set, remote image URLs are fetched through
+   * Backend CORS proxy URL prefix. Remote image URLs are fetched through
    * this proxy to avoid canvas tainting during capture.
-   *
-   * Default uses the built-in backend proxy at __BASE_URL__api/proxy/image?url=
-   * Override via VITE_CORS_PROXY. Set to empty string to disable.
    */
-  private static CORS_PROXY =
-    import.meta.env.VITE_CORS_PROXY ??
-    `${import.meta.env.BASE_URL}api/proxy/image?url=`;
+  private static CORS_PROXY = `${import.meta.env.BASE_URL}api/proxy/image?url=`;
 
   /**
    * Converts any image URL (remote, blob, or local) into a base64 Data URL.
