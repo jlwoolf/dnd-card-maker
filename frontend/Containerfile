@@ -25,12 +25,12 @@ RUN rm -rf /usr/share/nginx/html/*
 COPY --from=build-stage /app/dist /usr/share/nginx/html${VITE_BASE_PATH}
 COPY nginx.conf /tmp/nginx.conf
 RUN if [ "$VITE_BASE_PATH" = "/" ] || [ -z "$VITE_BASE_PATH" ]; then \
-        sed -e '/__WITH_SLASH__/d' -e '/__NO_SLASH__/d' /tmp/nginx.conf > /etc/nginx/conf.d/default.conf; \
+        sed -e '/__WITH_SLASH__/d' -e '/__NO_SLASH__/d' /tmp/nginx.conf > /etc/nginx/templates/default.conf.template; \
     else \
         BASE_NO_TRAILING="${VITE_BASE_PATH%/}"; \
         sed -e "s|__WITH_SLASH__|${VITE_BASE_PATH}|g" \
             -e "s|__NO_SLASH__|${BASE_NO_TRAILING}|g" \
-            /tmp/nginx.conf > /etc/nginx/conf.d/default.conf; \
+            /tmp/nginx.conf > /etc/nginx/templates/default.conf.template; \
     fi && \
     rm /tmp/nginx.conf
 EXPOSE 80
