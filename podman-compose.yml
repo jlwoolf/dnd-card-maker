@@ -28,12 +28,6 @@ services:
     env_file:
       - ./.env
     restart: always
-    healthcheck:
-      test: ["CMD", "/app/.venv/bin/python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/api/health')"]
-      interval: 10s
-      timeout: 5s
-      retries: 3
-      start_period: 15s
 
 volumes:
   db_data:
