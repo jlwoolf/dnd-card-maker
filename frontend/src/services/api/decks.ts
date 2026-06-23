@@ -6,6 +6,7 @@ import type { SnakeTheme } from "./types";
 import type {
   DeckResponse,
   DeckSummary,
+  LocalDeckResponse,
   SharedDeckData,
 } from "./types";
 
@@ -32,8 +33,18 @@ export const deckApi = {
 
   getAutosave: () => api.get<DeckResponse | null>("/decks/autosave"),
   saveAutosave: (data: {
-    cards: Array<{ id?: string; elements: Element[]; img_url: string; theme: SnakeTheme }>;
+    cards: Array<{ id?: string; elements: Element[]; img_url?: string; theme: SnakeTheme }>;
   }) => api.put<DeckResponse>("/decks/autosave", data),
+};
+
+/** Guest (unauthenticated) local-deck auto-save API. */
+export const localDeckApi = {
+  get: (deckId: string) => api.get<LocalDeckResponse>(`/decks/local/${deckId}`),
+  save: (deckId: string, data: {
+    cards: Array<{ elements: Element[]; img_url: string; theme: SnakeTheme }>;
+    editing_cloud_deck_id?: string | null;
+    editing_cloud_deck_title?: string | null;
+  }) => api.put<LocalDeckResponse>(`/decks/local/${deckId}`, data),
 };
 
 export const sharedDeckApi = {

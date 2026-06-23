@@ -23,6 +23,16 @@ from app.services.auth import validate_token_and_get_user
 
 router = APIRouter(prefix="/api/images", tags=["images"])
 
+# 1×1 transparent PNG — returned as a placeholder when a card has no stored image.
+_PLACEHOLDER_PNG = bytes([
+    0x89, 0x50, 0x4E, 0x47, 0x0D, 0x0A, 0x1A, 0x0A, 0x00, 0x00, 0x00, 0x0D,
+    0x49, 0x48, 0x44, 0x52, 0x00, 0x00, 0x00, 0x01, 0x00, 0x00, 0x00, 0x01,
+    0x08, 0x06, 0x00, 0x00, 0x00, 0x1F, 0x15, 0xC4, 0x89, 0x00, 0x00, 0x00,
+    0x0A, 0x49, 0x44, 0x41, 0x54, 0x78, 0x9C, 0x63, 0x00, 0x01, 0x00, 0x00,
+    0x05, 0x00, 0x01, 0x0D, 0x0A, 0xB4, 0x00, 0x00, 0x00, 0x00, 0x49, 0x45,
+    0x4E, 0x44, 0xAE, 0x42, 0x60, 0x82,
+])
+
 
 @lru_cache(maxsize=256)
 def _resize_image(img_bytes: bytes, scale: float) -> bytes:
@@ -37,10 +47,16 @@ def _resize_image(img_bytes: bytes, scale: float) -> bytes:
 
 
 def _serve_card_image(card: Card, scale: float) -> Response:
-    """Serve a resized card image from its data URL."""
-    if not card.img_url.startswith("data:image/"):
-        raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail="Unsupported image format"
+    """Serve a resized card image from its data URL.
+
+    When the card has no stored image a 1×1 transparent PNG placeholder
+    is returned so the client never sees a 400 error.
+    """
+    if not card.img_url or not card.img_url.startswith("data:image/"):
+        return Response(
+            content=_PLACEHOLDER_PNG,
+            media_type="image/png",
+            headers={"Cache-Control": "public, max-age=31536000, immutable"},
         )
     header, encoded = card.img_url.split(",", 1)
     img_bytes = b64decode(encoded)

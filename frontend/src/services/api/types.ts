@@ -114,3 +114,15 @@ export interface AdminTableRows {
   offset: number;
   limit: number;
 }
+
+/** Response from GET /api/decks/local/{id} */
+export interface LocalDeckResponse {
+  id: string;
+  cards: Array<{
+    elements: Element[];
+    img_url: string;
+    theme: SnakeTheme;
+  }>;
+  editing_cloud_deck_id: string | null;
+  editing_cloud_deck_title: string | null;
+}

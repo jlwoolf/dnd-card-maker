@@ -6,15 +6,6 @@ import { useAuthStore } from "@src/stores/useAuthStore";
 /*  Helpers                                                           */
 /* ------------------------------------------------------------------ */
 
-const DEFAULT_THEME = {
-  fill: "#111111",
-  bannerFill: "#222222",
-  boxFill: "#333333",
-  stroke: "#444444",
-  bannerText: "#555555",
-  boxText: "#666666",
-};
-
 function resetStores() {
   useExportCards.setState({
     cards: [],
@@ -38,43 +29,34 @@ describe("useAutosave", () => {
     localStorage.clear();
   });
 
-  describe("guest users (localStorage)", () => {
-    it("does not restore when there is no saved data", () => {
-      // Guest with no localStorage data — deck stays empty
+  describe("guest users", () => {
+    it("generates and stores a local deck ID in localStorage", () => {
+      // Simulate guest with no saved ID
       useAuthStore.setState({ isAuthenticated: false, isLoading: false });
 
+      // The hook generates a UUID and stores it under dnd-autosave-id
+      // We verify no pre-existing key exists
+      expect(localStorage.getItem("dnd-autosave-id")).toBeNull();
+    });
+
+    it("does not restore when there is no saved deck ID", () => {
+      useAuthStore.setState({ isAuthenticated: false, isLoading: false });
+
+      // Without a dnd-autosave-id, the hook won't attempt an API call
       const { cards } = useExportCards.getState();
       expect(cards).toEqual([]);
     });
 
-    it("restores cards from localStorage on mount", () => {
-      // Simulate a guest who previously had saved cards
-      const savedCards = [
-        {
-          id: "card-1",
-          elements: [],
-          imgUrl: "data:img;base64,test",
-          theme: DEFAULT_THEME,
-        },
-      ];
-      localStorage.setItem("dnd-autosave-deck", JSON.stringify(savedCards));
+    it("preserves existing local deck ID across sessions", () => {
+      localStorage.setItem("dnd-autosave-id", "existing-deck-uuid");
 
-      // Simulate loading state then becoming ready
-      useAuthStore.setState({ isAuthenticated: false, isLoading: true });
-      // During loading, nothing happens
-      useAuthStore.setState({ isAuthenticated: false, isLoading: false });
-
-      // After loading completes, the store won't have been updated yet
-      // because the hook sets state asynchronously.
-      // We verify that the localStorage data is valid JSON at least.
-      const raw = localStorage.getItem("dnd-autosave-deck");
-      expect(raw).not.toBeNull();
-      const parsed = JSON.parse(raw!);
-      expect(parsed).toHaveLength(1);
-      expect(parsed[0].id).toBe("card-1");
+      const id = localStorage.getItem("dnd-autosave-id");
+      expect(id).toBe("existing-deck-uuid");
     });
+  });
 
-    it("saves editing context to localStorage", () => {
+  describe("editing context (localStorage)", () => {
+    it("saves and loads editing context from dnd-autosave-context", () => {
       useExportCards.setState({
         editingCloudDeckId: "cloud-deck-1",
         editingCloudDeckTitle: "My Cloud Deck",
@@ -92,13 +74,24 @@ describe("useAutosave", () => {
       expect(parsed.editingCloudDeckId).toBe("cloud-deck-1");
       expect(parsed.editingCloudDeckTitle).toBe("My Cloud Deck");
     });
+
+    it("handles null editing context values", () => {
+      const ctx = {
+        editingCloudDeckId: null,
+        editingCloudDeckTitle: null,
+      };
+      localStorage.setItem("dnd-autosave-context", JSON.stringify(ctx));
+
+      const parsed = JSON.parse(localStorage.getItem("dnd-autosave-context")!);
+      expect(parsed.editingCloudDeckId).toBeNull();
+      expect(parsed.editingCloudDeckTitle).toBeNull();
+    });
   });
 
   describe("authenticated users", () => {
     it("does not try to save when not ready", () => {
       useAuthStore.setState({ isAuthenticated: true, isLoading: true });
 
-      // During loading, the deck should remain in its initial state
       const { cards } = useExportCards.getState();
       expect(cards).toEqual([]);
     });
@@ -118,26 +111,17 @@ describe("useAutosave", () => {
   });
 
   describe("data integrity", () => {
-    it("validates guest autosave data against CardSchema", () => {
-      // Invalid data — missing required fields
-      localStorage.setItem(
-        "dnd-autosave-deck",
-        JSON.stringify([{ id: "bad", theme: DEFAULT_THEME }]),
-      );
+    it("handles corrupted localStorage gracefully", () => {
+      localStorage.setItem("dnd-autosave-context", "not valid json {{{{");
 
-      // The parse should fail via Zod schema validation
-      const raw = localStorage.getItem("dnd-autosave-deck");
-      const data = JSON.parse(raw!);
-      // Missing 'elements' and 'imgUrl' — not a valid card
-      expect(data[0].elements).toBeUndefined();
-      expect(data[0].imgUrl).toBeUndefined();
+      expect(() =>
+        JSON.parse(localStorage.getItem("dnd-autosave-context")!),
+      ).toThrow();
     });
 
-    it("handles corrupted localStorage gracefully", () => {
-      localStorage.setItem("dnd-autosave-deck", "not valid json {{{");
-
-      // Reading should throw when parsing
-      expect(() => JSON.parse(localStorage.getItem("dnd-autosave-deck")!)).toThrow();
+    it("handles missing localStorage keys", () => {
+      expect(localStorage.getItem("dnd-autosave-id")).toBeNull();
+      expect(localStorage.getItem("dnd-autosave-context")).toBeNull();
     });
   });
 });

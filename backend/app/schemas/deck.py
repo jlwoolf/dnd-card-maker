@@ -14,7 +14,7 @@ class DeckCreate(BaseModel):
 class DeckCardInput(BaseModel):
     id: str | None = None
     elements: list[dict[str, Any]]
-    img_url: str
+    img_url: str = ""
     theme: CardThemeSchema
 
 

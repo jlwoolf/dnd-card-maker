@@ -19,6 +19,7 @@ from app.routes import (
     decks_router,
     decks_share_router,
     dev_router,
+    guest_decks_router,
     images_router,
     proxy_router,
     share_router,
@@ -42,6 +43,17 @@ log.info("Log level set to %s", settings.log_level.upper())
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     init_db()
+    # Clean up stale guest decks (unused > 30 days)
+    from app.database import SessionLocal
+    from app.services.guest_deck_service import cleanup_stale_guest_decks
+
+    db = SessionLocal()
+    try:
+        deleted = cleanup_stale_guest_decks(db)
+        if deleted:
+            log.info("Cleaned up %d stale guest deck(s)", deleted)
+    finally:
+        db.close()
     yield
 
 
@@ -86,6 +98,7 @@ app.include_router(cards_router)
 app.include_router(share_router)
 app.include_router(decks_router)
 app.include_router(decks_share_router)
+app.include_router(guest_decks_router)
 app.include_router(images_router)
 app.include_router(proxy_router)
 app.include_router(users_router)

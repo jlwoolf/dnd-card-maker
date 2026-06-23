@@ -68,13 +68,20 @@ describe("useAuthStore", () => {
     localStorage.setItem("access_token", "some-token");
     localStorage.setItem("refresh_token", "some-refresh");
 
+    // Step 1: logout signals auth change but keeps tokens
     useAuthStore.getState().logout();
 
+    const { isAuthenticated: afterLogout, user: userAfterLogout } = useAuthStore.getState();
+    expect(afterLogout).toBe(false);
+    expect(userAfterLogout).toBeNull();
+    // Tokens persist so autosave can convert images before clearing
+    expect(localStorage.getItem("access_token")).toBe("some-token");
+    expect(localStorage.getItem("refresh_token")).toBe("some-refresh");
+
+    // Step 2: completeLogout clears tokens
+    useAuthStore.getState().completeLogout();
     expect(localStorage.getItem("access_token")).toBeNull();
     expect(localStorage.getItem("refresh_token")).toBeNull();
-    const { isAuthenticated, user } = useAuthStore.getState();
-    expect(isAuthenticated).toBe(false);
-    expect(user).toBeNull();
   });
 
   it("checkAuth sets loading=false when no token exists", async () => {

@@ -229,14 +229,15 @@ def _upsert_cards(
             )
             if card:
                 card.elements = json.dumps(card_input["elements"])
-                card.img_url = card_input["img_url"]
+                if card_input.get("img_url"):
+                    card.img_url = card_input["img_url"]
                 card.theme = json.dumps(card_input["theme"].model_dump())
                 card_ids.append(card.id)
                 continue
         card = Card(
             user_id=user_id,
             elements=json.dumps(card_input["elements"]),
-            img_url=card_input["img_url"],
+            img_url=card_input.get("img_url", ""),
             theme=json.dumps(card_input["theme"].model_dump()),
         )
         db.add(card)

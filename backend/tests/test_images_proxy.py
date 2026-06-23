@@ -215,7 +215,7 @@ class TestImageEndpoint:
         )
         assert card.status_code == 403  # Can't create card while unverified
 
-    def test_non_data_uri_img_url_returns_400(self, client, auth_headers):
+    def test_non_data_uri_img_url_returns_placeholder(self, client, auth_headers):
         # Create a card via API with a non-data-URI img_url
         card = client.post(
             "/api/cards",
@@ -234,8 +234,9 @@ class TestImageEndpoint:
         token = _get_token_for_user(client, "nondata-img@example.com")
 
         resp = client.get(f"/api/images/{card_id}?token={token}")
-        assert resp.status_code == 400
-        assert "Unsupported image format" in resp.json()["detail"]
+        # Now returns a 1x1 transparent PNG placeholder instead of 400
+        assert resp.status_code == 200
+        assert resp.headers["content-type"] == "image/png"
 
     def test_scale_param_clamped(self, client, auth_headers):
         card = client.post(

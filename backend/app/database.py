@@ -47,6 +47,7 @@ def init_db() -> None:
     from app.models.card import Card  # noqa: F401
     from app.models.deck import Deck, DeckCard  # noqa: F401
     from app.models.email import SentEmail  # noqa: F401
+    from app.models.guest_deck import GuestDeck  # noqa: F401
     from app.models.user import User  # noqa: F401
 
     Base.metadata.create_all(bind=engine)

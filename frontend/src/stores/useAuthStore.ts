@@ -8,6 +8,7 @@ interface AuthState {
   login: (email: string, password: string) => Promise<void>;
   register: (email: string, password: string, turnstileToken?: string) => Promise<void>;
   logout: () => void;
+  completeLogout: () => void;
   checkAuth: () => Promise<void>;
   setUser: (user: { id: string; email: string }) => void;
 }
@@ -42,9 +43,14 @@ export const useAuthStore = create<AuthState>((set) => ({
   },
 
   logout: () => {
+    // Don't clear tokens immediately — useAutosave needs them
+    // to convert cloud card images to base64 before logout completes.
+    set({ user: null, isAuthenticated: false });
+  },
+
+  completeLogout: () => {
     localStorage.removeItem("access_token");
     localStorage.removeItem("refresh_token");
-    set({ user: null, isAuthenticated: false });
   },
 
   checkAuth: async () => {
