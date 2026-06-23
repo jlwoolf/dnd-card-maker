@@ -165,7 +165,6 @@ export interface DeckSummary {
   title: string;
   is_default: boolean;
   card_count: number;
-  first_card_img_url: string | null;
   first_card_id: string | null;
   share_slug: string | null;
   share_mode: string | null;
@@ -176,7 +175,6 @@ export interface DeckSummary {
 export interface DeckCardEntry {
   id: string;
   title: string | null;
-  img_url: string;
   saved: boolean;
   elements: Element[];
   theme: SnakeTheme;

@@ -41,13 +41,12 @@ import {
   sortableKeyboardCoordinates,
 } from "@dnd-kit/sortable";
 import { deckApi, cardApi } from "@src/services/api";
-import { getCardImageUrl } from "@src/utils/cardImageUrl";
+import ProgressiveCardImage from "./ProgressiveCardImage";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 
 interface PreviewCard {
   id: string;
   title: string | null;
-  img_url: string;
   elements: Element[];
   theme: PreviewTheme;
 }
@@ -124,8 +123,10 @@ function SortableCloudCard({
         },
       }}
     >
-      <img
-        src={getCardImageUrl(card.id, 0.6)}
+      <ProgressiveCardImage
+        cardId={card.id}
+        highResScale={0.6}
+        lowResScale={0.1}
         alt={card.title || "Card"}
         draggable="false"
         loading="lazy"
@@ -244,7 +245,6 @@ export default function CloudDeckPreview({
         res.data.cards.map((c) => ({
           id: c.id,
           title: c.title,
-          img_url: c.img_url,
           elements: c.elements,
           theme: themeFromSnake(c.theme),
         })),
@@ -293,7 +293,7 @@ export default function CloudDeckPreview({
   };
 
   const handleCopy = (card: PreviewCard) => {
-    addCard(card.elements, card.img_url, card.theme, card.id);
+    addCard(card.elements, "", card.theme, card.id);
     showSnackbar("Card copied to local deck", "success");
   };
 
@@ -310,7 +310,7 @@ export default function CloudDeckPreview({
 
   const handleLoadAll = () => {
     for (const card of cards) {
-      addCard(card.elements, card.img_url, card.theme, card.id);
+      addCard(card.elements, "", card.theme, card.id);
     }
     showSnackbar(`Loaded ${cards.length} card(s) to local deck`, "success");
   };

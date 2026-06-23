@@ -6,6 +6,7 @@ parameter because ``<img>`` tags cannot send Authorization headers.
 
 import io
 from base64 import b64decode
+from functools import lru_cache
 
 from fastapi import APIRouter, Depends, HTTPException, Query, status
 from fastapi.responses import Response
@@ -20,6 +21,18 @@ from app.models.card import Card
 from app.services.auth import decode_token, get_user_id_from_token
 
 router = APIRouter(prefix="/api/images", tags=["images"])
+
+
+@lru_cache(maxsize=256)
+def _resize_image(img_bytes: bytes, scale: float) -> bytes:
+    """Decode, resize, and re-encode a card image. Cached by input bytes + scale."""
+    img = Image.open(io.BytesIO(img_bytes))
+    if scale < 1.0:
+        new_size = (int(img.width * scale), int(img.height * scale))
+        img.thumbnail(new_size, Image.LANCZOS)
+    buf = io.BytesIO()
+    img.save(buf, format="PNG")
+    return buf.getvalue()
 
 
 @router.get("/{card_id}")
@@ -64,18 +77,10 @@ def get_card_image(
 
     header, encoded = card.img_url.split(",", 1)
     img_bytes = b64decode(encoded)
-    img = Image.open(io.BytesIO(img_bytes))
-
-    if scale < 1.0:
-        new_size = (int(img.width * scale), int(img.height * scale))
-        img.thumbnail(new_size, Image.LANCZOS)
-
-    buf = io.BytesIO()
-    img.save(buf, format="PNG")
-    buf.seek(0)
+    resized = _resize_image(img_bytes, scale)
 
     return Response(
-        content=buf.getvalue(),
+        content=resized,
         media_type="image/png",
         headers={
             "Cache-Control": "public, max-age=31536000, immutable",

@@ -18,6 +18,7 @@ import {
 } from "@mui/material";
 import { ArrowBack, Preview } from "@mui/icons-material";
 import { adminApi, type DeckResponse } from "@src/services/api";
+import { getCardImageUrl } from "@src/utils/cardImageUrl";
 
 const SIDEBAR_WIDTH = 240;
 const PAGE_SIZE = 100;
@@ -460,7 +461,7 @@ export default function AdminPage() {
               >
                 <Box
                   component="img"
-                  src={card.img_url}
+                  src={getCardImageUrl(card.id, 0.35)}
                   alt={card.title || card.id}
                   sx={{
                     width: "100%",

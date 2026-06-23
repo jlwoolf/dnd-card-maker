@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import { ImageProcessor } from "@src/services/ImageProcessor";
 import { sharedApi } from "@src/services/api";
-import { getCardImageUrl } from "@src/utils/cardImageUrl";
+import ProgressiveCardImage from "@src/components/Cloud/ProgressiveCardImage";
 import useExportCards from "@src/hooks/useExportCards";
 import { useSnackbar } from "@src/hooks/useSnackbar";
 import { themeFromSnake } from "@src/utils/themeHelpers";
@@ -113,8 +113,10 @@ export default function SharedCardPage() {
           mb: 3,
         }}
       >
-        <img
-          src={getCardImageUrl(card.id, 0.6)}
+        <ProgressiveCardImage
+          cardId={card.id}
+          highResScale={0.6}
+          lowResScale={0.1}
           alt={card.title || "Shared card"}
           loading="lazy"
           style={{

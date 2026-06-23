@@ -39,7 +39,6 @@ def _get_deck_cards(deck: Deck, db: Session) -> list[dict]:
                 {
                     "id": c.id,
                     "title": c.title,
-                    "img_url": c.img_url,
                     "saved": c.id in default_card_ids,
                     "elements": json.loads(c.elements),
                     "theme": json.loads(c.theme),
@@ -64,7 +63,6 @@ def get_deck_cards_for_share(deck: Deck, db: Session) -> list[dict]:
                 {
                     "id": c.id,
                     "title": c.title,
-                    "img_url": c.img_url,
                     "elements": json.loads(c.elements),
                     "theme": json.loads(c.theme),
                     "share_slug": c.share_slug,
@@ -99,7 +97,6 @@ def list_user_decks(user_id: str, db: Session) -> list[dict]:
                 title=d.title,
                 is_default=d.is_default,
                 card_count=card_count,
-                first_card_img_url=first_card.img_url if first_card else None,
                 first_card_id=first_card.id if first_card else None,
                 share_slug=d.share_slug,
                 share_mode=d.share_mode,

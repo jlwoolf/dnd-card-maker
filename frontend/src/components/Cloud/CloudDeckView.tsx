@@ -24,7 +24,7 @@ import {
   Typography,
 } from "@mui/material";
 import { cardApi, type CloudCardSummary } from "@src/services/api";
-import { getCardImageUrl } from "@src/utils/cardImageUrl";
+import ProgressiveCardImage from "./ProgressiveCardImage";
 import { useActiveCardStore } from "@src/stores/useActiveCardStore";
 import { themeFromSnake } from "@src/utils/themeHelpers";
 import useExportCards from "@src/hooks/useExportCards";
@@ -261,8 +261,10 @@ export default function CloudDeckView({ onClose }: CloudDeckViewProps) {
               },
             }}
           >
-            <img
-              src={getCardImageUrl(card.id, 0.6)}
+            <ProgressiveCardImage
+              cardId={card.id}
+              highResScale={0.6}
+              lowResScale={0.1}
               alt={card.title || "Cloud card"}
               loading="lazy"
               style={{

@@ -43,7 +43,6 @@ class DeckSummary(BaseModel):
     title: str
     is_default: bool
     card_count: int
-    first_card_img_url: str | None
     first_card_id: str | None
     share_slug: str | None
     share_mode: str | None
