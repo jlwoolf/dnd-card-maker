@@ -23,6 +23,7 @@ declare global {
         "timeout-callback"?: () => void;
       }) => string;
       reset: (widgetId?: string) => void;
+      remove: (widgetId: string) => void;
     };
     __onTurnstileLoad?: () => void;
   }
@@ -72,9 +73,11 @@ export default function RegisterPage() {
 
     return () => {
       delete window.__onTurnstileLoad;
-      if (turnstileWidgetId.current && window.turnstile) {
-        window.turnstile.reset(turnstileWidgetId.current);
-      }
+      try {
+        if (turnstileWidgetId.current && window.turnstile) {
+          window.turnstile.remove(turnstileWidgetId.current);
+        }
+      } catch { /* widget already removed from DOM */ }
     };
   }, []);
 
