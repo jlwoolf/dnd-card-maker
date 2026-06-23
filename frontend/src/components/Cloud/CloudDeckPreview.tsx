@@ -125,7 +125,7 @@ function SortableCloudCard({
       }}
     >
       <img
-        src={getCardImageUrl(card.id, 0.35)}
+        src={getCardImageUrl(card.id, 0.6)}
         alt={card.title || "Card"}
         draggable="false"
         loading="lazy"

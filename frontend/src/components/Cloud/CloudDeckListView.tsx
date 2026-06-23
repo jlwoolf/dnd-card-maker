@@ -278,7 +278,7 @@ export default function CloudDeckListView({ onClose }: CloudDeckListViewProps) {
                 <img
                   src={
                     deck.first_card_id
-                      ? getCardImageUrl(deck.first_card_id, 0.35)
+                      ? getCardImageUrl(deck.first_card_id, 0.6)
                       : deck.first_card_img_url ?? ""
                   }
                   alt={deck.title}
