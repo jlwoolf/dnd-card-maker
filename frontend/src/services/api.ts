@@ -263,4 +263,6 @@ export const adminApi = {
   getTables: () => api.get<{ tables: string[] }>("/admin/tables"),
   getRows: (table: string, offset: number, limit: number) =>
     api.get<AdminTableRows>("/admin/" + table, { params: { offset, limit } }),
+  getCard: (id: string) => api.get<CloudCard>(`/admin/cards/${id}`),
+  getDeck: (id: string) => api.get<DeckResponse>(`/admin/decks/${id}`),
 };

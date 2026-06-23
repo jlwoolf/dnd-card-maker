@@ -17,7 +17,7 @@ import {
   useTheme,
 } from "@mui/material";
 import { ArrowBack, Preview } from "@mui/icons-material";
-import { adminApi, deckApi, type DeckResponse } from "@src/services/api";
+import { adminApi, type DeckResponse } from "@src/services/api";
 
 const SIDEBAR_WIDTH = 240;
 const PAGE_SIZE = 100;
@@ -158,7 +158,7 @@ export default function AdminPage() {
     setDeckCards(null);
     setPreviewOpen(true);
     try {
-      const res = await deckApi.get(id);
+      const res = await adminApi.getDeck(id);
       setDeckCards(res.data.cards);
     } catch {
       setDeckCards([]);
