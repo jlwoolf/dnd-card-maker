@@ -19,10 +19,22 @@ test.describe("Deck Management", () => {
     // Add to deck
     await page.getByTestId("add-to-deck-btn").click();
 
-    // Clear editor (force click since deck panel may overlap bottom menu)
-    await page.getByTestId("clear-card-btn").click({ force: true });
+    // Hide the deck panel so it doesn't overlap the bottom card menu
+    await page.evaluate(() => {
+      const deck = document.querySelector('[data-testid="deck-container"]');
+      if (deck) (deck as HTMLElement).style.display = "none";
+    });
+
+    // Clear editor
+    await page.getByTestId("clear-card-btn").click();
     await page.waitForTimeout(500);
     await expect(page.locator('[data-testid^="card-element-"]')).toHaveCount(0);
+
+    // Restore the deck panel
+    await page.evaluate(() => {
+      const deck = document.querySelector('[data-testid="deck-container"]');
+      if (deck) (deck as HTMLElement).style.display = "";
+    });
 
     // Load from deck
     const deckCard = page.locator('[data-testid^="deck-card-"]').first();

@@ -67,5 +67,9 @@ export default defineConfig({
     command: 'npm run dev',
     url: 'http://localhost:5173',
     reuseExistingServer: !process.env.CI,
+    env: {
+      ...process.env,
+      VITE_DEV_AUTH: process.env.VITE_DEV_AUTH || '',
+    },
   },
 });
